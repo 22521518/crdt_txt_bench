@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@automerge/prosemirror": [
+        "../automerge-prosemirror/src"
+      ],
+      "@y/prosemirror": [
+        "../y-prosemirror/src"
+      ]
+    },
+    "types": [
+      "node",
+    ]
+  }
+}

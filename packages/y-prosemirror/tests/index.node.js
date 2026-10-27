@@ -1,0 +1,103 @@
+// @ts-nocheck
+import fs from 'fs'
+import path, { dirname } from 'path'
+import jsdom from 'jsdom'
+import v8 from 'v8'
+import vm from 'vm'
+
+// import * as prosemirror from './y-prosemirror.test.js'
+import * as cursor from './cursor.test.js'
+import * as delta from './delta.test.js'
+import * as positions from './positions.test.js'
+import * as suggestions from './suggestions.test.js'
+import * as suggestionSimulation from './suggestion-simulation.test.js'
+import * as attributedNodes from './attributed-nodes.test.js'
+import * as undo from './undo.test.js'
+import * as commands from './commands.test.js'
+import * as overlappingMarks from './overlapping-marks.test.js'
+import * as customCompare from './custom-compare.test.js'
+import * as isInitialContent from './is-initial-content.test.js'
+import * as inlineNodes from './inline-nodes.test.js'
+import * as attrAttribution from './attr-attribution.test.js'
+import * as brokenSchema from './broken-schema.test.js'
+import * as ySyncRdt from './y-sync-rdt.test.js'
+import * as prosemirrorRdt from './prosemirror-rdt.test.js'
+import * as swallowFormats from './swallow-formats.test.js'
+import * as convert from './convert.test.js'
+import * as impliedFormatAttribution from './implied-format-attribution.test.js'
+import * as v1Compat from './v1-compat.test.js'
+import * as syncPlugin from './sync-plugin.test.js'
+
+import { runTests } from 'lib0/testing'
+import { isBrowser, isNode } from 'lib0/environment'
+import * as log from 'lib0/logging'
+import { fileURLToPath } from 'url'
+
+// eslint-disable-next-line
+const __dirname = dirname(fileURLToPath(import.meta.url)) // eslint-disable-line
+const documentContent = fs.readFileSync(path.join(__dirname, '../test.html'))
+const { window } = new jsdom.JSDOM(documentContent)
+
+// expose a forced GC for the leak regression tests (sync-plugin.test.js)
+v8.setFlagsFromString('--expose-gc')
+global.gc = vm.runInNewContext('gc')
+
+global.window = window
+global.document = window.document
+global.innerHeight = 0
+document.getSelection = () => ({ })
+
+document.createRange = () => ({
+  setStart () {},
+  setEnd () {},
+  getClientRects () {
+    return {
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0
+    }
+  },
+  getBoundingClientRect () {
+    return {
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0
+    }
+  }
+})
+
+if (isBrowser) {
+  log.createVConsole(document.body)
+}
+runTests({
+  cursor,
+  delta,
+  positions,
+  suggestions,
+  suggestionSimulation,
+  attributedNodes,
+  undo,
+  commands,
+  overlappingMarks,
+  customCompare,
+  isInitialContent,
+  inlineNodes,
+  attrAttribution,
+  brokenSchema,
+  ySyncRdt,
+  prosemirrorRdt,
+  swallowFormats,
+  convert,
+  impliedFormatAttribution,
+  v1Compat,
+  syncPlugin
+  // prosemirror,
+  // tr
+}).then(success => {
+  /* istanbul ignore next */
+  if (isNode) {
+    process.exit(success ? 0 : 1)
+  }
+})

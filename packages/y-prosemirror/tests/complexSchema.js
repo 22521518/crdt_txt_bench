@@ -1,0 +1,298 @@
+import { Schema } from 'prosemirror-model'
+// import { builders } from 'prosemirror-test-builder'
+
+/**
+ * @type {import('prosemirror-model').DOMOutputSpec}
+ */
+const brDOM = ['br']
+
+const attributionMarkNames = 'y-attributed-insert y-attributed-delete y-attributed-format'
+
+/**
+ * @type {Object<string, import('prosemirror-model').NodeSpec>}
+ */
+export const nodes = {
+  // :: NodeSpec The top level document node.
+  doc: {
+    content: 'block*',
+    marks: attributionMarkNames
+  },
+
+  custom: {
+    atom: true,
+    group: 'block',
+    attrs: { checked: { default: false } },
+    parseDOM: [{ tag: 'div' }],
+    toDOM () {
+      return ['div']
+    }
+  },
+
+  // :: NodeSpec A plain paragraph textblock. Represented in the DOM
+  // as a `<p>` element.
+  paragraph: {
+    content: 'inline*',
+    group: 'block',
+    parseDOM: [{ tag: 'p' }],
+    toDOM () {
+      return ['p', 0]
+    }
+  },
+
+  // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
+  blockquote: {
+    content: 'block+',
+    group: 'block',
+    marks: attributionMarkNames,
+    defining: true,
+    parseDOM: [{ tag: 'blockquote' }],
+    toDOM () {
+      return ['blockquote', 0]
+    }
+  },
+
+  // :: NodeSpec A horizontal rule (`<hr>`).
+  horizontal_rule: {
+    group: 'block',
+    parseDOM: [{ tag: 'hr' }],
+    toDOM () {
+      return ['hr']
+    }
+  },
+
+  // :: NodeSpec A heading textblock, with a `level` attribute that
+  // should hold the number 1 to 6. Parsed and serialized as `<h1>` to
+  // `<h6>` elements.
+  heading: {
+    attrs: {
+      level: { default: 1 }
+    },
+    content: 'inline*',
+    group: 'block',
+    defining: true,
+    parseDOM: [
+      { tag: 'h1', attrs: { level: 1 } },
+      { tag: 'h2', attrs: { level: 2 } },
+      { tag: 'h3', attrs: { level: 3 } },
+      { tag: 'h4', attrs: { level: 4 } },
+      { tag: 'h5', attrs: { level: 5 } },
+      { tag: 'h6', attrs: { level: 6 } }
+    ],
+    toDOM (node) {
+      return ['h' + node.attrs.level, 0]
+    }
+  },
+
+  // :: NodeSpec A code listing. Disallows non-text inline nodes, and every
+  // mark except the reserved attribution ones - those must be admitted
+  // wherever attributable text can appear, or the binding's render is
+  // silently dropped by ProseMirror (see ATTRIBUTION.md "Allow the marks on
+  // every node where attribution can land"). Represented as a `<pre>`
+  // element with a `<code>` element inside of it.
+  code_block: {
+    content: 'text*',
+    marks: attributionMarkNames,
+    group: 'block',
+    code: true,
+    defining: true,
+    parseDOM: [{ tag: 'pre', preserveWhitespace: 'full' }],
+    toDOM () {
+      return ['pre', ['code', 0]]
+    }
+  },
+
+  // :: NodeSpec The text node.
+  text: {
+    group: 'inline'
+  },
+
+  // :: NodeSpec An inline image (`<img>`) node. Supports `src`,
+  // `alt`, and `href` attributes. The latter two default to the empty
+  // string.
+  image: {
+    inline: true,
+    attrs: {
+      src: {},
+      alt: { default: null },
+      title: { default: null }
+    },
+    group: 'inline',
+    draggable: true,
+    parseDOM: [
+      {
+        tag: 'img[src]',
+        getAttrs (dom) {
+          return {
+            src: dom.getAttribute('src'),
+            title: dom.getAttribute('title'),
+            alt: dom.getAttribute('alt')
+          }
+        }
+      }
+    ],
+    toDOM (node) {
+      return ['img', { src: node.attrs.src, title: node.attrs.title, alt: node.attrs.alt }]
+    }
+  },
+
+  // :: NodeSpec A hard line break, represented in the DOM as `<br>`.
+  hard_break: {
+    inline: true,
+    group: 'inline',
+    selectable: false,
+    parseDOM: [{ tag: 'br' }],
+    toDOM () {
+      return brDOM
+    }
+  }
+}
+
+/**
+ * @type {import('prosemirror-model').DOMOutputSpec}
+ */
+const emDOM = ['em', 0]
+/**
+ * @type {import('prosemirror-model').DOMOutputSpec}
+ */
+const strongDOM = ['strong', 0]
+/**
+ * @type {import('prosemirror-model').DOMOutputSpec}
+ */
+const codeDOM = ['code', 0]
+
+// :: Object [Specs](#model.MarkSpec) for the marks in the schema.
+/**
+ * @type {Object<string, import('prosemirror-model').MarkSpec>}
+ */
+export const marks = {
+  // :: MarkSpec A link. Has `href` and `title` attributes. `title`
+  // defaults to the empty string. Rendered and parsed as an `<a>`
+  // element.
+  link: {
+    attrs: {
+      href: {},
+      title: { default: null }
+    },
+    inclusive: false,
+    parseDOM: [
+      {
+        tag: 'a[href]',
+        getAttrs (dom) {
+          return {
+            href: dom.getAttribute('href'),
+            title: dom.getAttribute('title')
+          }
+        }
+      }
+    ],
+    toDOM (node) {
+      return ['a', node.attrs, 0]
+    }
+  },
+
+  // :: MarkSpec An emphasis mark. Rendered as an `<em>` element.
+  // Has parse rules that also match `<i>` and `font-style: italic`.
+  em: {
+    parseDOM: [{ tag: 'i' }, { tag: 'em' }, { style: 'font-style=italic' }],
+    toDOM () {
+      return emDOM
+    }
+  },
+
+  // :: MarkSpec A strong mark. Rendered as `<strong>`, parse rules
+  // also match `<b>` and `font-weight: bold`.
+  strong: {
+    parseDOM: [
+      { tag: 'strong' },
+      // This works around a Google Docs misbehavior where
+      // pasted content will be inexplicably wrapped in `<b>`
+      // tags with a font-weight normal.
+      {
+        tag: 'b',
+        getAttrs: node => node.style.fontWeight !== 'normal' && null
+      },
+      {
+        style: 'font-weight',
+        getAttrs: value => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null
+      }
+    ],
+    toDOM () {
+      return strongDOM
+    }
+  },
+
+  // :: MarkSpec Code font mark. Represented as a `<code>` element.
+  code: {
+    parseDOM: [{ tag: 'code' }],
+    toDOM () {
+      return codeDOM
+    }
+  },
+
+  ychange: {
+    attrs: {
+      user: { default: null },
+      type: { default: null }
+    },
+    inclusive: false,
+    parseDOM: [{ tag: 'ychange' }],
+    toDOM (node) {
+      return ['ychange', { ychange_user: node.attrs.user, ychange_type: node.attrs.type }]
+    }
+  },
+
+  comment: {
+    attrs: {
+      id: { default: null }
+    },
+    excludes: '',
+    parseDOM: [{ tag: 'comment' }],
+    toDOM (node) {
+      return ['comment', { comment_id: node.attrs.id }]
+    }
+  },
+
+  // Default `excludes` (= self-exclusion) is intentional: when a span's
+  // attribution attrs change between renders (e.g. userIdsByAttr gains a
+  // format key), `tr.addMark` should *replace* the prior instance, not stack
+  // a second copy on top of it. Setting `excludes: ''` here would let
+  // multiple instances of the same attribution mark coexist on a single span
+  // and accumulate over the diff/reconcile loop.
+  'y-attributed-insert': {
+    attrs: { userIds: { default: null }, timestamp: { default: null } },
+    parseDOM: [{ tag: 'y-ins' }],
+    toDOM () {
+      return /** @type {const} */ (['y-ins', 0])
+    }
+  },
+
+  'y-attributed-delete': {
+    attrs: { userIds: { default: null }, timestamp: { default: null } },
+    parseDOM: [{ tag: 'y-del' }],
+    toDOM () {
+      return /** @type {const} */ (['y-del', 0])
+    }
+  },
+
+  'y-attributed-format': {
+    attrs: {
+      userIds: { default: null },
+      userIdsByAttr: { default: null },
+      timestamp: { default: null }
+    },
+    parseDOM: [{ tag: 'y-fmt' }],
+    toDOM () {
+      return /** @type {const} */ (['y-fmt', 0])
+    }
+  }
+}
+
+// :: Schema
+// This schema rougly corresponds to the document schema used by
+// [CommonMark](http://commonmark.org/), minus the list elements,
+// which are defined in the [`prosemirror-schema-list`](#schema-list)
+// module.
+//
+// To reuse elements from this schema, extend or read from its
+// `spec.nodes` and `spec.marks` [properties](#model.Schema.spec).
+export const schema = new Schema({ nodes, marks })

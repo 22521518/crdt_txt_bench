@@ -1,0 +1,280 @@
+import { Schema } from 'prosemirror-model'
+import { userColorForId } from './user-colors.js'
+
+/**
+ * Pick the "primary" user id from a userIds array stored on an attribution mark.
+ * @param {any} userIds
+ * @returns {string | null}
+ */
+const primaryUserId = (userIds) => {
+  if (Array.isArray(userIds) && userIds.length > 0) return String(userIds[0])
+  if (typeof userIds === 'string' || typeof userIds === 'number') return String(userIds)
+  return null
+}
+
+/**
+ * Build the dom attrs that turn the per-user color into a CSS variable the
+ * stylesheet can pick up. The mark's existing tooltip is preserved.
+ * @param {any} mark
+ * @param {string} title
+ */
+const attributionMarkAttrs = (mark, title) => {
+  const uid = primaryUserId(mark.attrs.userIds)
+  if (!uid) return { title }
+  return {
+    title,
+    'data-userid': uid,
+    style: `--user-color: ${userColorForId(uid)}`
+  }
+}
+
+/**
+ * @type {import('prosemirror-model').DOMOutputSpec}
+ */
+const brDOM = ['br']
+
+const attributionMarkNames = 'y-attributed-insert y-attributed-delete y-attributed-format y-attributed-attrs'
+
+// :: Object
+// [Specs](#model.NodeSpec) for the nodes defined in this schema.
+/**
+ * @type {Object<string, import('prosemirror-model').NodeSpec>}
+ */
+export const nodes = {
+  // :: NodeSpec The top level document node.
+  doc: {
+    content: 'block*',
+    marks: attributionMarkNames
+  },
+
+  // :: NodeSpec A plain paragraph textblock. Represented in the DOM
+  // as a `<p>` element.
+  paragraph: {
+    content: 'inline*',
+    group: 'block',
+    parseDOM: [{ tag: 'p' }],
+    toDOM () { return ['p', 0] }
+  },
+
+  // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
+  blockquote: {
+    marks: attributionMarkNames,
+    content: 'block+',
+    group: 'block',
+    defining: true,
+    parseDOM: [{ tag: 'blockquote' }],
+    toDOM () { return ['blockquote', 0] }
+  },
+
+  // :: NodeSpec A horizontal rule (`<hr>`).
+  horizontal_rule: {
+    group: 'block',
+    parseDOM: [{ tag: 'hr' }],
+    toDOM () { return ['hr'] }
+  },
+
+  // :: NodeSpec A heading textblock, with a `level` attribute that
+  // should hold the number 1 to 6. Parsed and serialized as `<h1>` to
+  // `<h6>` elements.
+  heading: {
+    attrs: { level: { default: 1 } },
+    content: 'inline*',
+    group: 'block',
+    defining: true,
+    parseDOM: [{ tag: 'h1', attrs: { level: 1 } },
+      { tag: 'h2', attrs: { level: 2 } },
+      { tag: 'h3', attrs: { level: 3 } },
+      { tag: 'h4', attrs: { level: 4 } },
+      { tag: 'h5', attrs: { level: 5 } },
+      { tag: 'h6', attrs: { level: 6 } }],
+    toDOM (node) { return ['h' + node.attrs.level, 0] }
+  },
+
+  // :: NodeSpec A code listing. Disallows non-text inline nodes, and every
+  // mark except the reserved attribution ones - those must be admitted
+  // wherever attributable text can appear, or the binding's render is
+  // silently dropped by ProseMirror (see ATTRIBUTION.md "Allow the marks on
+  // every node where attribution can land"). Represented as a `<pre>`
+  // element with a `<code>` element inside of it.
+  code_block: {
+    content: 'text*',
+    marks: attributionMarkNames,
+    group: 'block',
+    code: true,
+    defining: true,
+    parseDOM: [{ tag: 'pre', preserveWhitespace: 'full' }],
+    toDOM () { return ['pre', ['code', 0]] }
+  },
+
+  // :: NodeSpec The text node.
+  text: {
+    group: 'inline'
+  },
+
+  // :: NodeSpec An inline image (`<img>`) node. Supports `src`,
+  // `alt`, and `href` attributes. The latter two default to the empty
+  // string.
+  image: {
+    inline: true,
+    attrs: {
+      src: {},
+      alt: { default: null },
+      title: { default: null }
+    },
+    group: 'inline',
+    draggable: true,
+    parseDOM: [{
+      tag: 'img[src]',
+      getAttrs (dom) {
+        return {
+          src: dom.getAttribute('src'),
+          title: dom.getAttribute('title'),
+          alt: dom.getAttribute('alt')
+        }
+      }
+    }],
+    toDOM (node) {
+      return ['img', { src: node.attrs.src, title: node.attrs.title, alt: node.attrs.alt }]
+    }
+  },
+
+  // :: NodeSpec A hard line break, represented in the DOM as `<br>`.
+  hard_break: {
+    inline: true,
+    group: 'inline',
+    selectable: false,
+    parseDOM: [{ tag: 'br' }],
+    toDOM () { return brDOM }
+  }
+}
+
+/** @type {import('prosemirror-model').DOMOutputSpec} */
+const emDOM = ['em', 0]
+/** @type {import('prosemirror-model').DOMOutputSpec} */
+const strongDOM = ['strong', 0]
+/** @type {import('prosemirror-model').DOMOutputSpec} */
+const codeDOM = ['code', 0]
+
+// :: Object [Specs](#model.MarkSpec) for the marks in the schema.
+/**
+ * @type {Object<string, import('prosemirror-model').MarkSpec>}
+ */
+export const marks = {
+  // :: MarkSpec A link. Has `href` and `title` attributes. `title`
+  // defaults to the empty string. Rendered and parsed as an `<a>`
+  // element.
+  link: {
+    attrs: {
+      href: {},
+      title: { default: null }
+    },
+    inclusive: false,
+    parseDOM: [{
+      tag: 'a[href]',
+      getAttrs (dom) {
+        return { href: dom.getAttribute('href'), title: dom.getAttribute('title') }
+      }
+    }],
+    toDOM (node) { return ['a', node.attrs, 0] }
+  },
+
+  // :: MarkSpec An emphasis mark. Rendered as an `<em>` element.
+  // Has parse rules that also match `<i>` and `font-style: italic`.
+  em: {
+    parseDOM: [{ tag: 'i' }, { tag: 'em' }, { style: 'font-style=italic' }],
+    toDOM () { return emDOM }
+  },
+
+  // :: MarkSpec A strong mark. Rendered as `<strong>`, parse rules
+  // also match `<b>` and `font-weight: bold`.
+  strong: {
+    parseDOM: [{ tag: 'strong' },
+      // This works around a Google Docs misbehavior where
+      // pasted content will be inexplicably wrapped in `<b>`
+      // tags with a font-weight normal.
+      { tag: 'b', getAttrs: node => node.style.fontWeight !== 'normal' && null },
+      { style: 'font-weight', getAttrs: value => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null }],
+    toDOM () { return strongDOM }
+  },
+
+  // :: MarkSpec Code font mark. Represented as a `<code>` element.
+  code: {
+    parseDOM: [{ tag: 'code' }],
+    toDOM () { return codeDOM }
+  },
+
+  'y-attributed-insert': {
+    attrs: { userIds: { default: null }, timestamp: { default: null } },
+    excludes: '',
+    parseDOM: [{ tag: 'y-ins' }],
+    toDOM (mark) {
+      const title = formatAttributionTitle('Inserted', mark.attrs.userIds, mark.attrs.timestamp)
+      return /** @type {const} */ (['y-ins', attributionMarkAttrs(mark, title), 0])
+    }
+  },
+
+  'y-attributed-delete': {
+    attrs: { userIds: { default: null }, timestamp: { default: null } },
+    excludes: '',
+    parseDOM: [{ tag: 'y-del' }],
+    toDOM (mark) {
+      const title = formatAttributionTitle('Deleted', mark.attrs.userIds, mark.attrs.timestamp)
+      return /** @type {const} */ (['y-del', attributionMarkAttrs(mark, title), 0])
+    }
+  },
+
+  'y-attributed-format': {
+    attrs: { userIdsByAttr: { default: null }, timestamp: { default: null } },
+    excludes: '',
+    parseDOM: [{ tag: 'y-fmt' }],
+    toDOM (mark) {
+      const byAttr = /** @type {Record<string, string[]>|null} */ (mark.attrs.userIdsByAttr)
+      const ids = byAttr ? [...new Set(Object.values(byAttr).flat())] : null
+      const title = formatAttributionTitle('Formatted', ids, mark.attrs.timestamp)
+      const uid = primaryUserId(ids)
+      const attrs = uid
+        ? { title, 'data-userid': uid, style: `--user-color: ${userColorForId(uid)}` }
+        : { title }
+      return /** @type {const} */ (['y-fmt', attrs, 0])
+    }
+  },
+
+  // Node-level mark for suggested ATTRIBUTE changes (e.g. heading level).
+  // Deliberately keeps the DEFAULT `excludes` (unlike the marks above): its
+  // `changes` payload differs between renders and a re-render must REPLACE
+  // the mark instead of stacking a second instance.
+  'y-attributed-attrs': {
+    attrs: { changes: { default: null } },
+    parseDOM: [{ tag: 'y-attr' }],
+    toDOM (mark) {
+      const changes = /** @type {Record<string, { userIds?: string[], timestamp?: number|null }>|null} */ (mark.attrs.changes) ?? {}
+      const keys = Object.keys(changes)
+      const ids = [...new Set(keys.flatMap(k => changes[k]?.userIds ?? []))]
+      const timestamp = keys.map(k => changes[k]?.timestamp).find(ts => ts != null) ?? null
+      const title = formatAttributionTitle('Attribute changed (' + keys.join(', ') + ')', ids, timestamp)
+      const uid = primaryUserId(ids)
+      const attrs = uid
+        ? { title, 'data-userid': uid, style: `--user-color: ${userColorForId(uid)}` }
+        : { title }
+      return /** @type {const} */ (['y-attr', attrs, 0])
+    }
+  }
+}
+
+/**
+ * Build the `title` tooltip string shown on hover over an attribution mark.
+ *
+ * @param {string} action - 'Inserted' | 'Deleted' | 'Formatted'
+ * @param {string[]|null} userIds
+ * @param {number|null} timestamp
+ * @returns {string}
+ */
+function formatAttributionTitle (action, userIds, timestamp) {
+  const who = userIds && userIds.length > 0 ? userIds.join(', ') : 'unknown'
+  const when = timestamp != null
+    ? new Date(timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
+    : 'unknown time'
+  return `${action} by ${who} on ${when}`
+}
+
+export const schema = new Schema({ nodes, marks })

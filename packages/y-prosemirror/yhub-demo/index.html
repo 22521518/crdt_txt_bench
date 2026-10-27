@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>YHub - ProseMirror Demo</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        padding: 24px;
+        background: #f9fafb;
+        color: #111827;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        flex-shrink: 0;
+      }
+
+      .header h1 { font-size: 20px; font-weight: 600; }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .status {
+        font-size: 13px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        background: #e5e7eb;
+        color: #6b7280;
+      }
+
+      .status.connected { background: #d1fae5; color: #065f46; }
+      .status.disconnected { background: #fee2e2; color: #991b1b; }
+      .status.connecting { background: #fef3c7; color: #92400e; }
+
+      .suggestion-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+      }
+
+      .suggestion-controls select {
+        padding: 4px 8px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 13px;
+        background: white;
+      }
+
+      .suggestion-controls button {
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 500;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        cursor: pointer;
+        background: white;
+      }
+
+      .suggestion-controls button:hover { background: #f3f4f6; }
+      .suggestion-controls button.accept { color: #16a34a; border-color: #16a34a; }
+      .suggestion-controls button.accept:hover { background: #f0fdf4; }
+      .suggestion-controls button.reject { color: #dc2626; border-color: #dc2626; }
+      .suggestion-controls button.reject:hover { background: #fef2f2; }
+
+      .main-container {
+        display: flex;
+        gap: 16px;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .editor-container {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #editor {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: auto;
+        flex: 1;
+      }
+
+      #editor .ProseMirror {
+        min-height: 100%;
+        padding: 16px 16px 16px 56px;  /* extra left padding reserves space for avatar gutter */
+        outline: none;
+        white-space: pre-wrap;  /* required by prosemirror-view, suppresses console warning */
+      }
+
+      /* Pin line-height so the gutter-avatar vertical offset stays predictable. */
+      #editor .ProseMirror p { margin-bottom: 0.5em; line-height: 1.5; }
+
+      /* Remote cursor */
+      .ProseMirror-yjs-cursor {
+        position: relative;
+        margin-left: -1px;
+        margin-right: -1px;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        border-color: var(--user-color, orange);
+        word-break: normal;
+        pointer-events: none;
+      }
+
+      .ProseMirror-yjs-cursor > div {
+        position: absolute;
+        top: -1.05em;
+        left: -1px;
+        font-size: 13px;
+        background-color: var(--user-color, rgb(250, 129, 0));
+        font-family: serif;
+        font-style: normal;
+        font-weight: normal;
+        line-height: normal;
+        user-select: none;
+        color: white;
+        padding-left: 2px;
+        padding-right: 2px;
+        white-space: nowrap;
+      }
+
+      .ProseMirror-yjs-selection {
+        background-color: var(--user-color, orange);
+        opacity: 0.3;
+      }
+
+      /* ── Attribution marks ────────────────────────────────────────────────
+         Per-user color is set via --user-color in schema.js#toDOM. */
+      y-ins {
+        background-color: color-mix(in srgb, var(--user-color, #6c5ce7) 22%, transparent);
+      }
+      y-del {
+        color: color-mix(in srgb, var(--user-color, #6c5ce7) 75%, #4a4a4a);
+        text-decoration: line-through;
+        text-decoration-color: var(--user-color, #6c5ce7);
+        text-decoration-thickness: 1.5px;
+      }
+      y-fmt {
+        text-decoration: underline;
+        text-decoration-style: wavy;
+        text-decoration-color: var(--user-color, #7ce24d);
+      }
+      /* Node attribute changes (e.g. heading level): y-attr wraps the whole
+         block - tint it and paint a per-user bar on the left edge. */
+      y-attr:has(> p, > h1, > h2, > h3, > h4, > h5, > h6, > blockquote, > pre, > ul, > ol, > div) {
+        display: block;
+      }
+      y-attr > p, y-attr > h1, y-attr > h2, y-attr > h3, y-attr > h4, y-attr > h5, y-attr > h6,
+      y-attr > blockquote, y-attr > pre, y-attr > ul, y-attr > ol, y-attr > div {
+        background-color: color-mix(in srgb, var(--user-color, #7e57c2) 10%, transparent);
+        box-shadow: inset 3px 0 0 var(--user-color, #7e57c2);
+      }
+      /* inline nodes (e.g. an image with a changed attribute) */
+      y-attr > img {
+        outline: 2px dashed var(--user-color, #7e57c2);
+        outline-offset: -2px;
+      }
+
+      /* PM allows attribution marks on doc-level too, so a wholly-inserted
+         <p> ends up wrapped in a sibling-level <y-ins>. That wrapper must not
+         paint, otherwise the inline mark inside paints a second time on top.
+         display:contents dissolves the wrapper from layout entirely. */
+      y-ins:has(> p, > h1, > h2, > h3, > h4, > h5, > h6, > blockquote, > pre, > ul, > ol, > div),
+      y-del:has(> p, > h1, > h2, > h3, > h4, > h5, > h6, > blockquote, > pre, > ul, > ol, > div) {
+        background: transparent;
+        color: inherit;
+        text-decoration: none;
+        display: contents;
+      }
+      /* Genuine inline-in-inline nesting (one user writes inside another user's
+         insertion) gets a deeper tint + dashed outline. The :not(:has) guard
+         keeps the block-wrapper case from counting as "nesting". */
+      y-ins:not(:has(> p, > h1, > h2, > h3, > h4, > h5, > h6, > blockquote, > pre, > ul, > ol, > div)) y-ins:not(:has(> p, > h1, > h2, > h3, > h4, > h5, > h6, > blockquote, > pre, > ul, > ol, > div)) {
+        background-color: color-mix(in srgb, var(--user-color, #6c5ce7) 40%, transparent);
+        outline: 1px dashed color-mix(in srgb, var(--user-color, #6c5ce7) 60%, transparent);
+        outline-offset: -1px;
+      }
+
+      /* ── Block-level attribution decorations (added by the gutter plugin) ─
+         All edited blocks (plain / inserted / deleted) share the same
+         negative-margin layout shift. That way the padding-box of every
+         edited block sits at the same x, and the gutter avatar lands at the
+         same absolute x regardless of the block's sub-state. The 14 px-wide
+         negative-margin / padding pair is the "bar gutter": insert/delete
+         decorations paint into that 14 px strip via background-image. */
+      #editor .ProseMirror .y-block-edited {
+        position: relative;
+        margin-left: -14px;
+        padding-left: 14px;
+      }
+      #editor .ProseMirror .y-block-edited::before {
+        content: attr(data-initials);
+        position: absolute;
+        /* Sit just outside the text column with a small gap, vertically
+           centered on the FIRST LINE of the paragraph (line-height 1.5 → 24px;
+           avatar 22px → (24-22)/2 = 1px from line top, which is at em-top). */
+        left: -32px;
+        top: 1px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--block-user-color, #6c5ce7);
+        color: white;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        user-select: none;
+      }
+      /* Second avatar for when a block has been touched by two distinct users. */
+      #editor .ProseMirror .y-block-edited[data-initials-2]::after {
+        content: attr(data-initials-2);
+        position: absolute;
+        left: -18px;
+        top: 1px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--block-user-color-2, #6c5ce7);
+        color: white;
+        font-size: 9px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        border: 2px solid white;
+        user-select: none;
+      }
+      /* When attribution carries no real user identity ("··" placeholder), the
+         avatar is meaningless noise — hide it. The block-inserted left bar still
+         communicates the edit. */
+      #editor .ProseMirror .y-block-edited[data-initials="··"]::before,
+      #editor .ProseMirror .y-block-edited[data-initials="··"]::after { display: none; }
+
+      /* Wholly-inserted blocks: a solid 3 px-wide user-colored bar painted
+         into the 14 px gutter via background-image (NOT border-left, which
+         would consume layout space and shift the avatar relative to plain
+         edited blocks). */
+      #editor .ProseMirror .y-block-inserted {
+        background-image: linear-gradient(var(--block-user-color, #6c5ce7), var(--block-user-color, #6c5ce7));
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        background-size: 3px 100%;
+      }
+      /* Wholly-deleted blocks: zig-zag RED left bar (NOT user-colored) plus a
+         faint red wash. Both are background layers so they don't affect the
+         block's outer dimensions — the gutter avatar stays aligned. The
+         zig-zag tiles seamlessly because both endpoints of the SVG path sit
+         at x=0. */
+      #editor .ProseMirror .y-block-deleted {
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='8' viewBox='0 0 4 8'><path d='M0 0 L4 2 L0 4 L4 6 L0 8' stroke='%23dc2626' fill='none' stroke-width='1.3' stroke-linejoin='miter' stroke-linecap='round'/></svg>");
+        background-repeat: repeat-y;
+        background-position: 0 0;
+        background-size: 4px 8px;
+        background-color: rgba(220, 38, 38, 0.07);
+      }
+      /* When a block is both inserted and deleted (edge case), the deleted
+         zig-zag wins — its background-image overrides the inserted gradient
+         simply by selector ordering. */
+
+      /* Right column */
+      .right-column {
+        width: 340px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 0;
+      }
+
+      #activity-panel {
+        flex: 1;
+        min-height: 0;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .panel-header {
+        padding: 14px 16px;
+        font-size: 15px;
+        font-weight: 600;
+        border-bottom: 1px solid #e5e7eb;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel-header .panel-title { flex: 1; }
+
+      /* The Rollback / Close buttons get re-parented into .comparing-bar by
+         renderComparingBar — they're hidden until that happens. */
+      #rollback-btn, #close-version-btn {
+        background: white;
+        border: 1px solid #c7d2fe;
+        cursor: pointer;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #4f46e5;
+      }
+      #close-version-btn:hover { background: #f5f3ff; }
+      #rollback-btn {
+        color: #dc2626;
+        border-color: #fecaca;
+      }
+      #rollback-btn:hover { background: #fef2f2; }
+
+      #activity-list {
+        overflow-y: auto;
+        flex: 1;
+        user-select: none;
+        padding: 8px;
+      }
+
+      /* "Compare" header — two rows in the active state:
+              ↔️ Compare                 [Rollback] [✕]
+              [from ▾] to [to ▾]
+         Always present at top of the list so items below never shift. */
+      .comparing-bar {
+        padding: 10px 12px;
+        margin: 4px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #1e1b4b;
+        background: #eef2ff;
+        border-radius: 8px;
+        /* Pin the active-state height so the bar is the same size whether
+           empty or filled — items below never shift. */
+        min-height: 72px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 6px;
+      }
+      .comparing-bar.empty {
+        color: #6b7280;
+        background: #f5f3ff;
+        border: 1px dashed #c7d2fe;
+        font-style: italic;
+        flex-direction: row;
+        align-items: center;
+      }
+      .comparing-bar .cmp-icon { margin-right: 4px; font-style: normal; }
+
+      .cmp-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;  /* allow children to shrink past their content width */
+      }
+      .cmp-row-top { justify-content: space-between; }
+      .cmp-label { font-weight: 600; color: #4f46e5; }
+      .cmp-actions { display: flex; gap: 6px; flex-shrink: 0; }
+      .cmp-to-label { color: #4f46e5; font-weight: 500; flex-shrink: 0; }
+      .cmp-row-bottom { flex-wrap: nowrap; }
+      .cmp-dropdown {
+        position: relative;
+        display: inline-block;
+        padding: 2px 6px;
+        background: white;
+        border: 1px solid #c7d2fe;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #4f46e5;
+        font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1 1 0;
+        min-width: 0;
+      }
+      .cmp-dropdown:hover { background: #f5f3ff; }
+      .cmp-dropdown-caret { opacity: 0.7; font-weight: normal; }
+
+      /* Dropdown popup menu of activity items. */
+      .pick-menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        background: white;
+        color: #111827;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        min-width: 220px;
+        max-height: 280px;
+        overflow-y: auto;
+        z-index: 20;
+        display: none;
+        font-weight: normal;
+      }
+      .cmp-dropdown.open .pick-menu { display: block; }
+      .pick-option {
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 12px;
+        line-height: 1.4;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .pick-option:last-child { border-bottom: none; }
+      .pick-option:hover { background: #f9fafb; }
+      .pick-date { color: #6b7280; font-weight: 500; margin-bottom: 1px; }
+      .pick-option.disabled { opacity: 0.4; cursor: not-allowed; }
+      .pick-option.disabled:hover { background: white; }
+
+      .activity-section-divider {
+        height: 1px;
+        margin: 8px 12px;
+        background: #e5e7eb;
+      }
+
+      .activity-item {
+        padding: 10px 12px;
+        font-size: 12px;
+        cursor: pointer;
+        border-radius: 6px;
+        line-height: 1.4;
+      }
+      .activity-item:hover { background: #f9fafb; }
+      .activity-time { color: #6b7280; font-weight: 500; margin-bottom: 2px; }
+      .activity-users { color: #111827; font-size: 12px; }
+
+      /* Every item in the half-open [from, to) selection gets the same blue
+         highlight — the user reads the range as one contiguous block. */
+      .activity-item.selected {
+        background: #4f46e5;
+        color: white;
+      }
+      .activity-item.selected:hover { background: #4338ca; }
+      .activity-item.selected .activity-time,
+      .activity-item.selected .activity-users { color: #e0e7ff; }
+      /* During drag-select don't show text-selection highlights, they fight
+         with our background highlight and feel sticky. */
+      #activity-list { user-select: none; }
+
+      .activity-prompt {
+        font-size: 11px;
+        color: #4f46e5;
+        font-style: italic;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .activity-rollback {
+        font-size: 11px;
+        color: #dc2626;
+        font-weight: 500;
+        margin-top: 2px;
+      }
+
+      .activity-empty {
+        padding: 24px 16px;
+        text-align: center;
+        color: #9ca3af;
+        font-size: 13px;
+      }
+
+
+      /* ProseMirror menu bar styling */
+      .ProseMirror-menubar {
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb;
+        padding: 4px 8px;
+        border-radius: 8px 8px 0 0;
+      }
+
+      /* prosemirror-menu */
+      .ProseMirror-textblock-dropdown { min-width: 3em; }
+      .ProseMirror-menu { margin: 0 -4px; line-height: 1; }
+      .ProseMirror-tooltip .ProseMirror-menu { width: fit-content; white-space: pre; }
+      .ProseMirror-menuitem { margin-right: 3px; display: inline-block; }
+      .ProseMirror-menuseparator { border-right: 1px solid #ddd; margin-right: 3px; }
+      .ProseMirror-menu-dropdown, .ProseMirror-menu-dropdown-menu { font-size: 90%; white-space: nowrap; }
+      .ProseMirror-menu-dropdown { vertical-align: 1px; cursor: pointer; position: relative; padding-right: 15px; }
+      .ProseMirror-menu-dropdown-wrap { padding: 1px 0 1px 4px; display: inline-block; position: relative; }
+      .ProseMirror-menu-dropdown:after { content: ""; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 4px solid currentColor; opacity: .6; position: absolute; right: 4px; top: calc(50% - 2px); }
+      .ProseMirror-menu-dropdown-menu, .ProseMirror-menu-submenu { position: absolute; background: white; color: #666; border: 1px solid #aaa; padding: 2px; }
+      .ProseMirror-menu-dropdown-menu { z-index: 15; min-width: 6em; }
+      .ProseMirror-menu-dropdown-item { cursor: pointer; padding: 2px 8px 2px 4px; }
+      .ProseMirror-menu-dropdown-item:hover { background: #f2f2f2; }
+      .ProseMirror-menu-submenu-wrap { position: relative; margin-right: -4px; }
+      .ProseMirror-menu-submenu-label:after { content: ""; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 4px solid currentColor; opacity: .6; position: absolute; right: 4px; top: calc(50% - 4px); }
+      .ProseMirror-menu-submenu { display: none; min-width: 4em; left: 100%; top: -3px; }
+      .ProseMirror-menu-active { background: #eee; border-radius: 4px; }
+      .ProseMirror-menu-disabled { opacity: .3; }
+      .ProseMirror-menu-submenu-wrap:hover .ProseMirror-menu-submenu, .ProseMirror-menu-submenu-wrap-active .ProseMirror-menu-submenu { display: block; }
+      .ProseMirror-icon { display: inline-block; line-height: .8; vertical-align: -2px; padding: 2px 8px; cursor: pointer; }
+      .ProseMirror-menu-disabled.ProseMirror-icon { cursor: default; }
+      .ProseMirror-icon svg { fill: currentColor; height: 1em; }
+      .ProseMirror-icon span { vertical-align: text-top; }
+
+      /* prosemirror-example-setup */
+      .ProseMirror-example-setup-style hr { padding: 2px 10px; border: none; margin: 1em 0; }
+      .ProseMirror-example-setup-style hr:after { content: ""; display: block; height: 1px; background-color: silver; line-height: 2px; }
+      .ProseMirror ul, .ProseMirror ol { padding-left: 30px; }
+      .ProseMirror blockquote { padding-left: 1em; border-left: 3px solid #eee; margin-left: 0; margin-right: 0; }
+      .ProseMirror-prompt { background: white; padding: 5px 10px 5px 15px; border: 1px solid silver; position: fixed; border-radius: 3px; z-index: 11; box-shadow: -.5px 2px 5px rgba(0, 0, 0, .2); }
+      .ProseMirror-prompt h5 { margin: 0; font-weight: normal; font-size: 100%; color: #444; }
+      .ProseMirror-prompt input[type="text"], .ProseMirror-prompt textarea { background: #eee; border: none; outline: none; }
+      .ProseMirror-prompt input[type="text"] { padding: 0 4px; }
+      .ProseMirror-prompt-close { position: absolute; left: 2px; top: 1px; color: #666; border: none; background: transparent; padding: 0; }
+      .ProseMirror-prompt-close:after { content: "✕"; font-size: 12px; }
+      .ProseMirror-invalid { background: #ffc; border: 1px solid #cc7; border-radius: 4px; padding: 5px 10px; position: absolute; min-width: 10em; }
+      .ProseMirror-prompt-buttons { margin-top: 5px; display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>YHub - ProseMirror Demo</h1>
+      <div class="header-right">
+        <div class="suggestion-controls">
+          <label>Suggestions:</label>
+          <select id="select-suggestion-mode">
+            <option value="off">Off</option>
+            <option value="view">View</option>
+            <option value="edit">Edit</option>
+          </select>
+          <button id="btn-accept-changes" class="accept" style="display:none">Accept</button>
+          <button id="btn-reject-changes" class="reject" style="display:none">Reject</button>
+          <button id="btn-accept-all" class="accept" style="display:none">Accept All</button>
+          <button id="btn-reject-all" class="reject" style="display:none">Reject All</button>
+        </div>
+        <span id="status" class="status">connecting</span>
+      </div>
+    </div>
+    <div class="main-container">
+      <div class="editor-container">
+        <div id="editor"></div>
+      </div>
+      <div class="right-column">
+        <div id="activity-panel">
+          <div class="panel-header">
+            <span class="panel-title">Activity</span>
+          </div>
+          <div id="activity-list">
+            <div class="activity-empty">No activity yet</div>
+          </div>
+          <!-- The Rollback and Close buttons live inside the Comparing bar
+               once it becomes active; they start detached from the panel
+               header and are re-parented by renderComparingBar. -->
+          <button id="rollback-btn" title="Roll back selected range" style="display:none">↩️ Rollback</button>
+          <button id="close-version-btn" title="Exit version view" style="display:none">✕</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./dist/demo.js" async></script>
+  </body>
+</html>

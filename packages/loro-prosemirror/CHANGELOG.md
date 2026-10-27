@@ -1,0 +1,147 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [0.4.4](https://github.com/loro-dev/loro-prosemirror/compare/v0.4.3...v0.4.4) (2026-08-22)
+
+
+### Bug Fixes
+
+* only emit style ops for ranges where marks actually changed ([31b85d1](https://github.com/loro-dev/loro-prosemirror/commit/31b85d19a14ca7931e38e57bbcf7ff7a7b987007))
+* only emit style ops for ranges where marks actually changed ([57277b6](https://github.com/loro-dev/loro-prosemirror/commit/57277b6dd33be84da480b0342807a3432c6a373e))
+* treat marks with unset inclusive as inclusive when configuring text style ([e954742](https://github.com/loro-dev/loro-prosemirror/commit/e9547422c8c0e65f349ebebc8cbce921752382a4))
+* treat marks with unset inclusive as inclusive when configuring text style ([c178b29](https://github.com/loro-dev/loro-prosemirror/commit/c178b294c36a44482fe34cb69f0ac6713e169fa2))
+
+## [0.4.3](https://github.com/loro-dev/loro-prosemirror/compare/v0.4.2...v0.4.3) (2026-02-19)
+
+
+### Bug Fixes
+
+* change module type to "module" ([#72](https://github.com/loro-dev/loro-prosemirror/issues/72)) ([050a9cc](https://github.com/loro-dev/loro-prosemirror/commit/050a9cc2e1912cdf9e43695feb3b1ee566547db1))
+
+## [0.4.2](https://github.com/loro-dev/loro-prosemirror/compare/v0.4.1...v0.4.2) (2025-11-30)
+
+
+### Bug Fixes
+
+* remove attributes in loro map ([#62](https://github.com/loro-dev/loro-prosemirror/issues/62)) ([1bc1e98](https://github.com/loro-dev/loro-prosemirror/commit/1bc1e980ebb7dad5b8ba0366e68952b420d4de1c))
+* update loro-crdt to v1.10.2 ([02bcc65](https://github.com/loro-dev/loro-prosemirror/commit/02bcc65a18a97ef060bbb00a76d66592ace530d8))
+
+## [0.4.1](https://github.com/loro-dev/loro-prosemirror/compare/v0.4.0...v0.4.1) (2025-11-25)
+
+
+### Bug Fixes
+
+* export some types ([9779149](https://github.com/loro-dev/loro-prosemirror/commit/9779149d778d5d00c0d89e2c82102564ef02fcbf))
+* export some types ([0b97d62](https://github.com/loro-dev/loro-prosemirror/commit/0b97d6283a480d762568e455a139ac96c53837a2))
+
+## [0.4.0](https://github.com/loro-dev/loro-prosemirror/compare/v0.3.7...v0.4.0) (2025-11-24)
+
+
+### Features
+
+* use CursorEphemeralStore ([#54](https://github.com/loro-dev/loro-prosemirror/issues/54)) ([acb3d61](https://github.com/loro-dev/loro-prosemirror/commit/acb3d61df2963b6f3b14e9b618c2b381721dd84c))
+
+## [0.3.7](https://github.com/loro-dev/loro-prosemirror/compare/v0.3.6...v0.3.7) (2025-11-10)
+
+
+### Bug Fixes
+
+* prevent operations on destroyed views ([#50](https://github.com/loro-dev/loro-prosemirror/issues/50)) ([14df211](https://github.com/loro-dev/loro-prosemirror/commit/14df21182b7a8ec21bd5fb93f570639bf9926c53))
+
+## [0.3.6](https://github.com/loro-dev/loro-prosemirror/compare/v0.3.5...v0.3.6) (2025-10-30)
+
+
+### Bug Fixes
+
+* ignore out-of-bounds positions ([#47](https://github.com/loro-dev/loro-prosemirror/issues/47)) ([d3481fd](https://github.com/loro-dev/loro-prosemirror/commit/d3481fdd354e24fd1f5062f1bfb5933439b91f63))
+
+## [0.3.5](https://github.com/loro-dev/loro-prosemirror/compare/v0.3.4...v0.3.5) (2025-10-29)
+
+
+### Miscellaneous Chores
+
+* trigger a release ([e969787](https://github.com/loro-dev/loro-prosemirror/commit/e969787a0f000e96352d74d9e458359ad7d1995c))
+
+## [0.3.4](https://github.com/loro-dev/loro-prosemirror/compare/v0.3.3...v0.3.4) (2025-10-29)
+
+### Miscellaneous Chores
+
+* trigger a release ([725f680](https://github.com/loro-dev/loro-prosemirror/commit/725f6805e8f83df5fb980df06871914c6fe91df5))
+
+## [0.3.3](https://github.com/loro-dev/loro-prosemirror/compare/v0.3.2...v0.3.3) (2025-10-29)
+
+### Bug Fixes
+
+* enable NPM OIDC publish ([#42](https://github.com/loro-dev/loro-prosemirror/issues/42)) ([0e35ee7](https://github.com/loro-dev/loro-prosemirror/commit/0e35ee79bbb114644b2f7b3635eb83262ac71c4a))
+
+## [0.3.2](https://github.com/loro-dev/loro-prosemirror/compare/v0.3.1...v0.3.2) (2025-10-27)
+
+### Bug Fixes
+
+* avoid interrupting sync when checking canRedo/canUndo ([#40](https://github.com/loro-dev/loro-prosemirror/issues/40)) ([4c8456e](https://github.com/loro-dev/loro-prosemirror/commit/4c8456e11537ebc69452715830f28096eb8a12ea))
+
+## [0.3.1](https://github.com/loro-dev/loro-prosemirror/compare/v0.3.0...v0.3.1) (2025-08-27)
+
+### Bug Fixes
+
+- undo/redo pos restore at the end of the text ([#35](https://github.com/loro-dev/loro-prosemirror/issues/35)) ([462d9fc](https://github.com/loro-dev/loro-prosemirror/commit/462d9fc6bee578eb8c8eabf84f78c7ddc7db5b9d))
+
+## [0.3.0](https://github.com/loro-dev/loro-prosemirror/compare/v0.2.3...v0.3.0) (2025-08-13)
+
+### Features
+
+- export remaining types ([a348b53](https://github.com/loro-dev/loro-prosemirror/commit/a348b538c97b8d3d97260dad51c3e4224d8ca791))
+
+## [0.2.3](https://github.com/loro-dev/loro-prosemirror/compare/v0.2.2...v0.2.3) (2025-05-20)
+
+### Bug Fixes
+
+- cursor mapping err and undo/redo issues ([#31](https://github.com/loro-dev/loro-prosemirror/issues/31)) ([ecdf9d1](https://github.com/loro-dev/loro-prosemirror/commit/ecdf9d1429b36acb1a2ecdccd6de28d118c1e390))
+
+## [0.2.2](https://github.com/loro-dev/loro-prosemirror/compare/v0.2.1...v0.2.2) (2025-05-19)
+
+### Bug Fixes
+
+- selection should not change after applying remote updates ([#29](https://github.com/loro-dev/loro-prosemirror/issues/29)) ([e2ddccd](https://github.com/loro-dev/loro-prosemirror/commit/e2ddccdf0d6d427491254977f4066c7e715a48e2))
+
+## [0.2.1](https://github.com/loro-dev/loro-prosemirror/compare/v0.2.0...v0.2.1) (2025-01-06)
+
+### Features
+
+- Editor history visualization ([#24](https://github.com/loro-dev/loro-prosemirror/issues/24)) ([74cbe41](https://github.com/loro-dev/loro-prosemirror/commit/74cbe41a883d0c9fd3e9642dd0a3fe962f1496a8))
+
+### Bug Fixes
+
+- deps ([cb9c334](https://github.com/loro-dev/loro-prosemirror/commit/cb9c334ec1b9de792e3113ce5208a02bbc995710))
+
+## [0.2.0](https://github.com/loro-dev/loro-prosemirror/compare/v0.1.0...v0.2.0) (2024-10-31)
+
+### Features
+
+- Adds ability to use custom ContainerID to persist prosemirror document to. ([#20](https://github.com/loro-dev/loro-prosemirror/issues/20)) ([224510f](https://github.com/loro-dev/loro-prosemirror/commit/224510f312e909994172ca9b193906dbf1811160))
+
+## [0.1.0](https://github.com/loro-dev/loro-prosemirror/compare/v0.0.8...v0.1.0) (2024-10-25)
+
+### Features
+
+- support loro-crdt v1 ([901f50d](https://github.com/loro-dev/loro-prosemirror/commit/901f50d829da354de50846bd7f24bbd135f6485f))
+
+## [0.0.8](https://github.com/loro-dev/loro-prosemirror/compare/v0.0.7...v0.0.8) (2024-08-22)
+
+### Continuous Integration
+
+- add release workflow ([#14](https://github.com/loro-dev/loro-prosemirror/issues/14)) ([5437a33](https://github.com/loro-dev/loro-prosemirror/commit/5437a33752dd26e675a1928ebcaa9eabbc2de634))
+
+### [0.0.7](https://github.com/loro-dev/prosemirror/compare/v0.0.6...v0.0.7) (2024-08-22)
+
+### Features
+
+- config Loro text style automatically based on ProseMirror schema ([#13](https://github.com/loro-dev/prosemirror/issues/13)) ([47afc9e](https://github.com/loro-dev/prosemirror/commit/47afc9eda4caef39f9f2d98701bf2bc61b23fa7d))
+- make `undo` and `redo` as ProseMirror commands ([#12](https://github.com/loro-dev/prosemirror/issues/12)) ([b0a1bc1](https://github.com/loro-dev/prosemirror/commit/b0a1bc12da9f4fc1b6c74cf759b2427a191ae2be))
+
+### [0.0.6](https://github.com/loro-dev/prosemirror/compare/v0.0.3...v0.0.6) (2024-07-28)
+
+### Features
+
+- expose more functions and types ([a97b000](https://github.com/loro-dev/prosemirror/commit/a97b000c373066d95974ae0242a7a685ab2766d7))

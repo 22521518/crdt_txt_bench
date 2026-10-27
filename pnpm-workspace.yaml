@@ -1,0 +1,9 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  '@swc/core': false
+  cbor-extract: false
+  cypress: false
+  esbuild: false
+  libreact: false

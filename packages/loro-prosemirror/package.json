@@ -1,0 +1,72 @@
+{
+  "name": "loro-prosemirror",
+  "version": "0.4.4",
+  "description": "ProseMirror Binding for Loro",
+  "packageManager": "pnpm@10.19.0",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "check-format": "prettier --check .",
+    "format": "prettier --write .",
+    "build": "tsdown",
+    "test": "vitest run",
+    "lint": "tsc --noEmit",
+    "coverage": "vitest run --coverage"
+  },
+  "homepage": "https://github.com/loro-dev/loro-prosemirror#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loro-dev/loro-prosemirror.git"
+  },
+  "bugs": {
+    "url": "https://github.com/loro-dev/loro-prosemirror/issues"
+  },
+  "keywords": [
+    "rich-text",
+    "prosemirror",
+    "loro",
+    "local-first",
+    "crdt"
+  ],
+  "author": "Loro Team",
+  "license": "MIT",
+  "dependencies": {
+    "@workspace/benchmark": "workspace:*",
+    "lib0": "^0.2.42",
+    "prosemirror-model": "^1.18.1",
+    "prosemirror-schema-basic": "^1.2.5",
+    "prosemirror-state": "^1.4.1",
+    "prosemirror-view": "^1.28.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "peerDependencies": {
+    "loro-crdt": "^1.10.2"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^26.6.5",
+    "@typescript-eslint/parser": "^7.4.0",
+    "@vitest/coverage-v8": "^1.4.0",
+    "chromatic": "^11.5.3",
+    "eslint": "^8.57.0",
+    "jsdom": "^29.1.1",
+    "lib0": "^0.2.93",
+    "loro-crdt": "^1.10.2",
+    "prettier": "^3.2.5",
+    "tsdown": "^0.20.3",
+    "typescript": "^5.4.3",
+    "vite": "^5.2.7",
+    "vitest": "^1.4.0"
+  }
+}

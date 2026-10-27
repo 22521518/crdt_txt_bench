@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Yjs Prosemirror Example</title>
+    <script type="text/javascript" src="./dist/prosemirror.js" async></script>
+    <link rel="stylesheet" href="./prosemirror.css" async defer />
+    <style>
+      placeholder {
+        display: inline;
+        border: 1px solid #ccc;
+        color: #ccc;
+      }
+      placeholder:after {
+        content: "☁";
+        font-size: 200%;
+        line-height: 0.1;
+        font-weight: bold;
+      }
+      .ProseMirror img {
+        max-width: 100px;
+      }
+
+      /* this is a rough fix for the first cursor position when the first paragraph is empty */
+      .ProseMirror > .ProseMirror-yjs-cursor:first-child {
+        margin-top: 16px;
+      }
+      .ProseMirror p:first-child,
+      .ProseMirror h1:first-child,
+      .ProseMirror h2:first-child,
+      .ProseMirror h3:first-child,
+      .ProseMirror h4:first-child,
+      .ProseMirror h5:first-child,
+      .ProseMirror h6:first-child {
+        margin-top: 16px;
+      }
+      /* This gives the remote user caret. The colors are automatically overwritten*/
+      .ProseMirror-yjs-cursor {
+        position: relative;
+        margin-left: -1px;
+        margin-right: -1px;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        border-color: var(--user-color, orange);
+        word-break: normal;
+        pointer-events: none;
+      }
+      /* This renders the username above the caret */
+      .ProseMirror-yjs-cursor > div {
+        position: absolute;
+        top: -1.05em;
+        left: -1px;
+        font-size: 13px;
+        background-color: var(--user-color, rgb(250, 129, 0));
+        font-family: serif;
+        font-style: normal;
+        font-weight: normal;
+        line-height: normal;
+        user-select: none;
+        color: white;
+        padding-left: 2px;
+        padding-right: 2px;
+        white-space: nowrap;
+      }
+      .ProseMirror-yjs-selection {
+        background-color: var(--user-color, orange);
+        opacity: 0.3;
+      }
+      #y-functions {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+      }
+      #y-functions > * {
+        display: inline-block;
+      }
+    </style>
+    <!-- custom styling for attributions -->
+    <style>
+      #y-version {
+        position: relative;
+      }
+
+      .version-modal[hidden] {
+        display: none;
+      }
+
+      .version-modal:not([hidden]) {
+        position: absolute;
+        top: 30px;
+        right: 0;
+        width: 300px;
+        min-height: 300px;
+        height: fit-content;
+        z-index: 20;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 11px;
+        border-top-right-radius: 0;
+        box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+      }
+
+      .version-modal > button {
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+
+      .version-list {
+        line-height: 30px;
+        padding: 0 8px;
+        cursor: pointer;
+      }
+
+      .version-list:hover {
+        background-color: #eee;
+      }
+
+      /* Attribution marks: insertions */
+      y-ins {
+        background-color: #d4edda;
+        border-bottom: 2px solid #28a745;
+      }
+
+      /* Attribution marks: deletions */
+      y-del {
+        text-decoration: line-through;
+        color: #dc3545;
+        background-color: #f8d7da;
+      }
+
+      /* Attribution marks: format changes */
+      y-fmt {
+        background-color: #fff3cd;
+        border-bottom: 2px dotted #ffc107;
+      }
+
+      /* Attribution marks: node attribute changes (e.g. heading level) */
+      y-attr {
+        display: block;
+      }
+      y-attr > h1, y-attr > h2, y-attr > h3, y-attr > h4, y-attr > h5, y-attr > h6,
+      y-attr > p, y-attr > blockquote, y-attr > pre, y-attr > img {
+        background-color: #ede7f6;
+        outline: 2px dashed #7e57c2;
+        outline-offset: -2px;
+      }
+      /* Demo UI Styles */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      .demo-header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .demo-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
+        color: #222;
+      }
+
+      .demo-header p {
+        margin: 8px 0;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .demo-header a {
+        color: #0066cc;
+        text-decoration: none;
+      }
+
+      .demo-header a:hover {
+        text-decoration: underline;
+      }
+
+      .controls-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .control-section {
+        background: white;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .control-section h3 {
+        margin: 0 0 15px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #222;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 8px;
+      }
+
+      .control-group {
+        margin-bottom: 12px;
+      }
+
+      .control-group:last-child {
+        margin-bottom: 0;
+      }
+
+      .control-group label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .control-group label:hover {
+        background-color: #f9f9f9;
+      }
+
+      .control-group input[type="checkbox"] {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+
+      .control-group label span {
+        font-size: 14px;
+        color: #555;
+      }
+
+      .control-section button {
+        padding: 8px 16px;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        background-color: #0066cc;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.1s;
+      }
+
+      .control-section button:hover:not(:disabled) {
+        background-color: #0052a3;
+        transform: translateY(-1px);
+      }
+
+      .control-section button:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      .control-section button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .control-section select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+        margin-top: 5px;
+      }
+
+      .control-section select:focus {
+        outline: none;
+        border-color: #0066cc;
+        box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+      }
+
+      .control-section label.select-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #555;
+      }
+
+      .control-section label.select-label:hover {
+        background-color: transparent;
+      }
+
+      .info-text {
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .info-text.success {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+      }
+
+      .info-text.warning {
+        background-color: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffcc80;
+      }
+
+      .info-text.info {
+        background-color: #e3f2fd;
+        color: #1565c0;
+        border: 1px solid #90caf9;
+      }
+
+      #ypm-container {
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo-header">
+      <h1>Yjs ⇔ ProseMirror Demo</h1>
+      <p>
+        This is a demo of the <a href="https://github.com/yjs/yjs">Yjs</a> ⇔
+        <a href="http://prosemirror.net/">ProseMirror</a> binding:
+        <a href="https://github.com/yjs/y-prosemirror">y-prosemirror</a>.
+      </p>
+      <p>
+        The content of this editor is shared with every client that visits this
+        domain.
+      </p>
+    </div>
+
+    <div class="controls-container">
+      <div class="control-section">
+        <h3>Connection</h3>
+        <div class="control-group">
+          <label>
+            <input id="toggle-connect" type="checkbox" />
+            <span>Connect to WebSocket</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="control-section">
+        <h3>Suggestion Mode</h3>
+        <div class="control-group">
+          <label class="select-label">Mode:</label>
+          <select id="select-suggestion-mode">
+            <option value="off">Off - Hide suggestions, edit original</option>
+            <option value="view">View - Show suggestions, edit original</option>
+            <option value="edit">
+              Edit - Show suggestions, create suggestions
+            </option>
+          </select>
+        </div>
+        <div class="control-group" id="suggestion-actions" style="display: none;">
+          <button id="btn-accept-changes">Accept Changes</button>
+          <button id="btn-reject-changes">Reject Changes</button>
+          <button id="btn-accept-all-changes">Accept All Changes</button>
+          <button id="btn-reject-all-changes">Reject All Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="ypm-container" />
+  </body>
+</html>

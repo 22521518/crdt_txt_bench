@@ -1,0 +1,95 @@
+{
+  "name": "@y/prosemirror",
+  "version": "2.0.0-15",
+  "description": "Prosemirror bindings for Yjs",
+  "type": "module",
+  "sideEffects": false,
+  "funding": {
+    "type": "GitHub Sponsors ❤",
+    "url": "https://github.com/sponsors/dmonad"
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "dist": "npm run clean && PRODUCTION=1 tsc --skipLibCheck --noEmit false && test -e dist/src/index.d.ts",
+    "test": "node ./tests/index.node.js",
+    "test:debug": "node --inspect-brk ./tests/index.node.js",
+    "lint": "standard && tsc --skipLibCheck",
+    "watch": "rollup -wc",
+    "debug": "concurrently '0serve -o test.html' 'npm run watch'",
+    "preversion": "npm run dist",
+    "start": "concurrently '0serve -o demo/prosemirror.html' 'npm run watch'"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/*",
+    "!dist/test.*",
+    "src/*",
+    "./global.d.ts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yjs/y-prosemirror.git"
+  },
+  "keywords": [
+    "Yjs"
+  ],
+  "author": "Kevin Jahns <kevin.jahns@protonmail.com>",
+  "license": "MIT",
+  "standard": {
+    "ignore": [
+      "/dist",
+      "/node_modules",
+      "/docs"
+    ]
+  },
+  "bugs": {
+    "url": "https://github.com/yjs/y-prosemirror/issues"
+  },
+  "homepage": "https://github.com/yjs/y-prosemirror#readme",
+  "dependencies": {
+    "@workspace/benchmark": "workspace:*",
+    "@y/y": "^14.0.0-rc.26",
+    "lib0": "^1.0.0-rc.32"
+  },
+  "peerDependencies": {
+    "@y/protocols": "^1.0.6-rc.1",
+    "prosemirror-model": "^1.7.1",
+    "prosemirror-state": "^1.2.3",
+    "prosemirror-transform": "^1.8.0",
+    "prosemirror-view": "^1.9.10"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.8",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^26.6.5",
+    "@y/protocols": "^1.0.6-rc.1",
+    "@y/websocket": "^4.0.0-rc.1",
+    "concurrently": "^10.0.3",
+    "http-server": "^14.1.1",
+    "jsdom": "^29.1.1",
+    "prosemirror-example-setup": "^1.2.1",
+    "prosemirror-model": "^1.18.1",
+    "prosemirror-schema-basic": "^1.2.0",
+    "prosemirror-state": "^1.4.1",
+    "prosemirror-test-builder": "1.1.1",
+    "prosemirror-transform": "^1.12.1",
+    "prosemirror-view": "^1.26.2",
+    "rollup": "^4.52.5",
+    "standard": "^17.0.0",
+    "typescript": "^6.0.3",
+    "y-prosemirror-v1": "npm:y-prosemirror@1.3.7",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.30"
+  },
+  "engines": {
+    "npm": ">=8.0.0",
+    "node": ">=16.0.0"
+  }
+}

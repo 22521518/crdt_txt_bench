@@ -1,0 +1,241 @@
+# Caveats
+
+This document covers design tradeoffs, known limitations, and open problems in `y-prosemirror`. Some are solvable and scheduled for a later release; some have mitigations that an integrator needs to be aware of; a few are fundamental to the CRDT / ProseMirror impedance mismatch and can only be worked around.
+
+## Context
+
+A handful of goals and constraints inform everything below:
+
+- **Attributed rendering.** The binding must be able to render attributed content (suggestions, diffs of activity items, etc.) on top of the live document.
+- **Yjs v14 schemas.** Yjs v14 will add schema support that restricts what collaborators can read or insert. It is similar in spirit to a ProseMirror schema but intentionally less expressive. A major motivation is letting LLMs and other tools understand a Yjs document's structure and produce valid edits to it directly.
+- **Direct Yjs manipulation.** Nice to have: humans and LLMs should be able to edit the Yjs document directly (outside the editor) and have those edits reflected correctly in ProseMirror.
+- **Migration compatibility.** We want a migration path - ideally transparent - for existing `y-prosemirror` users.
+
+## Initial content: the ytype is always the source of truth
+
+When the binding is set up, the Y document wins. Whatever the ProseMirror state contains at bind time is **not** imported into Yjs — the binding renders the ytype into the editor, replacing any pre-existing editor content. Only edits made *while the binding is active* are content that we sync. This is deliberate: importing editor state at bind time would make every client that opens a pre-populated editor a competing writer of the "same" initial content, and merging those writes duplicates it.
+
+To give a document initial content, write it into the Y document instead — server-side, or locally before binding (e.g. `ytype.applyDelta(pmnodeToDelta(node))`), or through any Yjs update. The binding then renders it into the editor.
+
+One refinement to "the ytype wins": a fresh editor is never truly empty, because ProseMirror always materializes the schema's `createAndFill()` default (e.g. `doc > paragraph`, or `doc > blockquote > paragraph` for a schema that requires a blockquote). Rendering an *empty* ytype into such an editor would let the schema refill the default skeleton, and writing that refill back to Yjs would reintroduce exactly the duplication problem above — every fresh client would seed its own copy (the "init race"). The binding therefore **gates** the schema-default document: while the ytype has no children and the editor content fingerprints equal to the schema default, nothing is written to Yjs and the skeleton stays a local-only rendering. The gate opens on the first real content from either side — a local edit syncs the full document (including the skeleton it grew from) as the first write, and incoming remote content replaces the skeleton wholesale. Integrators whose "empty" editor state is not the schema default can supply their own check via the `isInitialContent` option (`(doc) => boolean`, consulted only while the ytype has no children). See "Initial-content gate" in `src/rdt/prosemirror.js`.
+
+**Integrator requirements:**
+
+1. Do not pass initial content to the editor and expect it to reach Yjs — seed the ydoc instead.
+2. An editor bound to an empty ytype shows the schema-default document; that skeleton is not synced until someone edits.
+
+## Compatibility with older `y-prosemirror`
+
+Documents written by the old binding (`y-prosemirror` 1.x on Yjs 13) load in the new binding and can be edited further. That is the compatibility we promise, and tests/v1-compat.test.js exercises it against the real packages. The old binding cannot read what the new one writes, so a document must not be edited by old and new clients at the same time.
+
+**What works.** The old binding represented inline text as a nested `Y.Text` (which decodes to an anonymous, `name === null` child type); the new binding represents it as inline text inside the parent type. The default pipeline includes a compat stage (`src/transformers/inline-anonymous-nodes.js`) that flattens anonymous text containers at every depth for rendering, so old documents render identically and round-trip: edits strictly inside a flattened container are routed back *into* the nested type (the old representation is preserved in Y), while newly inserted nodes are written flat. Mixed documents are fine. Position mapping runs through the binding transformer, so cursors, undo bookmarks and relative positions created by the old binding resolve correctly inside old-representation paragraphs, and `ynodeToPmnode` applies the same flattening.
+
+**One-time normalizations.** Two constructs are rewritten by the first bind of an old document, once, and never again. Overlapping marks: the old binding keyed them with a sha256-based hash and we use a faster Rabin fingerprint, so the `comment--<hash>` keys are recomputed. Node attributes holding `null`: the old binding omitted them and we store every attribute the ProseMirror node holds. Both writes converge between concurrent new clients. A document without those constructs binds without any write.
+
+**What does not work.** The old binding cannot decode inline text stored flat: an old client that receives content written by the new binding throws in its render, or deletes the node where it catches the error. We therefore do not support old and new clients collaborating on one document, and we do not migrate the stored representation eagerly; old documents keep their nested containers until edits rewrite the content.
+
+The API changed as well; the changelog lists the old exports next to their replacements.
+
+## Node splitting, merging, and lifting
+
+ProseMirror's structural operations - splitting a node, merging two siblings, lifting a child out of its parent - have no first-class representation in Yjs. As a result, concurrent edits around these operations can diverge from ProseMirror's intended semantics. Concretely, splitting a paragraph at offset `n` is implemented in the CRDT as:
+
+1. Delete everything after `n` in the original node.
+2. Insert a new node containing the deleted content.
+
+More broadly, Yjs represents changes differently than ProseMirror - through a different set of transformation steps that have no notion of lifting, merging, or splitting.
+
+### Why we don't flatten the document (yet)
+
+One way out is to represent the document as a flat sequence where structure is expressed through markers or depth annotations rather than as a nested tree. [Automerge's ProseMirror binding](https://github.com/automerge/automerge-prosemirror) takes this approach, but it tightly couples the storage layer to the ProseMirror schema - which defeats our goal of letting LLMs and external tools work with the Yjs document without having to understand the editor's schema.
+
+A schema-agnostic flattening is also possible. For example, inlining everything into a single Y.Type with depth annotations:
+
+```
+<doc depth=0><p depth=1>hello<p depth=1>world
+```
+
+is reconstructed as `<doc><p>hello</p><p>world</p></doc>`. Each opening marker implicitly closes any earlier sibling at the same or deeper depth, so the second `<p depth=1>` marks the end of the first paragraph and the start of the second. Depth markers give a natural representation of splits, merges, and lifts. But a flat representation is hostile to direct manipulation: a human or LLM reading the raw Yjs state has to reason about depth markers and reconstruction rules on top of the schema.
+
+**Planned mitigation.** Wrap the flat representation in a tree-shaped API, similar to the type wrappers in `y-utilities`. Consumers that need compatibility with pre-existing documents continue to use the unflattened `Y.Type`; new users (and users who can migrate) get the flat representation via the wrapper. The wrapper would be built on `lib0/delta/transformers`, which is expressive enough to recognize "node-split deltas" in the flat model and surface them as splits through the tree API. This wrapper would likely be broadly useful - `y-slate` could share it, for instance. More investigation is needed before it is production-ready; until then we stay on the tree structure.
+
+## Position divergence across peers
+
+Because Yjs represents a split as "delete tail + insert new node" (see above), absolute ProseMirror positions produced on one peer do not necessarily point at the same semantic content on another peer once concurrent edits have been merged in.
+
+**Mitigation.** Editor plugins that need positions to survive remote edits - comments, cursors, awareness, anchored decorations - must use Yjs relative positions rather than absolute ProseMirror positions. Relative positions are guaranteed to converge to the same absolute position.
+
+@nperez's relative-position mapping in this package makes this ergonomic; see the `Position Mapping` section of [`PROJECT_GOALS.md`](./PROJECT_GOALS.md).
+
+## Diffing ambiguity
+
+When we cannot derive the intent of a ProseMirror transaction unambiguously (for example, because only the before/after documents are available, or because the step is a `ReplaceAroundStep` whose intent is not directly representable in Yjs), we fall back to diffing the document. Diffing a repeated substring is inherently ambiguous.
+
+**Example.** Inserting `a` into `aaaaa` yields `aaaaaa`. A structural diff can tell you that one `a` was added, but not at which of the six possible positions. On a single peer this is usually harmless, but once a second peer's concurrent edit is rebased against the resolved position, the "wrong" choice can produce visibly incorrect merges.
+
+**Mitigation.** A known technique is to bias the diff toward the last known caret position - users overwhelmingly insert at the caret, so anchoring the diff there is right in the common case. We used this approach in Quill a few years ago; see [jhchen/fast-diff#2](https://github.com/jhchen/fast-diff/pull/2).
+
+Note that the incremental reference-walk (`pmDocDiff`) stays inside the same ambiguity class: it narrows the diff window by node identity before diffing, so its pairing may differ from a global diff's in rare ambiguous windows, but every choice is one a diff of the two documents could also have made.
+
+**Status:** solvable, likely not in the initial release.
+
+## Schema mismatches under concurrency
+
+ProseMirror schemas are very expressive - content expressions like `title image{2,4} paragraph+` (exactly one title, 2-4 images, at least one paragraph) are valid. This expressiveness is a liability under concurrent editing: two individually valid changes can compose into a schema-invalid document.
+
+**Example.** A blockquote whose schema requires `paragraph+`:
+
+- Initial state: `<blockquote><p>A</p><p>B</p></blockquote>`.
+- User 1 deletes paragraph A.
+- User 2 concurrently deletes paragraph B.
+- Merged state: `<blockquote></blockquote>` - schema-invalid.
+
+The only schema-valid resolution is to delete the blockquote entirely, which the binding does on each peer that receives the merged state. A small remote edit has cascaded into the implicit deletion of a much larger structure on the other peer. Offline users are especially dangerous here: their locally valid edit can invalidate a large number of remote changes on sync.
+
+This is inherent to ProseMirror schemas, not specific to Yjs. `prosemirror-collab` avoids CRDT-style merging by serializing all steps through a central authority; each client rebases its unconfirmed local steps on top of whatever the authority has since accepted. Neither the authority nor the plugin validates schemas. Instead, `rebaseSteps` reapplies each local step via `transform.maybeStep` and silently discards any step whose `.failed` is true - which includes steps whose application would produce a schema-invalid document. For an online user the window for loss is narrow, since each edit round-trips quickly. A user who edits offline, however, accumulates many dependent local steps, and on reconnect can watch a large contiguous run of their work vanish without any warning. The mitigation under `prosemirror-collab` is the same as under Yjs: widen the schema.
+
+### Recommendations for schema authors
+
+- **Prefer `*` over `+` and over bounded repetitions `{n,m}`.** `paragraph*` and `image*` are concurrency-safe; `paragraph+` and `image{2,4}` are not. Use the stricter form only when implicit deletion of the parent on invalidation is an acceptable outcome (for blockquote, it arguably is - an empty blockquote is meaningless anyway).
+- **Consider explicit "invalid-schema" node variants.** Define relaxed variant node types that only the binding can produce - never the user. When concurrent edits would produce an invalid parent, the binding can reshape into the relaxed variant rather than drop content. User-generated content still has to conform to the strict schema. This is implemented: it is the `attributedNodes` option plus a `{nodeName}--attributed` type, described in [`ATTRIBUTION.md`](./ATTRIBUTION.md) ("Rendering attributed nodes under a variant node type"). Note the scope, though - `attributedNodes` is consulted only for *attributed* nodes, so a variant helps in suggestion mode and version diffs but does nothing for the plain concurrent-emptying case above; only relaxing the canonical expression fixes that one.
+
+**Status:** implemented. We resolve it the way the previous binding did, at node-construction time: `deltaToPNode` drops a node whose content no longer satisfies its content expression, and the fix loop deletes that node from Yjs on every peer that renders the merged state, so all peers converge without writing per-peer schema fillers. The document node is never dropped; it is filled through `createAndFill` as before. We no longer fill any other node either, so content written to Yjs by non-ProseMirror clients has to be schema-complete or it is dropped. Mark constraints are not part of this check (see "Attribution mark names are fixed" below). Integrators still need to be aware of the failure mode, because a concurrent edit can cascade into the deletion of a larger structure.
+
+## Schema mismatches in suggestion mode
+
+A suggestion is an ordinary node rendered with a mark, attribute, or decoration that indicates its suggestion status (insertion / deletion / modification). This composition breaks down against strict cardinality constraints.
+
+**Example.** A schema like `image{2,4}` means "exactly 2-4 images". A suggestion that proposes "delete these 4 images and insert 4 others" requires transiently holding 8 images in the parent - violating the schema regardless of how the proposal is rendered.
+
+**Mitigation.** The schema has to be suggestion-aware. Either:
+
+- Relax cardinality in the schema itself (e.g., `image*` with separate validation at commit time), or
+- Introduce suggestion-specific node types that relax the constraints while preserving the visual / semantic distinction.
+
+Without this, the binding has no choice but to drop invalid content, silently discarding part of the suggestion.
+
+One case cannot be dropped: a node that is already a *pending delete* and then loses its required content (its paragraphs are deleted for real in the base document while the suggestion is still open). The Y side keeps rendering a pending delete until it is resolved, so deleting it from the view would be re-inserted and filling it would be reverted by `@y/y`; either would loop forever. We render such a node as-is instead: an empty struck-through blockquote that is not a valid ProseMirror node (`doc.check()` fails while it is on screen). It disappears as soon as the deletion is accepted or a peer editing the base document drops it for real. A relaxed `<name>--attributed` variant (the invalid-node variant from the previous section) makes that state schema-valid. This handling keys on the reserved `y-attributed-delete` format, so a `mapAttributionToMark` that omits the delete kind loses it.
+
+The same rules cover a *required attribute* (one without a schema default) that Y does not hold. Y does not validate schemas, so a peer with a different schema can write an image without its `src`. On a live node that is schema-invalid content and the node is dropped, exactly like content the schema rejects. On a pending delete the attribute is held as `null` instead (ProseMirror accepts `null`, only `undefined` is "missing"), and the view never writes it back: a fix that would land inside a pending-deleted node is not sent, because `@y/y` would revert it and the fix loop would never settle. Inside a pending delete the projection is best-effort and read-only.
+
+See [`ATTRIBUTION.md`](./ATTRIBUTION.md) ("Hardening an existing editor schema") for the concrete recipe - including the fact that a `--attributed` variant can only be reached through a `group`, never by name - and [`yhub-tiptap-demo/src/schema.js`](./yhub-tiptap-demo/src/schema.js) for a schema that implements it against a stock Tiptap StarterKit + tables setup.
+
+**Status:** addressable; integrators need to be aware.
+
+## Attribution mark names are fixed
+
+Attributed content (insertions, deletions, format changes) is surfaced in ProseMirror as marks. The names of those marks are part of `y-prosemirror`'s contract and are **not user-configurable**:
+
+- `y-attributed-insert`
+- `y-attributed-delete`
+- `y-attributed-format`
+
+The default `defaultMapAttributionToMark` produces these names; custom `mapAttributionToMark` mappers must produce them too. Other internals reference the names directly - the `swallowFormats` pipeline stage gates exactly the `y-attributed-*` namespace on the view→data direction (its list is the `defaultSwallowedFormats` constant in `src/transformers/swallow-formats.js`), and `attributedVariant`/`ProsemirrorRdt`'s read-only-projection guard branch on the literal names. Returning a different name from your mapper will cause `y-prosemirror` to fail to clear the attribution formatting on subsequent renders, and any code that relies on these names (decorations, accept/reject UI) will silently miss the marks.
+
+**Integrator requirements:**
+
+1. Define ProseMirror mark types with these exact names. Tiptap example:
+
+   ```js
+   Mark.create({
+     name: 'y-attributed-insert',
+     addAttributes () { return { userIds: { default: null }, timestamp: { default: null } } },
+     parseHTML () { return [{ tag: 'y-ins' }] },
+     renderHTML ({ HTMLAttributes }) { return ['y-ins', HTMLAttributes, 0] }
+   })
+   // ...similarly for y-attributed-delete and y-attributed-format
+   ```
+
+2. **Make sure the schema actually accepts these marks on every node where they may land.** This sounds trivial but is the most common integration pitfall, because ProseMirror's `gatherMarks` resolves a node's `marks` spec by mark name first and only falls back to mark-group matching when no mark by that name exists. If your schema has nodes that declare e.g. `marks: "insertion modification deletion"` and your editor *also* defines marks literally named `insertion`/`deletion`/`modification` (BlockNote's `SuggestionMarks` is a real-world example), the group-based fallback never fires and the `y-attributed-*` marks get silently shadowed - even if you put them in `group: "insertion"`. The runtime symptom is a `RangeError: Invalid content for node …` from `tr.addNodeMark` the moment a user makes the first edit in suggestion mode.
+
+   The safest fix is to extend the affected node types' `markSet` after editor construction so the `y-attributed-*` marks are explicitly listed.
+
+## The `y-attributed-*` projection is read-only in ProseMirror
+
+The attribution marks are a *projection* of the Y side's attribution dimension - they are computed by the binding (see [`ARCHITECTURE.md`](./ARCHITECTURE.md)) and cannot be written back: the `swallowFormats` pipeline stage swallows every `y-attributed-*` key before a change reaches the Y document. A local edit to that projection therefore has no data to change and would silently diverge from every other peer. Three ways this happens in practice:
+
+- **Explicitly** - a user (or plugin) removes a `y-attributed-*` mark, e.g. via "clear formatting".
+- **Implicitly** - a fresh insert *inherits* an inclusive attribution mark from its neighborhood, e.g. typing inside a suggestion-deleted span inherits `y-attributed-delete` onto the typed character. Pasting previously-attributed content has the same effect.
+- **Structurally** - the node cannot hold the mark at all. A node whose resolved `markSet` excludes the attribution marks makes ProseMirror's `tr.addMark` skip them silently (or `tr.addNodeMark` throw), so the render is simply lost. Watch out for `marks: ''` copied from `prosemirror-schema-basic`'s `code_block`, and for containers that simply *omit* `marks:` - ProseMirror resolves an omitted `marks:` on a node without inline content to `[]`, not "everything".
+
+The binding handles these in two places:
+
+- `ProsemirrorRdt.pull()` **restores** the projection on content the change *retained*, from the pre-change snapshot. That covers the explicit case, and also ProseMirror's incidental damage - a plain delete can re-split text runs and drop a mark off a neighbouring character.
+- The `swallowFormats` stage **clears** the keys off freshly *inserted* content (the implicit case) with a correction applied straight back to the view, and **swallows** everything else. A structurally impossible mark is therefore not reported to Y and not re-asserted on the view: re-asserting it would loop forever, so the view keeps rendering that range without the mark until a Y change re-renders it.
+
+The structural case has its own diagnostic, and it is the one to act on. When a binding is (re)established **with a renderer**, the plugin audits the editor's schema and logs, once, every node type that will drop an attribution mark:
+
+```
+[y/prosemirror] these node types do not allow the attribution marks this binding renders:
+  code_block: y-attributed-insert, y-attributed-delete, y-attributed-format
+ProseMirror drops those marks silently (or throws from `tr.addNodeMark`) and the binding
+swallows the loss, so attribution will not render inside those nodes. …
+```
+
+A renderer-less binding (plain collaborative editing) produces no attribution at all, so it is not audited - the check runs at the moment you configure a renderer, which is the moment you ask for suggestions or versioning. Configuring a renderer against a schema that declares *none* of the `y-attributed-*` marks gets its own warning, since nothing will be able to display the attribution.
+
+Fix it by whitelisting the marks on the named node types (see [`ATTRIBUTION.md`](./ATTRIBUTION.md)). A second, weaker warning (`[y/prosemirror] a view-side change removed the render-only attribution format …`, once per key) fires when a removal is actually swallowed at runtime; it cannot tell a schema refusal from a deliberate edit, so read it together with the bind-time warning.
+
+The Y side then re-attributes the emitted content through its renderer and sends the correct marks back as a fix (the typed character above ends up with `y-attributed-insert`, as on every other peer). Integrators should treat the `y-attributed-*` marks strictly as render output - to change attribution, go through the renderer (accept/reject) or edit the content itself.
+
+## Editing suggestion-deleted content from ProseMirror
+
+Content that is deleted in the base document but still rendered through a suggestion overlay occupies positions in the view (struck-through text). Text inserts and deletes at those positions work; *modifications* of a suggestion-deleted node (e.g. adding a mark across a suggestion-deleted paragraph) are **reverted by design**: `YType.applyDelta` addresses the deleted-but-rendered node renderer-aware, applies nothing to it, and returns the inverse as its fix. The binding propagates that revert, so all peers stay convergent - the formatting of the deleted content is undone rather than becoming a format-suggestion.
+
+## Overlapping marks and mark order
+
+ProseMirror marks of a type that does not exclude itself (declared with `excludes: ''`, e.g. a `comment` mark) may overlap on the same span - several distinct instances coexist. The Y document stores marks as a flat per-span `format` map keyed by mark name, so two instances of the same type would collide on one key. `y-prosemirror` therefore gives each overlapping mark a stable content-hash suffix - `` `${markName}--${hash}` `` (8 base64 chars, see `hashOfJSON`/`yattr2markname` in `utils.js`/`sync-utils.js`) - so each instance keeps its own key. The suffix is stripped again on the way back to ProseMirror. The reserved `y-attributed-*` attribution marks are exempt - they are never hashed (regardless of their schema's `excludes`), so the binding can keep filtering them by their exact names. Two consequences:
+
+- **`--<8 base64 chars>` is a reserved suffix.** A real mark whose name literally ends in `--` followed by exactly 8 base64 characters would be mis-parsed as a hashed overlapping mark. This is the same class of reserved-suffix limitation as `--attributed` (see "Node splitting, merging, and lifting"). Don't name marks that way.
+
+- **The *relative order* of overlapping marks of the same type is not significant and is not guaranteed to be identical across peers.** ProseMirror keeps same-type marks in an order-sensitive array (`Mark.sameSet` compares positionally), but the `format` map is unordered, so a peer that adds overlapping marks locally keeps them in the order the user applied them, while a peer that renders the same span from Y may order them differently. The rendered result is identical (both marks wrap the text); only the marks-array order - and, consequently, where ProseMirror happens to split adjacent text nodes - can differ. Treat overlapping marks of a single type as an unordered set; do not rely on their array order matching on every peer or on `doc.toJSON()` being byte-identical across peers when overlapping marks are present.
+
+## Transaction discipline around the binding
+
+Two integration constraints follow from how the sync binding consumes the ytype's native RDT surface (see `src/rdt/y-sync.js` and ARCHITECTURE.md "Why the two thin wrappers exist"):
+
+- **Wrapping binding-driven ProseMirror dispatches in your own `ydoc.transact(...)` is supported but degrades the fast path.** The write the binding issues then merges into your transaction: its events and cache patch defer, so the binding falls back to the legacy full-render diffing (the "uncertain window") until your transaction's cleanup queue drains. Correctness is preserved - the merged emission, which carries *your* origin and contains the binding's own write, is netted out by diffing rather than double-applied - but the O(doc) render cost returns for the duration of the window.
+
+- **Do not write to `ytype.doc` synchronously from inside a binding-initiated dispatch** (e.g. a ProseMirror plugin reacting to a `y-sync-transaction` by mutating the Y document in the same call stack). The resulting `'delta'` emission fires while the binding's echo mutex is held and is dropped; the content only reaches the other side after the next unrelated change re-syncs the affected region. This was already lossy before the native-payload refactor. Dispatch such writes asynchronously (microtask) instead.
+
+## One sync plugin instance per live editor
+
+Each `syncPlugin()` instance must serve at most one mounted `EditorView` per ytype. Every binding writes to Y with the plugin instance as its transaction origin, and it drops Y events carrying that origin as the echo of its own writes. Two live views sharing a plugin instance - the same `EditorState` mounted twice, or two states created from one `plugins` array - therefore silently miss each other's edits, while changes from other peers still reach both. The undo plugin tracks the same origin, so their undo histories would mix as well, and a shared `EditorState` also shares the `Y.UndoManager` held in its undo plugin state. We warn in the console when we detect this setup.
+
+We support these patterns:
+
+- **Remounting a retained state.** Destroy the old view, then create a new `EditorView` with the same `EditorState`. The new view rebuilds the binding and catches up with the Y changes made while it was unmounted. Note that this catch-up dispatches from inside the `EditorView` constructor; a wrapper that routes `dispatchTransaction` through a reference assigned only after the constructor returns will drop it.
+- **Changing the plugin list.** `state.reconfigure` (e.g. Tiptap's / BlockNote's `registerPlugin`) recreates every plugin view; the sync plugin hands its live binding over instead of rebuilding it.
+
+To show one document in several editors, create a separate `syncPlugin()` (and a separate undo plugin with its own `Y.UndoManager`) for each of them.
+
+## Editor plugins that repair the document
+
+A ProseMirror plugin whose `appendTransaction` *fixes up* the document is a hazard next to this binding. `prosemirror-tables`' `fixTables` (installed by `tableEditing`), Tiptap's `TrailingNode`, and `Link`'s autolink all fire on the binding's own dispatches, and the sync plugin's `update` pull then writes the repair into Y. A rendering artifact of the attributed projection becomes real content on every peer - and in a version-diff view it mutates a historical document the user is only reading.
+
+`fixTables` is the sharpest case. An attributed table legitimately holds a pending-deleted row next to an inserted one, which `TableMap` reports as ragged; `fixTable` pads short rows and **deletes zero-sized tables outright**.
+
+Gate such plugins on two conditions:
+
+- `ySyncPluginKey.getState(state).renderer != null` - a renderer is configured, so the document on screen is a projection of the Y side's attribution dimension, not content anybody authored. Nothing may repair it.
+- `trs.some(tr => tr.getMeta('y-sync-transaction') != null)` - the batch came from the binding. This matters *even in plain live mode*: without it every peer repairs the same incoming remote change independently and writes conflicting repairs back into Y.
+
+The plugin's own spec cannot simply be re-implemented (`tableEditing` depends on `drawCellSelection`, `handleMouseDown`, `handleTripleClick`, `handleKeyDown` and `normalizeSelection`, none of which `prosemirror-tables` exports). Build the stock plugin and rebuild it around a guarded copy of its spec instead: `EditorState` reads `plugin.spec.appendTransaction` at call time and `spec.key` rides along with the spread, so the plugin's key, state field and handlers keep working.
+
+Watch for DOM-event handlers as well as `appendTransaction`. `columnResizing` writes `colwidth` via `setNodeMarkup` on mouse drag and never consults `view.editable`, and `Table.addProseMirrorPlugins` evaluates `resizable && editor.isEditable` once at construction while `Editor.setEditable` does not rebuild plugins - so a read-only version-diff view still lets the user drag column borders, and the write lands in the historical document. Gate its `handleDOMEvents` on the renderer too (but *only* its - gating `tableEditing`'s would also kill cell selection in suggestion mode).
+
+One consequence to accept: with the guard in place, a table that arrives ragged from Y in live mode is never repaired by anyone. That is fine as long as the row content expression permits it (`(tableCell | tableHeader)*`), since a ragged table is then schema-valid and `TableMap` renders it with `problems` set.
+
+See `yhub-tiptap-demo/src/guards.js` for a worked implementation, and [`ATTRIBUTION.md`](./ATTRIBUTION.md) ("Hardening an existing editor schema") for the schema side.
+
+## Visualizing attributed content
+
+Attributed rendering - showing insertions, deletions, and modifications inline - is currently a coarse red / yellow / green background treatment. That works as a floor, but several cases need more:
+
+- ~~How do we render a pure attribute change? For example, an image's `height` changes from `200` to `400` - there is no text to highlight.~~ Resolved: attr changes surface as the reserved node-level `y-attributed-attrs` mark (attrs `{ changes: { <attrKey>: { userIds, timestamp } } }`), materialized automatically when the schema declares that mark (declare it with the DEFAULT `excludes`, unlike the other three). Limitations: attr changes on the *root* type have no parent op to carry the mark and are not rendered; per-attribute attribution is still not modeled on the attr ops themselves.
+- For attribute changes more generally, do we visualize the change in place, or show both versions side-by-side for comparison?
+- Are insertions colored by author (per-user color) or by semantics (green-for-insertion)? The two schemes compete, and picking one loses information.
+
+Visualizing this well requires the editor, the ProseMirror schema, and `y-prosemirror` to cooperate - the binding can surface attribution metadata, but the rendering strategy has to be schema-aware.
+
+**Status:** the simple solution is good enough for now; optimal rendering will need schema-level collaboration.

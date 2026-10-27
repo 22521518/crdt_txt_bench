@@ -1,0 +1,38 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Benchmark Automerge-ProseMirror",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "tsx",
+        "${workspaceFolder}\\packages\\automerge-prosemirror\\__benchmark\\benchmark.ts"
+      ],
+      "cwd": "${workspaceFolder}",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Benchmark Y-ProseMirror",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "tsx",
+        "${workspaceFolder}\\packages\\y-prosemirror\\__benchmark\\benchmark.ts"
+      ],
+      "cwd": "${workspaceFolder}",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+node_modules
+dist
+.idea
+.claude/worktrees
+next.md
+.playwright-mcp
