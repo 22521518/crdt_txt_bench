@@ -6,4 +6,5 @@ allowBuilds:
   cbor-extract: false
   cypress: false
   esbuild: false
+  leveldown: false
   libreact: false

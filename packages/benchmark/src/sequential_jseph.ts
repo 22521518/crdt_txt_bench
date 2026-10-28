@@ -4,14 +4,14 @@ import stats from '../jspeh_utils/stats.js';
 import check from '../jspeh_utils/check.js';
 
 const DATASET_PATH = [
-  new URL('../data/sequential-edit/automerge-paper.json', import.meta.url), //  1
-  new URL('../data/sequential-edit/clownschool_flat.json', import.meta.url), //  2
-  new URL('../data/sequential-edit/friendsforever_flat.json', import.meta.url), //  3
-  new URL('../data/sequential-edit/json-crdt-blog-post.json', import.meta.url), //  4
-  new URL('../data/sequential-edit/json-crdt-patch.json', import.meta.url), //  5
-  new URL('../data/sequential-edit/rustcode.json', import.meta.url), //  6
-  new URL('../data/sequential-edit/seph-blog1.json', import.meta.url), //  7
-  new URL('../data/sequential-edit/sveltecomponent.json', import.meta.url), //  8
+  new URL('../data/sequential-edit/sveltecomponent.json', import.meta.url), //  8 > 10000
+  new URL('../data/sequential-edit/json-crdt-patch.json', import.meta.url), //  5 > 10000
+  new URL('../data/sequential-edit/clownschool_flat.json', import.meta.url), //  2 > 20000
+  new URL('../data/sequential-edit/friendsforever_flat.json', import.meta.url), //  3 > 20000
+  new URL('../data/sequential-edit/json-crdt-blog-post.json', import.meta.url), //  4 > 20000
+  new URL('../data/sequential-edit/rustcode.json', import.meta.url), //  6 > 30000
+  new URL('../data/sequential-edit/seph-blog1.json', import.meta.url), //  7 > 130000
+  new URL('../data/sequential-edit/automerge-paper.json', import.meta.url), //  1 > 250000 
 ];
 
 export const get_the_minimal_set = () => DATASET_PATH[7];

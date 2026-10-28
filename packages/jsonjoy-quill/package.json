@@ -1,0 +1,24 @@
+{
+  "name": "jsonjoy-quill",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@workspace/benchmark": "workspace:*",
+    "@jsonjoy.com/collaborative-quill": "^18.30.0",
+    "json-joy": "^18.30.0",
+    "quill": "^2.0.3",
+    "quill-delta": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^26.6.5",
+    "jsdom": "^29.1.1"
+  }
+}
