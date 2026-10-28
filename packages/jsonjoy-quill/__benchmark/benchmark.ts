@@ -26,6 +26,8 @@ function run_bench(dataset_path: string | URL) {
     }
     assert.equal("", endContent);
 
+  } catch (err) {
+    console.error(`${NAME_FILE} document mismatch:`, err);
   } finally {
   }
 }

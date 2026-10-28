@@ -64,6 +64,8 @@ function run_bench(dataset_path: string | URL) {
     }
 
     assert.equal(getLoroText(doc), endContent);
+  } catch (err) {
+    console.error(`${NAME_FILE} document mismatch:`, err);
   } finally {
     view.destroy();
   }

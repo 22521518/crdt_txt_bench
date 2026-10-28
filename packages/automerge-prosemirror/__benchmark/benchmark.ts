@@ -52,6 +52,8 @@ function run_bench(dataset_path: string | URL) {
     }
 
     assert.equal(handle.doc().text, endContent);
+  } catch (err) {
+    console.error(`${NAME_FILE} document mismatch:`, err);
   } finally {
     view.destroy();
   }

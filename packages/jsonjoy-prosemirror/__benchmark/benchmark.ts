@@ -72,6 +72,8 @@ function run_bench(dataset_path: string | URL) {
     assert.equal(finalContent, endContent);
 
     return finalContent;
+  } catch (err) {
+    console.error(`${NAME_FILE} document mismatch:`, err);
   } finally {
     unbind();
     facade.dispose();
