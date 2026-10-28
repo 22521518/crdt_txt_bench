@@ -90,6 +90,7 @@ const ỉterations = Math.max(Number(argv_iterations.split('=')[1]), 1)
 
 const NAME_FILE = 'jjsonjoy_prosemirror'
 DATASET_PATH.slice(start, end).forEach(async data => {
+  console.log(data.pathname)
   const result = await benchmark(run_bench, data, { warmup: warmup, iterations: ỉterations, collectMemory: true, }, NAME_FILE);
-  console.log("JsonJoy + Peritext + ProseMirror benchmark:\n", data.pathname, "\n", data, result);
+  console.log("JsonJoy + Peritext + ProseMirror benchmark:\n", "\n", JSON.stringify(result));
 })

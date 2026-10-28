@@ -69,6 +69,7 @@ const ỉterations = Math.max(Number(argv_iterations.split('=')[1]), 1)
 const NAME_FILE = 'automerge_prosemirror'
 console.log(DATASET_PATH.slice(start, end).length)
 DATASET_PATH.slice(start, end).forEach(async data => {
+  console.log(data.pathname)
   const result = await benchmark(run_bench, data, { warmup: warmup, iterations: ỉterations, collectMemory: true, }, NAME_FILE);
-  console.log("Automerge-ProseMirror benchmark:\n", data.pathname, "\n", data, result);
+  console.log("Automerge-ProseMirror benchmark:\n", "\n", JSON.stringify(result));
 })

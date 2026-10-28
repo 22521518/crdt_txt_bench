@@ -21,6 +21,21 @@ export type BenchmarkMetrics = {
   };
 }
 
+export type BenchmarkMetricDetail = {
+  run_th: number;
+  time: {
+    minMs: number;
+    maxMs: number;
+  };
+  memory: {
+    heapUsedBeforeMB: number;
+    heapUsedAfterMB: number;
+    heapDeltaMB: number;
+    rssBeforeMB: number;
+    rssAfterMB: number;
+  };
+}
+
 export type BenchmarkResult = BenchmarkMetrics & {
   iterations: number;
 };

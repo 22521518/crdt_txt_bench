@@ -4,7 +4,7 @@ import process from "node:process";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { BenchmarkMetrics, BenchmarkOptions, BenchmarkResult } from "./benchmark.type";
+import { BenchmarkMetricDetail, BenchmarkMetrics, BenchmarkOptions, BenchmarkResult } from "./benchmark.type";
 
 function percentile(sorted: number[], p: number): number {
   sorted.sort((a, b) => a - b)
@@ -68,7 +68,7 @@ export async function benchmark<TInput, TOutput>(
   input: TInput,
   options: BenchmarkOptions = {},
   save_filename: string | null = null
-): Promise<BenchmarkResult> {
+): Promise<{ overall: BenchmarkResult; details: BenchmarkMetricDetail[] }> {
   const { warmup = 100, iterations = 1000, collectMemory = true } = options;
 
   if (warmup < 0 || !Number.isInteger(warmup)) throw new Error("warmup must be a non-negative integer");
@@ -80,17 +80,20 @@ export async function benchmark<TInput, TOutput>(
   const gc = (globalThis as typeof globalThis & { gc?: () => void; }).gc;
   if (collectMemory && gc) { gc(); }
 
-  const before = process.memoryUsage();
   const durations: number[] = [];
 
+  const befores: NodeJS.MemoryUsage[] = []
+  const afters: NodeJS.MemoryUsage[] = []
+
   for (let i = 0; i < iterations; i++) {
+    befores.push(process.memoryUsage());
     const start = performance.now();
     await fn(input);
     const end = performance.now();
     durations.push(end - start);
+    afters.push(process.memoryUsage());
   }
 
-  const after = process.memoryUsage();
   // durations.sort((a, b) => a - b);
   const total = durations.reduce((sum, t) => sum + t, 0);
 
@@ -104,16 +107,34 @@ export async function benchmark<TInput, TOutput>(
       percentile95Ms: round(percentile(durations, 0.95)),
     },
     memory: {
-      heapUsedBeforeMB: round(toMB(before.heapUsed)),
-      heapUsedAfterMB: round(toMB(after.heapUsed)),
-      heapDeltaMB: round(toMB(after.heapUsed - before.heapUsed),),
-      rssBeforeMB: round(toMB(before.rss)),
-      rssAfterMB: round(toMB(after.rss)),
+      heapUsedBeforeMB: round(toMB(befores[0].heapUsed)),
+      heapUsedAfterMB: round(toMB(afters[iterations - 1].heapUsed)),
+      heapDeltaMB: round(toMB(afters[iterations - 1].heapUsed - befores[0].heapUsed),),
+      rssBeforeMB: round(toMB(befores[0].rss)),
+      rssAfterMB: round(toMB(afters[iterations - 1].rss)),
     },
   };
 
-  if (save_filename) await saveBenchmarkResult(output, save_filename)
-  return output
+  const details: BenchmarkMetricDetail[] = durations.map((duration, idx) => ({
+    run_th: idx + 1,
+    time: {
+      minMs: round(duration),
+      maxMs: round(duration),
+    },
+    memory: {
+      heapUsedBeforeMB: round(toMB(befores[idx].heapUsed)),
+      heapUsedAfterMB: round(toMB(afters[idx].heapUsed)),
+      heapDeltaMB: round(toMB(afters[idx].heapUsed - befores[idx].heapUsed),),
+      rssBeforeMB: round(toMB(befores[idx].rss)),
+      rssAfterMB: round(toMB(afters[idx].rss)),
+    },
+  }))
+
+  if (save_filename) {
+    await saveBenchmarkResult(output, save_filename)
+    await saveBenchmarkResult(details, save_filename + '_detail')
+  }
+  return { overall: output, details: details }
 }
 
 export function compareBenchmarkResult(br1: BenchmarkResult, br2: BenchmarkResult): BenchmarkMetrics {

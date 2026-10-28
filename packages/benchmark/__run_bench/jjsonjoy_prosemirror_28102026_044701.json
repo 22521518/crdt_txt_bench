@@ -1,0 +1,18 @@
+{
+  "iterations": 1,
+  "time": {
+    "minMs": 5352.394,
+    "maxMs": 5352.394,
+    "meanMs": 5352.394,
+    "medianMs": 5352.394,
+    "percentile95Ms": 5352.394
+  },
+  "memory": {
+    "heapUsedBeforeMB": 121.528,
+    "heapUsedAfterMB": 261.698,
+    "heapDeltaMB": 140.17,
+    "rssBeforeMB": 595.199,
+    "rssAfterMB": 595.859
+  }
+}  }
+}

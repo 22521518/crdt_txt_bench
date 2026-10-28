@@ -83,10 +83,7 @@ const ỉterations = Math.max(Number(argv_iterations.split('=')[1]), 1)
 
 const NAME_FILE = 'yjs_prosemirror'
 DATASET_PATH.slice(start, end).forEach(async data => {
+  console.log(data.pathname)
   const result = await benchmark(run_bench, data, { warmup: warmup, iterations: ỉterations, collectMemory: true, }, NAME_FILE);
-  console.log("Yjs v2 + ProseMirror benchmark:\n", data.pathname, "\n", data, result);
+  console.log("Yjs v2 + ProseMirror benchmark:\n", "\n", JSON.stringify(result));
 })
-
-import { get_file } from "@workspace/benchmark/index"
-
-console.log(get_file())
