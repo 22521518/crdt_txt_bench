@@ -3,7 +3,7 @@ import {
   DATASET_PATH,
   get_the_minimal_set,
   parse_sequential_joseph,
-} from "@workspace/benchmark/index";
+} from "@workspace/_benchmark/index";
 
 import { schema } from "prosemirror-schema-basic";
 import { EditorState } from "prosemirror-state";
@@ -31,7 +31,7 @@ Object.defineProperty(globalThis, "MutationObserver", { value: dom.window.Mutati
 let glob_count = 0
 function run_bench(dataset_path: string | URL) {
   const { startContent, endContent, txns } = parse_sequential_joseph(dataset_path);
-  console.log("Start running y-prosemirror ", glob_count++)
+  console.log("Start running y-prosemirror ", typeof dataset_path === 'string' ? dataset_path : dataset_path.pathname, " ", glob_count++)
   const ydoc = new Y.Doc();
   const ytype = ydoc.get("prosemirror");
   const initialDoc = schema.node("doc", null, [
@@ -65,12 +65,14 @@ function run_bench(dataset_path: string | URL) {
     }
 
     assert.equal(view.state.doc.textContent, endContent);
+    assert.equal(ytype.toString(), endContent);
     return view.state.doc.textContent;
   } catch (err) {
     console.error(`${NAME_FILE} document mismatch:`, err);
   } finally {
     view.destroy();
     ydoc.destroy();
+    mount.remove()
   }
 }
 const argv_start = process.argv.length > 2 ? process.argv[2] : '--start=0'
@@ -81,11 +83,11 @@ const argv_iterations = process.argv.length > 5 ? process.argv[5] : '--iteration
 const start = Number(argv_start.split('=')[1])
 const end = Number(argv_end.split('=')[1]) > 0 ? Number(argv_end.split('=')[1]) : undefined
 const warmup = Math.max(Number(argv_warmup.split('=')[1]), 1)
-const ỉterations = Math.max(Number(argv_iterations.split('=')[1]), 1)
+const iterations = Math.max(Number(argv_iterations.split('=')[1]), 1)
 
 const NAME_FILE = 'yjs_prosemirror'
 DATASET_PATH.slice(start, end).forEach(async data => {
   console.log(data.pathname)
-  const result = await benchmark(run_bench, data, { warmup: warmup, iterations: ỉterations, collectMemory: true, }, NAME_FILE);
+  const result = await benchmark(run_bench, data, { warmup: warmup, iterations: iterations, collectMemory: true, }, NAME_FILE);
   console.log("Yjs v2 + ProseMirror benchmark:\n", "\n", JSON.stringify(result));
 })

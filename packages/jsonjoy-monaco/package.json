@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@workspace/benchmark": "workspace:*",
+    "@workspace/_benchmark": "workspace:*",
     "@jsonjoy.com/collaborative-monaco": "^18.30.0",
     "json-joy": "^18.30.0",
     "monaco-editor": "^0.50.0"

@@ -7,6 +7,29 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Benchmark jsonjoy-monaco",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "--import",
+        "tsx",
+        "--import",
+        "./ignore-css-loader.mjs"
+      ],
+      "program": "${workspaceFolder}/packages/jsonjoy-monaco/__benchmark/benchmark.ts",
+      "args": [
+        "--start=0",
+        "--end=1",
+        "--warmup=0"
+      ],
+      "cwd": "${workspaceFolder}",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Benchmark Automerge-ProseMirror",
       "runtimeExecutable": "npx",
       "runtimeArgs": [

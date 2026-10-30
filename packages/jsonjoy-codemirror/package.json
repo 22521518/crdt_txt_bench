@@ -10,8 +10,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@workspace/benchmark": "workspace:*",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/lang-markdown": "^6.5.2",
+    "@codemirror/lang-rust": "^6.0.2",
     "@jsonjoy.com/collaborative-codemirror": "^18.30.0",
+    "@workspace/_benchmark": "workspace:*",
     "codemirror": "^6.0.2",
     "json-joy": "^18.30.0"
   },

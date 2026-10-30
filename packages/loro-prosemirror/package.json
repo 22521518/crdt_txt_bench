@@ -39,7 +39,7 @@
   "author": "Loro Team",
   "license": "MIT",
   "dependencies": {
-    "@workspace/benchmark": "workspace:*",
+    "@workspace/_benchmark": "workspace:*",
     "lib0": "^0.2.42",
     "prosemirror-model": "^1.18.1",
     "prosemirror-schema-basic": "^1.2.5",

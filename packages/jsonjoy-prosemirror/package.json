@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@workspace/benchmark": "workspace:*",
+    "@workspace/_benchmark": "workspace:*",
     "@jsonjoy.com/collaborative-peritext": "^18.30.0",
     "@jsonjoy.com/collaborative-prosemirror": "^18.30.0",
     "json-joy": "^18.30.0",

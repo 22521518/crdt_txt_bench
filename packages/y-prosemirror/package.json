@@ -53,7 +53,7 @@
   },
   "homepage": "https://github.com/yjs/y-prosemirror#readme",
   "dependencies": {
-    "@workspace/benchmark": "workspace:*",
+    "@workspace/_benchmark": "workspace:*",
     "@y/y": "^14.0.0-rc.26",
     "lib0": "^1.0.0-rc.32"
   },

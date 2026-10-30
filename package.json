@@ -1,0 +1,7 @@
+{
+	"devDependencies": {
+		"canvas": "^3.2.3",
+		"resize-observer-polyfill": "^1.5.1",
+		"tsx": "^4.23.15"
+	}
+}

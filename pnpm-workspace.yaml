@@ -3,8 +3,10 @@ packages:
   - "packages/*"
 allowBuilds:
   '@swc/core': false
+  canvas: false
   cbor-extract: false
   cypress: false
   esbuild: false
+  fsevents: false
   leveldown: false
   libreact: false

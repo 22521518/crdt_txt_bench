@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@workspace/benchmark": "workspace:*",
+    "@workspace/_benchmark": "workspace:*",
     "@jsonjoy.com/collaborative-quill": "^18.30.0",
     "json-joy": "^18.30.0",
     "quill": "^2.0.3",

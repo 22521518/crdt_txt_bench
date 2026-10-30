@@ -55,8 +55,9 @@
   },
   "homepage": "https://github.com/yjs/y-quill#readme",
   "dependencies": {
-    "@workspace/benchmark": "workspace:*",
-    "lib0": "^0.2.97"
+    "@workspace/_benchmark": "workspace:*",
+    "lib0": "^0.2.97",
+    "quill-delta": "^5.1.0"
   },
   "peerDependencies": {
     "quill": "^2.0.0",

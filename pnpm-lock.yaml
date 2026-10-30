@@ -6,6 +6,37 @@ settings:
 
 importers:
 
+  .:
+    devDependencies:
+      canvas:
+        specifier: ^3.2.3
+        version: 3.2.3
+      resize-observer-polyfill:
+        specifier: ^1.5.1
+        version: 1.5.1
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
+
+  packages/_benchmark:
+    dependencies:
+      '@automerge/prosemirror':
+        specifier: workspace:*
+        version: link:../automerge-prosemirror
+      '@y/prosemirror':
+        specifier: workspace:*
+        version: link:../y-prosemirror
+    devDependencies:
+      '@types/node':
+        specifier: ^26.6.5
+        version: 26.6.5
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+
   packages/automerge-codemirror:
     dependencies:
       '@automerge/automerge':
@@ -17,9 +48,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.0.0
         version: 6.43.15
-      '@workspace/benchmark':
+      '@workspace/_benchmark':
         specifier: workspace:*
-        version: link:../benchmark
+        version: link:../_benchmark
       codemirror:
         specifier: ^6.0.0
         version: 6.0.2
@@ -56,7 +87,7 @@ importers:
         version: 1.1.7
       jsdom:
         specifier: ^24.0.0
-        version: 24.1.3(supports-color@8.1.1)
+        version: 24.1.3(canvas@3.2.3)(supports-color@8.1.1)
       prettier:
         specifier: ^2.8.8
         version: 2.8.8
@@ -87,9 +118,9 @@ importers:
       '@automerge/automerge':
         specifier: ^3.1
         version: 3.5.0
-      '@workspace/benchmark':
+      '@workspace/_benchmark':
         specifier: workspace:*
-        version: link:../benchmark
+        version: link:../_benchmark
       eventemitter3:
         specifier: ^5.0.4
         version: 5.0.4
@@ -186,7 +217,7 @@ importers:
         version: 1.1.1
       jsdom:
         specifier: ^29.1.1
-        version: 29.1.1(@noble/hashes@1.8.0)
+        version: 29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3)
       lucide-react:
         specifier: ^0.344.0
         version: 0.344.0(react@18.3.1)
@@ -230,33 +261,26 @@ importers:
         specifier: ^3.2.2
         version: 3.6.0(vite@4.5.14(@types/node@20.19.43)(terser@5.51.2))
 
-  packages/benchmark:
-    dependencies:
-      '@automerge/prosemirror':
-        specifier: workspace:*
-        version: link:../automerge-prosemirror
-      '@y/prosemirror':
-        specifier: workspace:*
-        version: link:../y-prosemirror
-    devDependencies:
-      '@types/node':
-        specifier: ^26.6.5
-        version: 26.6.5
-      tsx:
-        specifier: ^4.23.15
-        version: 4.23.15
-      typescript:
-        specifier: ^7.0.2
-        version: 7.0.2
-
   packages/jsonjoy-codemirror:
     dependencies:
+      '@codemirror/lang-javascript':
+        specifier: ^6.2.5
+        version: 6.2.5
+      '@codemirror/lang-json':
+        specifier: ^6.0.2
+        version: 6.0.2
+      '@codemirror/lang-markdown':
+        specifier: ^6.5.2
+        version: 6.5.2
+      '@codemirror/lang-rust':
+        specifier: ^6.0.2
+        version: 6.0.2
       '@jsonjoy.com/collaborative-codemirror':
         specifier: ^18.30.0
         version: 18.30.0(@babel/runtime@7.29.10)(@codemirror/state@6.7.6)(@codemirror/view@6.43.15)(@types/react@18.3.31)(codemirror@6.0.2)(prop-types@15.8.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)(supports-color@10.2.2)(tslib@2.8.1)
-      '@workspace/benchmark':
+      '@workspace/_benchmark':
         specifier: workspace:*
-        version: link:../benchmark
+        version: link:../_benchmark
       codemirror:
         specifier: ^6.0.2
         version: 6.0.2
@@ -272,16 +296,16 @@ importers:
         version: 26.6.5
       jsdom:
         specifier: ^29.1.1
-        version: 29.1.1(@noble/hashes@1.8.0)
+        version: 29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3)
 
   packages/jsonjoy-monaco:
     dependencies:
       '@jsonjoy.com/collaborative-monaco':
         specifier: ^18.30.0
         version: 18.30.0(@babel/runtime@7.29.10)(@types/react@18.3.31)(monaco-editor@0.50.0)(prop-types@15.8.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)(supports-color@10.2.2)(tslib@2.8.1)
-      '@workspace/benchmark':
+      '@workspace/_benchmark':
         specifier: workspace:*
-        version: link:../benchmark
+        version: link:../_benchmark
       json-joy:
         specifier: ^18.30.0
         version: 18.30.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)(tslib@2.8.1)
@@ -297,7 +321,7 @@ importers:
         version: 26.6.5
       jsdom:
         specifier: ^29.1.1
-        version: 29.1.1(@noble/hashes@1.8.0)
+        version: 29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3)
 
   packages/jsonjoy-prosemirror:
     dependencies:
@@ -307,9 +331,9 @@ importers:
       '@jsonjoy.com/collaborative-prosemirror':
         specifier: ^18.30.0
         version: 18.30.0(@babel/runtime@7.29.10)(@types/react@18.3.31)(prop-types@15.8.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)(supports-color@10.2.2)(tslib@2.8.1)
-      '@workspace/benchmark':
+      '@workspace/_benchmark':
         specifier: workspace:*
-        version: link:../benchmark
+        version: link:../_benchmark
       json-joy:
         specifier: ^18.30.0
         version: 18.30.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)(tslib@2.8.1)
@@ -337,16 +361,16 @@ importers:
         version: 26.6.5
       jsdom:
         specifier: ^29.1.1
-        version: 29.1.1(@noble/hashes@1.8.0)
+        version: 29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3)
 
   packages/jsonjoy-quill:
     dependencies:
       '@jsonjoy.com/collaborative-quill':
         specifier: ^18.30.0
         version: 18.30.0(quill@2.0.3)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)(tslib@2.8.1)
-      '@workspace/benchmark':
+      '@workspace/_benchmark':
         specifier: workspace:*
-        version: link:../benchmark
+        version: link:../_benchmark
       json-joy:
         specifier: ^18.30.0
         version: 18.30.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rxjs@7.8.2)(tslib@2.8.1)
@@ -365,13 +389,13 @@ importers:
         version: 26.6.5
       jsdom:
         specifier: ^29.1.1
-        version: 29.1.1(@noble/hashes@1.8.0)
+        version: 29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3)
 
   packages/loro-prosemirror:
     dependencies:
-      '@workspace/benchmark':
+      '@workspace/_benchmark':
         specifier: workspace:*
-        version: link:../benchmark
+        version: link:../_benchmark
       lib0:
         specifier: ^0.2.42
         version: 0.2.119
@@ -399,7 +423,7 @@ importers:
         version: 7.18.0(eslint@8.57.1(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3)
       '@vitest/coverage-v8':
         specifier: ^1.4.0
-        version: 1.6.1(supports-color@10.2.2)(vitest@1.6.1(@types/node@26.6.5)(jsdom@29.1.1(@noble/hashes@1.8.0))(supports-color@10.2.2)(terser@5.51.2))
+        version: 1.6.1(supports-color@10.2.2)(vitest@1.6.1(@types/node@26.6.5)(jsdom@29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3))(supports-color@10.2.2)(terser@5.51.2))
       chromatic:
         specifier: ^11.5.3
         version: 11.29.0
@@ -408,7 +432,7 @@ importers:
         version: 8.57.1(supports-color@10.2.2)
       jsdom:
         specifier: ^29.1.1
-        version: 29.1.1(@noble/hashes@1.8.0)
+        version: 29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3)
       loro-crdt:
         specifier: ^1.10.2
         version: 1.17.1
@@ -426,10 +450,19 @@ importers:
         version: 5.4.21(@types/node@26.6.5)(terser@5.51.2)
       vitest:
         specifier: ^1.4.0
-        version: 1.6.1(@types/node@26.6.5)(jsdom@29.1.1(@noble/hashes@1.8.0))(supports-color@10.2.2)(terser@5.51.2)
+        version: 1.6.1(@types/node@26.6.5)(jsdom@29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3))(supports-color@10.2.2)(terser@5.51.2)
 
   packages/y-codemirror:
     dependencies:
+      '@types/jsdom':
+        specifier: ^30.0.0
+        version: 30.0.0
+      '@types/node':
+        specifier: ^26.6.6
+        version: 26.6.6
+      '@workspace/_benchmark':
+        specifier: workspace:*
+        version: link:../_benchmark
       lib0:
         specifier: ^0.2.43
         version: 0.2.119
@@ -454,7 +487,7 @@ importers:
         version: 0.12.3(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       jsdom:
         specifier: ^16.7.0
-        version: 16.7.0(supports-color@10.2.2)
+        version: 16.7.0(canvas@3.2.3)(supports-color@10.2.2)
       rollup:
         specifier: ^2.60.1
         version: 2.80.0
@@ -463,7 +496,7 @@ importers:
         version: 1.0.4
       standard:
         specifier: ^14.3.4
-        version: 14.3.4(@typescript-eslint/parser@8.72.0(eslint@6.8.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@4.9.5))(supports-color@10.2.2)
+        version: 14.3.4(@typescript-eslint/parser@8.72.0(eslint@8.57.1(supports-color@10.2.2))(supports-color@10.2.2)(typescript@4.9.5))(supports-color@10.2.2)
       typescript:
         specifier: ^4.5.2
         version: 4.9.5
@@ -476,12 +509,15 @@ importers:
 
   packages/y-monaco:
     dependencies:
-      '@workspace/benchmark':
+      '@workspace/_benchmark':
         specifier: workspace:*
-        version: link:../benchmark
+        version: link:../_benchmark
       lib0:
         specifier: ^0.2.43
         version: 0.2.119
+      monaco-editor:
+        specifier: '>=0.20.0'
+        version: 0.50.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^21.0.1
@@ -501,18 +537,21 @@ importers:
       css-loader:
         specifier: ^6.7.1
         version: 6.11.0(webpack@5.112.2)
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
       file-loader:
         specifier: ^6.2.0
         version: 6.2.0(webpack@5.112.2)
       jsdom:
         specifier: ^15.2.1
-        version: 15.2.1
+        version: 15.2.1(canvas@3.2.3)
       live-server:
         specifier: ^1.2.1
         version: 1.2.2(supports-color@10.2.2)
-      monaco-editor:
-        specifier: ^0.50.0
-        version: 0.50.0
+      resize-observer-polyfill:
+        specifier: link:@types\resize-observer-polyfill
+        version: link:@types/resize-observer-polyfill
       rollup:
         specifier: ^2.63.0
         version: 2.80.0
@@ -521,7 +560,7 @@ importers:
         version: 4.0.2(postcss@8.5.31)(ts-node@10.9.2(@swc/core@1.16.20)(@swc/wasm@1.16.20)(@types/node@12.20.55)(typescript@4.9.5))
       standard:
         specifier: ^14.3.4
-        version: 14.3.4(@typescript-eslint/parser@8.72.0(eslint@8.57.1(supports-color@10.2.2))(supports-color@10.2.2)(typescript@4.9.5))(supports-color@10.2.2)
+        version: 14.3.4(@typescript-eslint/parser@8.72.0(eslint@6.8.0(supports-color@10.2.2))(supports-color@10.2.2)(typescript@4.9.5))(supports-color@10.2.2)
       style-loader:
         specifier: ^1.3.0
         version: 1.3.0(webpack@5.112.2)
@@ -549,9 +588,9 @@ importers:
 
   packages/y-prosemirror:
     dependencies:
-      '@workspace/benchmark':
+      '@workspace/_benchmark':
         specifier: workspace:*
-        version: link:../benchmark
+        version: link:../_benchmark
       '@y/y':
         specifier: ^14.0.0-rc.26
         version: 14.0.0-rc.29
@@ -585,7 +624,7 @@ importers:
         version: 14.1.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       jsdom:
         specifier: ^29.1.1
-        version: 29.1.1(@noble/hashes@1.8.0)
+        version: 29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3)
       prosemirror-example-setup:
         specifier: ^1.2.1
         version: 1.2.3
@@ -628,15 +667,18 @@ importers:
 
   packages/y-quill:
     dependencies:
-      '@workspace/benchmark':
+      '@workspace/_benchmark':
         specifier: workspace:*
-        version: link:../benchmark
+        version: link:../_benchmark
       lib0:
         specifier: ^0.2.97
         version: 0.2.119
       quill-cursors:
         specifier: ^4.0.2
         version: 4.3.0
+      quill-delta:
+        specifier: ^5.1.0
+        version: 5.1.0
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^25.0.7
@@ -655,7 +697,7 @@ importers:
         version: 8.2.2
       jsdom:
         specifier: ^24.0.0
-        version: 24.1.3(supports-color@10.2.2)
+        version: 24.1.3(canvas@3.2.3)(supports-color@10.2.2)
       quill:
         specifier: ^2.0.2
         version: 2.0.3
@@ -884,8 +926,14 @@ packages:
   '@codemirror/lang-javascript@6.2.5':
     resolution: {integrity: sha512-zD4e5mS+50htS7F+TYjBPsiIFGanfVqg4HyUz6WNFikgOPf2BgKlx+TQedI1w6n/IqRBVBbBWmGFdLB/7uxO4A==}
 
+  '@codemirror/lang-json@6.0.2':
+    resolution: {integrity: sha512-x2OtO+AvwEHrEwR0FyyPtfDUiloG3rnVTSZV1W8UteaLL8/MajQd8DpvUb2YVzC+/T18aSDv0H9mu+xw0EStoQ==}
+
   '@codemirror/lang-markdown@6.5.2':
     resolution: {integrity: sha512-AwBOdkWYuA//WcM0xO5PfHPUcmz/O2i5o0Nsg1U69SII/loCJlFI1Romd9xp2HYb1kYJRGZotyqRghuHH5n8Kw==}
+
+  '@codemirror/lang-rust@6.0.2':
+    resolution: {integrity: sha512-EZaGjCUegtiU7kSMvOfEZpaCReowEf3yNidYu7+vfuGTm9ow4mthAparY5hisJqOHmJowVH3Upu+eJlUji6qqA==}
 
   '@codemirror/language@6.13.1':
     resolution: {integrity: sha512-zfvU2r3TyylQLMj/te+5CnQ0rSqZi8B1oTCBbQkagcLW4Xc6imab6qN+pEJhsuNOLaJqiRyBXp9UhWA1DhVvDw==}
@@ -1892,11 +1940,17 @@ packages:
   '@lezer/javascript@1.5.6':
     resolution: {integrity: sha512-sEvOqpl4vJQca0NugSQK02vQPbc5KrvoojnYGoqqFgFO0MtcYhwGiHKVEB+LuXYJnfyXo4QPA8ztbrEa4Fw5NA==}
 
+  '@lezer/json@1.0.3':
+    resolution: {integrity: sha512-BP9KzdF9Y35PDpv04r0VeSTKDeox5vVr3efE7eBbx3r4s3oNLfunchejZhjArmeieBH+nVOpgIiBJpEAv8ilqQ==}
+
   '@lezer/lr@1.4.11':
     resolution: {integrity: sha512-UwgZcl1R66H2hDzBrA7kWyYmX6s8p5TQ+e/t7CuvgCtBEPxbEPaHYHu+pJBvTvDotEJpuQkJjbXuHiw5Cixxgw==}
 
   '@lezer/markdown@1.8.1':
     resolution: {integrity: sha512-M5YmEcKWO4mJ45Y1hECwqyu8cLv25EiXOK554PVOvDOWOP0olwelHHQUWr9sjF+d1bENVhy0nfJ8E57XZUTiXg==}
+
+  '@lezer/rust@1.0.3':
+    resolution: {integrity: sha512-XxErOjZzQ7yJt1agUT4fu9qQvESZ3acgoxpPaPTPOiUx+duCjaVAtZGFIgphkHxlN05djdVAIOy/wItShMEjqQ==}
 
   '@marijn/find-cluster-break@1.0.4':
     resolution: {integrity: sha512-Wy0V7+SGUjnF9/TkiM1hKVDPj7jKXduPNboMVtHTA8dySMURWqfg/JZ9E2Sq8JgSJmkl7k7Qe9FLeMSrSraWmQ==}
@@ -2725,6 +2779,9 @@ packages:
 
   '@types/node@26.6.5':
     resolution: {integrity: sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg==}
+
+  '@types/node@26.6.6':
+    resolution: {integrity: sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==}
 
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
@@ -3696,6 +3753,10 @@ packages:
   caniuse-lite@1.0.30001819:
     resolution: {integrity: sha512-LFUqIIAwpzsIuevnKnsR9qnStBcgzPShTX61lBwN9uFkkf8o8zLiebEjbW8AYtZiF+1YKDWfdt/pWDtMuG8Xwg==}
 
+  canvas@3.2.3:
+    resolution: {integrity: sha512-PzE5nJZPz72YUAfo8oTp0u3fqqY7IzlTubneAihqDYAUcBk7ryeCmBbdJBEdaH0bptSOe2VT2Zwcb3UaFyaSWw==}
+    engines: {node: ^18.12.0 || >= 20.9.0}
+
   caseless@0.12.0:
     resolution: {integrity: sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==}
 
@@ -4166,6 +4227,10 @@ packages:
     resolution: {integrity: sha512-FqUYQ+8o158GyGTrMFJms9qh3CqTKvAqgqsTnkLI8sKu0028orqBhxNMFkFen0zGyg6epACD32pjVk58ngIErQ==}
     engines: {node: '>=0.10'}
 
+  decompress-response@6.0.0:
+    resolution: {integrity: sha512-aW35yZM6Bb/4oJlZncMH2LCoZtJXTRxES17vE3hoRiowU2kWHaJKFkSBDnDR+cm9J+9QhXmREyIfv0pji9ejCQ==}
+    engines: {node: '>=10'}
+
   deep-eql@4.1.4:
     resolution: {integrity: sha512-SUwdGfqdKOwxCPeVYjwSyRpJ7Z+fhpwIAtmCUdZIWZ/YP5R9WAsyuSgpLVDi9bjWoN2LXHNss/dk3urXtdQxGg==}
     engines: {node: '>=6'}
@@ -4173,6 +4238,10 @@ packages:
   deep-eql@5.0.2:
     resolution: {integrity: sha512-h5k/5U50IJJFpzfL6nO9jaaumfjO/f2NjK/oYB2Djzm4p9L+3T9qWpZqZ2hAbLPuuYq9wrU08WQyBTL5GbPk5Q==}
     engines: {node: '>=6'}
+
+  deep-extend@0.6.0:
+    resolution: {integrity: sha512-LOHxIOaPYdHlJRtCQfDIVZtfw/ufM8+rVj649RIHzcm/vGwQRXFt6OPqIFWsm2XEMrNIEtWR64sY1LEKD2vAOA==}
+    engines: {node: '>=4.0.0'}
 
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
@@ -4771,6 +4840,10 @@ packages:
     resolution: {integrity: sha512-w/ozOKR9Obk3qoWeY/WDi6MFta9AoMR+zud60mdnbniMcBxRuFJyDt2LdX/14A1UABeqk+Uk+LDfUpvoGKppZA==}
     engines: {node: '>=0.10.0'}
 
+  expand-template@2.0.3:
+    resolution: {integrity: sha512-XYfuKMvj4O35f/pOXLObndIRvyQ+/+6AhODh+OKWj9S9498pHHn/IMszH+gt0fBCRWMNfk1ZSp5x3AifmnI2vg==}
+    engines: {node: '>=6'}
+
   express@4.22.3:
     resolution: {integrity: sha512-Bdcs4+3qlpVlx2NRn6fgX2Ue2/gGRaPeawebgclM0ERSCqDpA+owF1fdPwjJUTAJWMTuAaxjDf+hzb0/4eKvvw==}
     engines: {node: '>= 0.10.0'}
@@ -5118,6 +5191,9 @@ packages:
   getpass@0.1.7:
     resolution: {integrity: sha512-0fzj9JxOLfJ+XGLhR8ze3unN0KZCgZwiSSDz168VERjK8Wl8kVSdcu2kspd4s4wtAa1y/qrVRiAA0WclVsu0ng==}
 
+  github-from-package@0.0.0:
+    resolution: {integrity: sha512-SyHy3T1v2NUXn29OsWdxmK6RwHD+vkj3v8en8AOBZ1wBQ/hCAQ5bAQTD02kW4W9tUp/3Qh6J8r9EvntiyCmOOw==}
+
   glob-parent@3.1.0:
     resolution: {integrity: sha512-E8Ak/2+dZY6fnzlR7+ueWvhsH1SjHr4jjss4YS/h4py44jY9MhK/VFdaZJAWDz6BbL21KeteKxFSFpq8OS5gVA==}
 
@@ -5448,6 +5524,9 @@ packages:
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
+
+  ini@1.3.8:
+    resolution: {integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==}
 
   ini@2.0.0:
     resolution: {integrity: sha512-7PnF4oN3CvZF23ADhA5wRaYEQpJ8qygSkbtTXWBeXWXmEVRXK+1ITciHWwHhsjv1TmW0MgacIv6hEi5pX5NQdA==}
@@ -6225,6 +6304,10 @@ packages:
     resolution: {integrity: sha512-vqiC06CuhBTUdZH+RYl8sFrL096vA45Ok5ISO6sE/Mr1jRbGH4Csnhi8f3wKVl7x8mO4Au7Ir9D3Oyv1VYMFJw==}
     engines: {node: '>=12'}
 
+  mimic-response@3.1.0:
+    resolution: {integrity: sha512-z0yWI+4FDrrweS8Zmt4Ej5HdJmky15+L2e6Wgn3+iK5fWzb6T3fhNFq2+MeTRb064c6Wr4N/wv0DzQTjNzHNGQ==}
+    engines: {node: '>=10'}
+
   minimalistic-assert@1.0.1:
     resolution: {integrity: sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==}
 
@@ -6371,6 +6454,9 @@ packages:
     resolution: {integrity: sha512-fpoe2T0RbHwBTBUOftAfBPaDEi06ufaUai0mE6Yn1kacc3SnTErfb/h+X94VXzI64rKFHYImXSvdwGGCmwOqCA==}
     engines: {node: '>=0.10.0'}
 
+  napi-build-utils@2.0.0:
+    resolution: {integrity: sha512-GEbrYkbfF7MoNaoh2iGG84Mnf/WZfB0GdGEsM8wz7Expx/LlWf5U8t9nvJKXSp3qr5IsEbK04cBGhol/KwOsWA==}
+
   napi-macros@2.0.0:
     resolution: {integrity: sha512-A0xLykHtARfueITVDernsAWdtIMbOJgKgcluwENp3AlsKN/PloyO10HtmoqnFAQAcxPkgZN7wdfPfEd0zNGxbg==}
 
@@ -6390,6 +6476,13 @@ packages:
 
   nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
+
+  node-abi@3.101.0:
+    resolution: {integrity: sha512-bkb/RkuWCE64eWu1PCh3Fu2pGc9mKRs+kOE+FU2bGHRYlQa86/D321DSATV54AsCQMKz3/xSt9sRgraZTpqdhQ==}
+    engines: {node: '>=10'}
+
+  node-addon-api@7.1.1:
+    resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
 
   node-cleanup@2.1.2:
     resolution: {integrity: sha512-qN8v/s2PAJwGUtr1/hYTpNKlD6Y9rc4p8KSmJXyGdYGZsDGKXrGThikLFP9OCHFeLeEpQzPwiAtdIvBLqm//Hw==}
@@ -7019,6 +7112,12 @@ packages:
     resolution: {integrity: sha512-YUbWYCgErwnMAVkjUnYa+KlMBzGpHwiIt/DE7f0G33AuX2LH9UcTk6KgWxd3zRU+pN3u/C+Xl3EnMLM4Hea7Sg==}
     engines: {node: ^10 || ^12 || >=14}
 
+  prebuild-install@7.1.3:
+    resolution: {integrity: sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug==}
+    engines: {node: '>=10'}
+    deprecated: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+    hasBin: true
+
   prelude-ls@1.1.2:
     resolution: {integrity: sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==}
     engines: {node: '>= 0.8.0'}
@@ -7209,6 +7308,10 @@ packages:
   raw-body@2.5.3:
     resolution: {integrity: sha512-s4VSOf6yN0rvbRZGxs8Om5CWj6seneMwK3oDb4lWDH0UPhWcxwOWw5+qk24bxq87szX1ydrwylIOp2uG1ojUpA==}
     engines: {node: '>= 0.8'}
+
+  rc@1.2.8:
+    resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
+    hasBin: true
 
   react-colorful@5.8.1:
     resolution: {integrity: sha512-oz68bhsnFWnpDf1ZR8daiQbYpXUnM2h2J6hl9Zg2rTpM/DU6vCqe1E+CpqmqLnJucMZetHZeifSAfJ+geN9lcA==}
@@ -7806,6 +7909,12 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
+  simple-concat@1.0.1:
+    resolution: {integrity: sha512-cSFtAPtRhljv69IK0hTVZQ+OfE9nePi/rtJmw5UjHeVyVroEqJXP1sFztKUy1qU+xvz3u/sfYJLa947b7nAN2Q==}
+
+  simple-get@4.0.1:
+    resolution: {integrity: sha512-brv7p5WgH0jmQJr1ZDDfKDOSeWWg+OVypG99A/5vYGPqJ6pxiaHLy8nxtFjBA7oMa01ebA9gfh1uMCFqOuXxvA==}
+
   simple-peer@9.11.1:
     resolution: {integrity: sha512-D1SaWpOW8afq1CZGWB8xTfrT3FekjQmPValrqncJMX7QFl8YwhrPTZvMCANLtgBwwdS+7zURyqxDDEmY558tTw==}
 
@@ -8051,6 +8160,10 @@ packages:
   strip-final-newline@3.0.0:
     resolution: {integrity: sha512-dOESqjYr96iWYylGObzd39EuNTa5VJxyvVAEm5Jnh7KGo75V43Hk1odPQkNDyXNmUR6k+gEiDVXnjB8HJ3crXw==}
     engines: {node: '>=12'}
+
+  strip-json-comments@2.0.1:
+    resolution: {integrity: sha512-4gB8na07fecVVkOI6Rs4e7T6NOTki5EmL7TUduTs6bu3EdnSycntVJ4re8kgZA+wx9IueI2Y11bfbgwtzuE0KQ==}
+    engines: {node: '>=0.10.0'}
 
   strip-json-comments@3.1.1:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
@@ -9433,6 +9546,11 @@ snapshots:
       '@lezer/common': 1.5.4
       '@lezer/javascript': 1.5.6
 
+  '@codemirror/lang-json@6.0.2':
+    dependencies:
+      '@codemirror/language': 6.13.1
+      '@lezer/json': 1.0.3
+
   '@codemirror/lang-markdown@6.5.2':
     dependencies:
       '@codemirror/autocomplete': 6.20.4
@@ -9442,6 +9560,11 @@ snapshots:
       '@codemirror/view': 6.43.15
       '@lezer/common': 1.5.4
       '@lezer/markdown': 1.8.1
+
+  '@codemirror/lang-rust@6.0.2':
+    dependencies:
+      '@codemirror/language': 6.13.1
+      '@lezer/rust': 1.0.3
 
   '@codemirror/language@6.13.1':
     dependencies:
@@ -10396,6 +10519,12 @@ snapshots:
       '@lezer/highlight': 1.2.5
       '@lezer/lr': 1.4.11
 
+  '@lezer/json@1.0.3':
+    dependencies:
+      '@lezer/common': 1.5.4
+      '@lezer/highlight': 1.2.5
+      '@lezer/lr': 1.4.11
+
   '@lezer/lr@1.4.11':
     dependencies:
       '@lezer/common': 1.5.4
@@ -10404,6 +10533,12 @@ snapshots:
     dependencies:
       '@lezer/common': 1.5.4
       '@lezer/highlight': 1.2.5
+
+  '@lezer/rust@1.0.3':
+    dependencies:
+      '@lezer/common': 1.5.4
+      '@lezer/highlight': 1.2.5
+      '@lezer/lr': 1.4.11
 
   '@marijn/find-cluster-break@1.0.4': {}
 
@@ -11185,6 +11320,10 @@ snapshots:
     dependencies:
       undici-types: 8.9.0
 
+  '@types/node@26.6.6':
+    dependencies:
+      undici-types: 8.9.0
+
   '@types/prop-types@15.7.15': {}
 
   '@types/qs@6.15.1': {}
@@ -11204,7 +11343,7 @@ snapshots:
 
   '@types/resolve@1.17.1':
     dependencies:
-      '@types/node': 26.6.5
+      '@types/node': 26.6.6
 
   '@types/resolve@1.20.2': {}
 
@@ -11761,7 +11900,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@1.6.1(supports-color@10.2.2)(vitest@1.6.1(@types/node@26.6.5)(jsdom@29.1.1(@noble/hashes@1.8.0))(supports-color@10.2.2)(terser@5.51.2))':
+  '@vitest/coverage-v8@1.6.1(supports-color@10.2.2)(vitest@1.6.1(@types/node@26.6.5)(jsdom@29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3))(supports-color@10.2.2)(terser@5.51.2))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -11776,7 +11915,7 @@ snapshots:
       std-env: 3.10.0
       strip-literal: 2.1.1
       test-exclude: 6.0.0
-      vitest: 1.6.1(@types/node@26.6.5)(jsdom@29.1.1(@noble/hashes@1.8.0))(supports-color@10.2.2)(terser@5.51.2)
+      vitest: 1.6.1(@types/node@26.6.5)(jsdom@29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3))(supports-color@10.2.2)(terser@5.51.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -12426,6 +12565,11 @@ snapshots:
       lodash.uniq: 4.5.0
 
   caniuse-lite@1.0.30001819: {}
+
+  canvas@3.2.3:
+    dependencies:
+      node-addon-api: 7.1.1
+      prebuild-install: 7.1.3
 
   caseless@0.12.0: {}
 
@@ -13080,11 +13224,17 @@ snapshots:
 
   decode-uri-component@0.2.2: {}
 
+  decompress-response@6.0.0:
+    dependencies:
+      mimic-response: 3.1.0
+
   deep-eql@4.1.4:
     dependencies:
       type-detect: 4.1.0
 
   deep-eql@5.0.2: {}
+
+  deep-extend@0.6.0: {}
 
   deep-is@0.1.4: {}
 
@@ -13146,8 +13296,7 @@ snapshots:
 
   destroy@1.2.0: {}
 
-  detect-libc@2.1.2:
-    optional: true
+  detect-libc@2.1.2: {}
 
   detect-node-es@1.1.0: {}
 
@@ -14103,6 +14252,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  expand-template@2.0.3: {}
+
   express@4.22.3(supports-color@10.2.2):
     dependencies:
       accepts: 1.3.8
@@ -14507,6 +14658,8 @@ snapshots:
     dependencies:
       assert-plus: 1.0.0
 
+  github-from-package@0.0.0: {}
+
   glob-parent@3.1.0:
     dependencies:
       is-glob: 3.1.0
@@ -14894,6 +15047,8 @@ snapshots:
 
   inherits@2.0.4: {}
 
+  ini@1.3.8: {}
+
   ini@2.0.0: {}
 
   inline-style-prefixer@4.0.2:
@@ -15224,7 +15379,7 @@ snapshots:
     dependencies:
       is-equal: 0.1.0
 
-  jsdom@15.2.1:
+  jsdom@15.2.1(canvas@3.2.3):
     dependencies:
       abab: 2.0.6
       acorn: 7.4.1
@@ -15252,11 +15407,13 @@ snapshots:
       whatwg-url: 7.1.0
       ws: 7.5.13
       xml-name-validator: 3.0.0
+    optionalDependencies:
+      canvas: 3.2.3
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  jsdom@16.7.0(supports-color@10.2.2):
+  jsdom@16.7.0(canvas@3.2.3)(supports-color@10.2.2):
     dependencies:
       abab: 2.0.6
       acorn: 8.19.0
@@ -15285,12 +15442,14 @@ snapshots:
       whatwg-url: 8.7.0
       ws: 7.5.13
       xml-name-validator: 3.0.0
+    optionalDependencies:
+      canvas: 3.2.3
     transitivePeerDependencies:
       - bufferutil
       - supports-color
       - utf-8-validate
 
-  jsdom@24.1.3(supports-color@10.2.2):
+  jsdom@24.1.3(canvas@3.2.3)(supports-color@10.2.2):
     dependencies:
       cssstyle: 4.6.0
       data-urls: 5.0.0
@@ -15313,12 +15472,14 @@ snapshots:
       whatwg-url: 14.2.0
       ws: 8.22.0
       xml-name-validator: 5.0.0
+    optionalDependencies:
+      canvas: 3.2.3
     transitivePeerDependencies:
       - bufferutil
       - supports-color
       - utf-8-validate
 
-  jsdom@24.1.3(supports-color@8.1.1):
+  jsdom@24.1.3(canvas@3.2.3)(supports-color@8.1.1):
     dependencies:
       cssstyle: 4.6.0
       data-urls: 5.0.0
@@ -15341,12 +15502,14 @@ snapshots:
       whatwg-url: 14.2.0
       ws: 8.22.0
       xml-name-validator: 5.0.0
+    optionalDependencies:
+      canvas: 3.2.3
     transitivePeerDependencies:
       - bufferutil
       - supports-color
       - utf-8-validate
 
-  jsdom@29.1.1(@noble/hashes@1.8.0):
+  jsdom@29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3):
     dependencies:
       '@asamuzakjp/css-color': 5.1.11
       '@asamuzakjp/dom-selector': 7.1.1
@@ -15369,6 +15532,8 @@ snapshots:
       whatwg-mimetype: 5.0.0
       whatwg-url: 16.0.1(@noble/hashes@1.8.0)
       xml-name-validator: 5.0.0
+    optionalDependencies:
+      canvas: 3.2.3
     transitivePeerDependencies:
       - '@noble/hashes'
 
@@ -15826,6 +15991,8 @@ snapshots:
 
   mimic-fn@4.0.0: {}
 
+  mimic-response@3.1.0: {}
+
   minimalistic-assert@1.0.1: {}
 
   minimatch@10.2.6:
@@ -16012,6 +16179,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  napi-build-utils@2.0.0: {}
+
   napi-macros@2.0.0:
     optional: true
 
@@ -16024,6 +16193,12 @@ snapshots:
   negotiator@0.6.4: {}
 
   nice-try@1.0.5: {}
+
+  node-abi@3.101.0:
+    dependencies:
+      semver: 7.8.5
+
+  node-addon-api@7.1.1: {}
 
   node-cleanup@2.1.2: {}
 
@@ -16631,6 +16806,21 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.2
 
+  prebuild-install@7.1.3:
+    dependencies:
+      detect-libc: 2.1.2
+      expand-template: 2.0.3
+      github-from-package: 0.0.0
+      minimist: 1.2.8
+      mkdirp-classic: 0.5.3
+      napi-build-utils: 2.0.0
+      node-abi: 3.101.0
+      pump: 3.0.4
+      rc: 1.2.8
+      simple-get: 4.0.1
+      tar-fs: 2.1.5
+      tunnel-agent: 0.6.0
+
   prelude-ls@1.1.2: {}
 
   prelude-ls@1.2.1: {}
@@ -16856,6 +17046,13 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.4.24
       unpipe: 1.0.0
+
+  rc@1.2.8:
+    dependencies:
+      deep-extend: 0.6.0
+      ini: 1.3.8
+      minimist: 1.2.8
+      strip-json-comments: 2.0.1
 
   react-colorful@5.8.1(react-dom@19.3.1(react@19.3.1))(react@18.3.1):
     dependencies:
@@ -17747,6 +17944,14 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
+  simple-concat@1.0.1: {}
+
+  simple-get@4.0.1:
+    dependencies:
+      decompress-response: 6.0.0
+      once: 1.4.0
+      simple-concat: 1.0.1
+
   simple-peer@9.11.1(supports-color@10.2.2):
     dependencies:
       buffer: 6.0.3
@@ -18118,6 +18323,8 @@ snapshots:
   strip-final-newline@2.0.0: {}
 
   strip-final-newline@3.0.0: {}
+
+  strip-json-comments@2.0.1: {}
 
   strip-json-comments@3.1.1: {}
 
@@ -18851,7 +19058,7 @@ snapshots:
       terser: 5.51.2
       tsx: 4.23.15
 
-  vitest@1.6.1(@types/node@26.6.5)(jsdom@29.1.1(@noble/hashes@1.8.0))(supports-color@10.2.2)(terser@5.51.2):
+  vitest@1.6.1(@types/node@26.6.5)(jsdom@29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3))(supports-color@10.2.2)(terser@5.51.2):
     dependencies:
       '@vitest/expect': 1.6.1
       '@vitest/runner': 1.6.1
@@ -18875,7 +19082,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.6.5
-      jsdom: 29.1.1(@noble/hashes@1.8.0)
+      jsdom: 29.1.1(@noble/hashes@1.8.0)(canvas@3.2.3)
     transitivePeerDependencies:
       - less
       - lightningcss

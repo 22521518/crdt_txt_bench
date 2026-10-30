@@ -3,7 +3,7 @@ import {
   DATASET_PATH,
   get_the_minimal_set,
   parse_sequential_joseph,
-} from "@workspace/benchmark/index";
+} from "@workspace/_benchmark/index";
 
 import { schema } from "prosemirror-schema-basic";
 import { EditorState } from "prosemirror-state";
@@ -25,7 +25,7 @@ Object.defineProperty(globalThis, "MutationObserver", { value: dom.window.Mutati
 let glob_count = 0
 function run_bench(dataset_path: string | URL) {
   const { startContent, endContent, txns } = parse_sequential_joseph(dataset_path);
-  console.log("Start running jsonjoy-prosemirror", glob_count++);
+  console.log("Start running jsonjoy-prosemirror", typeof dataset_path === 'string' ? dataset_path : dataset_path.pathname, " ", glob_count++);
 
   const initialDoc = schema.node("doc", null, [
     schema.node("paragraph", null, startContent.length > 0 ? [schema.text(startContent)] : []),
@@ -70,12 +70,21 @@ function run_bench(dataset_path: string | URL) {
 
     const finalContent = view.state.doc.textContent;
     assert.equal(finalContent, endContent);
+    const actual = model.view();
+    if (!Array.isArray(actual)) {
+      assert.equal(actual, '\n' + endContent, 'CRDT extension text differs from expected');
+      // throw new Error(`model.view() did not return an array\n ${actual}`); 
+    } else {
+      const actualText = actual.map((op: { insert: string }) => op.insert).join('');
+      assert.equal(actualText, endContent, 'CRDT extension text differs from expected');
+    }
 
     return finalContent;
   } catch (err) {
     console.error(`${NAME_FILE} document mismatch:`, err);
   } finally {
     unbind();
+    model.api.stopAutoFlush?.();
     facade.dispose();
     view.destroy();
   }
@@ -88,11 +97,11 @@ const argv_iterations = process.argv.length > 5 ? process.argv[5] : '--iteration
 const start = Number(argv_start.split('=')[1])
 const end = Number(argv_end.split('=')[1]) > 0 ? Number(argv_end.split('=')[1]) : undefined
 const warmup = Math.max(Number(argv_warmup.split('=')[1]), 1)
-const ỉterations = Math.max(Number(argv_iterations.split('=')[1]), 1)
+const iterations = Math.max(Number(argv_iterations.split('=')[1]), 1)
 
 const NAME_FILE = 'jjsonjoy_prosemirror'
 DATASET_PATH.slice(start, end).forEach(async data => {
   console.log(data.pathname)
-  const result = await benchmark(run_bench, data, { warmup: warmup, iterations: ỉterations, collectMemory: true, }, NAME_FILE);
+  const result = await benchmark(run_bench, data, { warmup: warmup, iterations: iterations, collectMemory: true, }, NAME_FILE);
   console.log("JsonJoy + Peritext + ProseMirror benchmark:\n", "\n", JSON.stringify(result));
 })
