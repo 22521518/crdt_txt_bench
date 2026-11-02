@@ -3,7 +3,7 @@ packages:
   - "packages/*"
 allowBuilds:
   '@swc/core': false
-  canvas: false
+  canvas: true
   cbor-extract: false
   cypress: false
   esbuild: false
