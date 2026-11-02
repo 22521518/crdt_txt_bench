@@ -10,3 +10,5 @@ allowBuilds:
   fsevents: false
   leveldown: false
   libreact: false
+patchedDependencies:
+  '@jsonjoy.com/collaborative-monaco@18.30.0': patches/@jsonjoy.com__collaborative-monaco@18.30.0.patch

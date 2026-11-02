@@ -1,0 +1,26 @@
+diff --git a/lib/MonacoEditorFacade.js b/lib/MonacoEditorFacade.js
+index 01ac9770ccf70c7c73adc33e3d034f85b1e6bb5e..c1f060935c86a4bd4215c3b5a1ac7d2f38e09272 100644
+--- a/lib/MonacoEditorFacade.js
++++ b/lib/MonacoEditorFacade.js
+@@ -2,7 +2,7 @@
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.MonacoEditorFacade = void 0;
+ const tslib_1 = require("tslib");
+-const monaco = tslib_1.__importStar(require("monaco-editor"));
++const monaco = tslib_1.__importStar(require("monaco-editor/esm/vs/editor/editor.api.js"));
+ class MonacoEditorFacade {
+     constructor(editor) {
+         this.editor = editor;
+diff --git a/lib/presence/MonacoPresence.js b/lib/presence/MonacoPresence.js
+index 92f969775975015afe2bfe622af29f2b4fd0dcdd..51de6465105e73bd2c6aa050c29882c76f3e8cc2 100644
+--- a/lib/presence/MonacoPresence.js
++++ b/lib/presence/MonacoPresence.js
+@@ -5,7 +5,7 @@ const tslib_1 = require("tslib");
+ const collaborative_presence_1 = require("@jsonjoy.com/collaborative-presence");
+ const collaborative_presence_2 = require("@jsonjoy.com/collaborative-presence");
+ const view_1 = require("./view");
+-const monaco = tslib_1.__importStar(require("monaco-editor"));
++const monaco = tslib_1.__importStar(require("monaco-editor/esm/vs/editor/editor.api.js"));
+ /**
+  * A Monaco Content Widget wrapper for a remote peer's cursor.
+  *

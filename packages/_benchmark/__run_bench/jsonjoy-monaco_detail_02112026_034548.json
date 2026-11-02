@@ -1,0 +1,16 @@
+[
+  {
+    "run_th": 1,
+    "time": {
+      "minMs": 1059.095,
+      "maxMs": 1059.095
+    },
+    "memory": {
+      "heapUsedBeforeMB": 167.494,
+      "heapUsedAfterMB": 177.947,
+      "heapDeltaMB": 10.453,
+      "rssBeforeMB": 363.969,
+      "rssAfterMB": 383.742
+    }
+  }
+]
