@@ -13,6 +13,7 @@ export interface RichTextWrapper {
 
   isNodeTypeSelected: (types: string[]) => boolean
   isSelectedNodeTypeActive?: (name: string, attributes?: {}) => boolean // Attributes are the metadata for the node type of the rich text
+  isMarkActive?: (name: string, attributes?: {}) => boolean
   isNodeTypeInSchema: (typeName: string) => boolean
   isMarkInSchema: (markName: string) => boolean
 

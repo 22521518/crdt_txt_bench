@@ -45,6 +45,7 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
       return false
     },
     isSelectedNodeTypeActive(name: string, attributes?: {}) { return editor?.isActive(name, attributes) ?? false },
+    isMarkActive(name: string, attributes?: {}) { return editor?.isActive(name, attributes) ?? false },
     isNodeTypeInSchema(typeName: string) { return editor?.schema ? editor.schema.spec.nodes.get(typeName) !== undefined : false },
     isMarkInSchema(markName: string) { return editor?.schema ? editor.schema.spec.marks.get(markName) !== undefined : false },
 

@@ -33,6 +33,10 @@ export interface ColorHighlightPopoverContentProps {
    * If not provided, defaults to a predefined set of colors.
    */
   colors?: HighlightColor[]
+  /**
+   * Called when a color is applied or removed.
+   */
+  onApplied?: ({ color, label }: { color: string; label: string }) => void
 }
 
 export interface ColorHighlightPopoverProps
@@ -79,10 +83,11 @@ export function ColorHighlightPopoverContent({
     "var(--tt-color-highlight-purple)",
     "var(--tt-color-highlight-yellow)",
   ]),
+  onApplied,
 }: ColorHighlightPopoverContentProps) {
   const currentEditor = useCurrentEditor()
   const editor = providedEditor ?? currentEditor
-  const { handleRemoveHighlight } = useColorHighlight({ editor })
+  const { handleRemoveHighlight } = useColorHighlight({ editor, onApplied })
   const isMobile = useIsMobile()
   const containerRef = React.useRef<HTMLDivElement>(null)
 
@@ -125,6 +130,7 @@ export function ColorHighlightPopoverContent({
                 aria-label={`${color.label} highlight color`}
                 tabIndex={index === selectedIndex ? 0 : -1}
                 data-highlighted={selectedIndex === index}
+                onApplied={onApplied}
               />
             ))}
           </ButtonGroup>
@@ -165,8 +171,13 @@ export function ColorHighlightPopover({
   const currentEditor = useCurrentEditor()
   const editor = providedEditor ?? currentEditor
   const [isOpen, setIsOpen] = React.useState(false)
-  const { isVisible, canColorHighlight, isActive, label, Icon } = useColorHighlight({ editor, hideWhenUnavailable, onApplied, })
+  const { isVisible, canColorHighlight, isActive, label, Icon } = useColorHighlight({ editor, hideWhenUnavailable, onApplied })
   if (!isVisible) return null
+
+  const handleApplied = (data: { color: string; label: string }) => {
+    onApplied?.(data)
+    setIsOpen(false)
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -189,7 +200,11 @@ export function ColorHighlightPopover({
         align="start"
         sideOffset={8}
       >
-        <ColorHighlightPopoverContent editor={editor} colors={colors} />
+        <ColorHighlightPopoverContent
+          editor={editor}
+          colors={colors}
+          onApplied={handleApplied}
+        />
       </PopoverContent>
     </Popover>
   )

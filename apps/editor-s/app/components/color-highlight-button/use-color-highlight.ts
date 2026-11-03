@@ -53,26 +53,33 @@ export function pickHighlightColorsByValue(values: string[]) {
 }
 
 export function canColorHighlight(editor: RichTextWrapper | null): boolean {
-  if (!editor || !editor.isEditable) return false
-  if (editor.isSelectionMarkable("highlight") || editor.isNodeTypeSelected(["image"])) return false
-  return editor.isSelectionMarkable("highlight")
+  if (!editor) return false
+  const isEditable = typeof editor.isEditable === "function" ? editor.isEditable() : Boolean(editor.isEditable)
+  if (!isEditable) return false
+  if (editor.isNodeTypeSelected?.(["image"])) return false
+  return editor.isSelectionMarkable?.("highlight") ?? false
 }
 
 export function isColorHighlightActive(
   editor: RichTextWrapper | null,
   highlightColor?: string
 ): boolean {
-  if (!editor || !editor.isEditable || !editor.isSelectedNodeTypeActive) return false
+  if (!editor) return false
+  const isEditable = typeof editor.isEditable === "function" ? editor.isEditable() : Boolean(editor.isEditable)
+  if (!isEditable) return false
+  const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
+  if (!checkActive) return false
   return highlightColor ?
-    editor.isSelectedNodeTypeActive("highlight", { color: highlightColor }) :
-    editor.isSelectedNodeTypeActive("highlight")
+    checkActive("highlight", { color: highlightColor }) :
+    checkActive("highlight")
 }
 
 export function removeHighlight(editor: RichTextWrapper | null): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor) return false
+  const isEditable = typeof editor.isEditable === "function" ? editor.isEditable() : Boolean(editor.isEditable)
+  if (!isEditable) return false
   if (!canColorHighlight(editor)) return false
   return editor.createTransaction().focus().unsetMark("highlight").commit()
-  // return editor.unsetSelectionWithMark("highlight")
 }
 
 export function shouldShowButton(props: {
@@ -81,10 +88,13 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, hideWhenUnavailable } = props
 
-  if (!editor || !editor.isEditable) return false
-  if (!editor.isMarkInSchema("highlight")) return false
+  if (!editor) return false
+  const isEditable = typeof editor.isEditable === "function" ? editor.isEditable() : Boolean(editor.isEditable)
+  if (!isEditable) return false
+  if (!editor.isMarkInSchema?.("highlight")) return false
 
-  if (hideWhenUnavailable && editor.isSelectedNodeTypeActive && !editor.isSelectedNodeTypeActive("code")) {
+  const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
+  if (hideWhenUnavailable && checkActive && !checkActive("code")) {
     return canColorHighlight(editor)
   }
 
@@ -103,40 +113,50 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
   const currentEditor = useCurrentEditor()
   const editor = providedEditor ?? currentEditor
   const isMobile = useIsMobile()
-  const [isVisible, setIsVisible] = React.useState<boolean>(true)
-  const canColorHighlightState = canColorHighlight(editor)
-  const isActive = isColorHighlightActive(editor, highlightColor)
+
+  const [isVisible, setIsVisible] = React.useState<boolean>(() =>
+    shouldShowButton({ editor, hideWhenUnavailable })
+  )
+  const [canColorHighlightState, setCanColorHighlightState] = React.useState<boolean>(() =>
+    canColorHighlight(editor)
+  )
+  const [isActive, setIsActive] = React.useState<boolean>(() =>
+    isColorHighlightActive(editor, highlightColor)
+  )
 
   React.useEffect(() => {
     if (!editor) return
-    const handleSelectionUpdate = () => setIsVisible(shouldShowButton({ editor, hideWhenUnavailable }))
-    handleSelectionUpdate()
-    editor.on?.("selectionUpdate", handleSelectionUpdate)
-    return () => editor.off?.("selectionUpdate", handleSelectionUpdate)
-  }, [editor, hideWhenUnavailable])
+
+    const handleUpdate = () => {
+      setIsVisible(shouldShowButton({ editor, hideWhenUnavailable }))
+      setCanColorHighlightState(canColorHighlight(editor))
+      setIsActive(isColorHighlightActive(editor, highlightColor))
+    }
+
+    handleUpdate()
+
+    editor.on?.("selectionUpdate", handleUpdate)
+    editor.on?.("transaction", handleUpdate)
+
+    return () => {
+      editor.off?.("selectionUpdate", handleUpdate)
+      editor.off?.("transaction", handleUpdate)
+    }
+  }, [editor, hideWhenUnavailable, highlightColor])
 
   const handleColorHighlight = React.useCallback(() => {
     if (!editor || !canColorHighlightState || !highlightColor || !label) return false
-    if (editor.getSelectionMarkTypeList()) {
-      const highlightMarkType = editor.getMarkTypeInSchema('highlight')
-      // if (highlightMarkType) {
-      //   innerEditor.view?.dispatch?.(
-      //     innerEditor.state.tr.removeStoredMark(highlightMarkType)
-      //   )
-      // }
-      // editor.unsetSelectionWithMark(highlightMarkType)
-      editor.createTransaction().focus().unsetMark(highlightMarkType).commit()
+
+    const success = editor
+      .createTransaction()
+      .focus()
+      .toggleMark("highlight", { color: highlightColor })
+      .commit()
+
+    if (success) {
+      onApplied?.({ color: highlightColor, label })
     }
-
-    setTimeout(() => {
-      let success = editor.toggleSelectionWithMark("highlight", { color: highlightColor })
-      if (success) {
-        onApplied?.({ color: highlightColor, label })
-      }
-      return success
-    }, 0)
-
-    return true
+    return success
   }, [canColorHighlightState, highlightColor, editor, label, onApplied])
 
   const handleRemoveHighlight = React.useCallback(() => {

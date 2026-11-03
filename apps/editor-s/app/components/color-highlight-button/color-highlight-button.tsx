@@ -127,7 +127,7 @@ export const ColorHighlightButton = React.forwardRef<
         {children ?? (
           <>
             <span
-              className="tiptap-button-color-highlight"
+              className="tiptap-button-highlight"
               style={{ backgroundColor: highlightColor }}
             />
             {text && <span className="tiptap-button-text">{text}</span>}

@@ -47,7 +47,7 @@ export const MainToolbarContent = ({
         <MarkButton type="strike" />
         <MarkButton type="code" />
         <MarkButton type="underline" /> */}
-        <ColorHighlightPopoverButton onClick={isMobile ? () => onHighlighterClick() : ()=>{}} />
+        {!isMobile ? <ColorHighlightPopover /> : <ColorHighlightPopoverButton onClick={onHighlighterClick} />}
         {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
       </ToolbarGroup>
 
