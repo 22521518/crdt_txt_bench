@@ -1,0 +1,187 @@
+import type { ForwardedRef, HTMLProps, Ref, RefObject } from 'react'
+import React, { forwardRef } from 'react'
+import ReactDOM from 'react-dom'
+import { useSyncExternalStore } from 'use-sync-external-store/shim/index.js'
+import type { ContentComponent, EditorWithContentComponent, ReactRenderer } from './ReactRenderer'
+import type { RichTextWrapper } from '@/libs/richtext.js'
+
+
+const mergeRefs = <T extends HTMLDivElement>(
+  ...refs: Array<RefObject<T> | Ref<T> | undefined>
+) => {
+  return (node: T) => {
+    refs.forEach(ref => {
+      if (typeof ref === 'function') {
+        ref(node)
+      } else if (ref) {
+        ;(ref as RefObject<T | null>).current = node
+      }
+    })
+  }
+}
+
+/**
+ * This component renders all of the editor's node views.
+ */
+const Portals: React.FC<{ contentComponent: ContentComponent }> = ({ contentComponent }) => {
+  // For performance reasons, we render the node view portals on state changes only
+  const renderers = useSyncExternalStore(
+    contentComponent.subscribe,
+    contentComponent.getSnapshot,
+    contentComponent.getServerSnapshot,
+  )
+
+  // This allows us to directly render the portals without any additional wrapper
+  return <>{Object.values(renderers)}</>
+}
+
+export interface EditorContentProps extends HTMLProps<HTMLDivElement> {
+  editor: RichTextWrapper | null
+  innerRef?: ForwardedRef<HTMLDivElement | null>
+}
+
+export function createContentComponent(): ContentComponent {
+  const subscribers = new Set<() => void>()
+  let renderers: Record<string, React.ReactPortal> = {}
+  let isNotificationQueued = false
+
+  const notifySubscribers = () => {
+    if (isNotificationQueued || !subscribers.size) {
+      return
+    }
+
+    isNotificationQueued = true
+
+    queueMicrotask(() => {
+      isNotificationQueued = false
+      subscribers.forEach(subscriber => subscriber())
+    })
+  }
+
+  return {
+    /**
+     * Subscribe to the editor instance's changes.
+     */
+    subscribe(callback: () => void) {
+      subscribers.add(callback)
+      return () => {
+        subscribers.delete(callback)
+      }
+    },
+    getSnapshot() {
+      return renderers
+    },
+    getServerSnapshot() {
+      return renderers
+    },
+    /**
+     * Adds a new NodeView Renderer to the editor.
+     */
+    setRenderer(id: string, renderer: ReactRenderer) {
+      renderers = {
+        ...renderers,
+        [id]: ReactDOM.createPortal(renderer.reactElement, renderer.element, id),
+      }
+
+      notifySubscribers()
+    },
+    /**
+     * Removes a NodeView Renderer from the editor.
+     */
+    removeRenderer(id: string) {
+      const nextRenderers = { ...renderers }
+
+      delete nextRenderers[id]
+      renderers = nextRenderers
+      notifySubscribers()
+    },
+  }
+}
+
+export class PureEditorContent extends React.Component<
+  EditorContentProps,
+  { hasContentComponentInitialized: boolean }
+> {
+  editorContentRef: React.RefObject<any>
+
+  constructor(props: EditorContentProps) {
+    super(props)
+    this.editorContentRef = React.createRef()
+  }
+
+  componentDidMount() {
+    this.init()
+  }
+
+  componentDidUpdate() {
+    this.init()
+  }
+
+  init() {
+    const editor = this.props.editor as EditorWithContentComponent | null
+    if (editor && !editor.isDestroyed) {
+      if (editor.contentComponent) {
+        return
+      }
+
+      const element = this.editorContentRef.current
+
+      editor.unmount()
+      editor.contentComponent = createContentComponent()
+
+      if(editor.doBeforeMount) editor.doBeforeMount()
+      editor.mount(element)
+      if(editor.doAfterMount) editor.doAfterMount()
+
+      editor.isEditorContentInitialized = true
+
+      this.forceUpdate()
+    }
+  }
+
+  componentWillUnmount() {
+    const editor = this.props.editor as EditorWithContentComponent | null
+
+    if (!editor) {
+      return
+    }
+
+    editor.isEditorContentInitialized = false
+
+    if(editor.doBeforeUnmount) editor.doBeforeUnmount()
+    editor.unmount()
+    if(editor.doAfterUnmount) editor.doAfterUnmount()
+    editor.contentComponent = null
+  }
+
+  render() {
+    const { editor, innerRef, ...rest } = this.props
+
+    return (
+      <>
+        <div ref={mergeRefs(innerRef, this.editorContentRef)} {...rest} />
+        {/* @ts-ignore */}
+        {editor?.contentComponent && <Portals contentComponent={editor.contentComponent} />}
+      </>
+    )
+  }
+}
+
+// EditorContent should be re-created whenever the Editor instance changes
+const EditorContentWithKey = forwardRef<HTMLDivElement, EditorContentProps>(
+  (props: Omit<EditorContentProps, 'innerRef'>, ref) => {
+    const key = React.useMemo(() => {
+      return Math.floor(Math.random() * 0xffffffff).toString()
+      // oxlint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.editor])
+
+    // Can't use JSX here because it conflicts with the type definition of Vue's JSX, so use createElement
+    return React.createElement(PureEditorContent, {
+      key,
+      innerRef: ref,
+      ...props,
+    })
+  },
+)
+
+export const EditorContent = React.memo(EditorContentWithKey)
