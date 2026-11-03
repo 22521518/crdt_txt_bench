@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react'
 import ReactDOM from 'react-dom'
 import { useSyncExternalStore } from 'use-sync-external-store/shim/index.js'
 import type { ContentComponent, EditorWithContentComponent, ReactRenderer } from './ReactRenderer'
-import type { RichTextWrapper } from '@/libs/richtext.js'
+import type { RichTextWrapper } from '@/libs/richtext'
 
 
 const mergeRefs = <T extends HTMLDivElement>(
@@ -119,24 +119,36 @@ export class PureEditorContent extends React.Component<
 
   init() {
     const editor = this.props.editor as EditorWithContentComponent | null
-    if (editor && !editor.isDestroyed) {
-      if (editor.contentComponent) {
-        return
-      }
+    if (!editor) return
 
-      const element = this.editorContentRef.current
-
-      editor.unmount()
-      editor.contentComponent = createContentComponent()
-
-      if(editor.doBeforeMount) editor.doBeforeMount()
-      editor.mount(element)
-      if(editor.doAfterMount) editor.doAfterMount()
-
-      editor.isEditorContentInitialized = true
-
-      this.forceUpdate()
+    const isDestroyed = typeof editor.isDestroyed === 'function' ? editor.isDestroyed() : !!editor.isDestroyed
+    if (isDestroyed) {
+      return
     }
+
+    if (editor.contentComponent) {
+      return
+    }
+
+    const element = this.editorContentRef.current
+    if (!element) return
+
+    const contentComponent = createContentComponent()
+    editor.contentComponent = contentComponent
+    if (editor.editor) {
+      editor.editor.contentComponent = contentComponent
+    }
+
+    if (editor.doBeforeMount) editor.doBeforeMount()
+    editor.mount(element)
+    if (editor.doAfterMount) editor.doAfterMount()
+
+    editor.isEditorContentInitialized = true
+    if (editor.editor) {
+      editor.editor.isEditorContentInitialized = true
+    }
+
+    this.forceUpdate()
   }
 
   componentWillUnmount() {
@@ -147,11 +159,18 @@ export class PureEditorContent extends React.Component<
     }
 
     editor.isEditorContentInitialized = false
+    if (editor.editor) {
+      editor.editor.isEditorContentInitialized = false
+    }
 
-    if(editor.doBeforeUnmount) editor.doBeforeUnmount()
+    if (editor.doBeforeUnmount) editor.doBeforeUnmount()
     editor.unmount()
-    if(editor.doAfterUnmount) editor.doAfterUnmount()
+    if (editor.doAfterUnmount) editor.doAfterUnmount()
+
     editor.contentComponent = null
+    if (editor.editor) {
+      editor.editor.contentComponent = null
+    }
   }
 
   render() {
@@ -173,7 +192,7 @@ const EditorContentWithKey = forwardRef<HTMLDivElement, EditorContentProps>(
     const key = React.useMemo(() => {
       return Math.floor(Math.random() * 0xffffffff).toString()
       // oxlint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.editor])
+    }, [props.editor?.editor ?? props.editor])
 
     // Can't use JSX here because it conflicts with the type definition of Vue's JSX, so use createElement
     return React.createElement(PureEditorContent, {

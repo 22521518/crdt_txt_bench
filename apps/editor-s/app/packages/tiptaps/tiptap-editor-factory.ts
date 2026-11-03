@@ -1,11 +1,13 @@
 import type { RichTextWrapper } from "@/libs/richtext"
 import { NodeSelection, PluginKey, Plugin } from "@tiptap/pm/state"
-import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
+import { useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import { useTiptapEditor } from "./use-tiptap-editor"
 import { handleMobileEnter } from "./handle-mobile-enter"
+import React from "react"
 
 const mobileEnterPluginKey = new PluginKey('reactMobileEnter')
+
 export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper => {
   const editor = useEditor({
     immediatelyRender: false,
@@ -16,16 +18,17 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
         autocorrect: "off",
         autocapitalize: "off",
         "aria-label": "Main content area, start typing to enter text.",
-        class: "simple-editor",
+        class: "richtxt-editor",
       },
     },
     extensions: getExtension(),
     content: initialContent,
   })
-  return {
+
+  return React.useMemo<RichTextWrapper>(() => ({
     editor: editor,
     useEditorState() { return useTiptapEditor(editor) },
-    isFocus() { return !editor || editor.isDestroyed || !editor.isInitialized ? false : (editor?.view.hasFocus() ?? false) },
+    isFocus() { return !editor || editor.isDestroyed || !editor.view ? false : (editor.view.hasFocus() ?? false) },
 
     isEditable() { return editor?.isEditable ?? false },
     isNodeTypeSelected(types: string[]) {
@@ -44,7 +47,7 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
     unsetSelectionWithMark(markName: string) { return editor?.chain().focus().unsetMark(markName).run() ?? false },
 
     getCursorCoord() {
-      if (!editor || !this.isFocus()) return { left: 0, right: 0, top: 0, bottom: 0 }
+      if (!editor || !this.isFocus() || !editor.view) return { left: 0, right: 0, top: 0, bottom: 0 }
       return editor.view.coordsAtPos(editor.state.selection.from)
     },
 
@@ -54,25 +57,60 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
     redo() { return editor?.chain().focus().redo().run() ?? false },
 
     doBeforeMount() { },
-    mount(element) { editor?.mount(element) },
+    mount(element: HTMLElement) {
+      if (!editor || editor.isDestroyed) return
+
+      if (editor.view?.dom?.parentNode) {
+        element.append(...editor.view.dom.parentNode.childNodes)
+        editor.setOptions({
+          element,
+        })
+        editor.createNodeViews()
+      } else {
+        editor.mount(element)
+      }
+    },
     doAfterMount() {
-      editor?.registerPlugin(new Plugin({
-        key: mobileEnterPluginKey,
-        props: {
-          handleDOMEvents: {
-            beforeinput: (_view, event) => handleMobileEnter(editor, event),
+      if (!editor?.isDestroyed) {
+        editor?.registerPlugin(new Plugin({
+          key: mobileEnterPluginKey,
+          props: {
+            handleDOMEvents: {
+              beforeinput: (_view, event) => handleMobileEnter(editor, event),
+            },
           },
-        },
-      }))
+        }))
+      }
     },
 
-    doBeforeUnmount() { if (!editor?.isDestroyed) editor?.unregisterPlugin(mobileEnterPluginKey) },
-    unmount() { editor?.unmount() },
+    doBeforeUnmount() {
+      if (!editor?.isDestroyed) {
+        editor?.unregisterPlugin(mobileEnterPluginKey)
+        editor?.view?.setProps({
+          nodeViews: {},
+        })
+      }
+    },
+    unmount() {
+      if (!editor || editor.isDestroyed) return
+
+      try {
+        if (!editor.view?.dom?.parentNode) return
+
+        const newElement = document.createElement('div')
+        newElement.append(...editor.view.dom.parentNode.childNodes)
+        editor.setOptions({
+          element: newElement,
+        })
+      } catch {
+        // do nothing
+      }
+    },
     doAfterUnmount() { },
 
     destroy() { editor?.destroy() },
-    isDestroyed() { return editor?.isDestroyed ?? false },
-  }
+    isDestroyed() { return !editor || editor.isDestroyed },
+  }), [editor])
 }
 
 function getExtension() {
