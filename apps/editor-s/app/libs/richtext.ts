@@ -1,9 +1,12 @@
 import type { EditorCursorCoord } from "@/hooks/tiptap/use-cursor-visibility"
 import { Editor as TiptapEditor } from "@tiptap/react"
+// import { assert } from "console"
+import type { RichTextTransaction } from "./richtext-command"
 
 export interface RichTextWrapper {
   editor: TiptapEditor | any
-  useEditorState: () => any // This hook allows you to watch for changes on the editor instance.
+  createTransaction(): RichTextTransaction;
+
 
   isEditable: () => boolean,
   isFocus: () => boolean,
@@ -13,16 +16,32 @@ export interface RichTextWrapper {
   isNodeTypeInSchema: (typeName: string) => boolean
   isMarkInSchema: (markName: string) => boolean
 
-  isSelectionMarkable: (markName: string) => boolean
-  setSelectionWithMark: (markName: string) => boolean
-  unsetSelectionWithMark: (markName: string) => boolean
+  getSelectionMarkTypeList: () => readonly any[]
+  getMarkTypeInSchema: (markName: string) => any | undefined
+  // getSelectionNodeTypeAttributes: (typeName: string | any) => any | undefined
+  // getSelectionMarkAttributes: (markName: string | any) => any | undefined
+  getSelectionAttributes: (typeOrName: string | any) => any
 
+  isSelectionMarkable: (markName: string | any, attributes?: {}) => boolean
+  // setSelectionWithMark: (markName: string | any, attributes?: {}) => boolean
+  // unsetSelectionWithMark: (markName: string | any) => boolean
+  toggleSelectionWithMark: (markName: string | any, attributes?: {}) => boolean // state = !state
+
+  getSelection: () => { from: number, to: number, isEmpty: boolean }
   getCursorCoord: () => EditorCursorCoord
 
   undoable?: () => boolean
   redoable?: () => boolean
   undo?: () => boolean
   redo?: () => boolean
+
+  // Content transfer API
+  getContent?: () => any
+  setContent?: (content: any) => void
+
+  // Event subscription API
+  on?: (event: string, callback: (...args: any[]) => void) => void
+  off?: (event: string, callback: (...args: any[]) => void) => void
 
   // DOM cycle API
   doBeforeMount?: () => void
@@ -37,34 +56,108 @@ export interface RichTextWrapper {
   isDestroyed: () => boolean
 }
 
-export function RichTextReducer(wrapper: RichTextWrapper, action: any) {
-  switch (action.type) {
-    case 'undo':
-    case 'redo':
+/**
+ * Singleton of the active instance RichTextWrapper.
+ * (switchEditor) to other libs (Quill, Slate, ProseMirror)
+ * with maintaining the existing content.
+ */
+export class RichTextSingleton {
+  private static instance: RichTextWrapper | null = null
+  private static listeners = new Set<(instance: RichTextWrapper | null) => void>()
 
-    case 'toggle-heading':
-      const level = action.level
+  public static getInstance(): RichTextWrapper | null {
+    return this.instance
+  }
 
-    case 'mark-bold':
-    case 'mark-italic':
-    case 'mark-underline':
-    case 'mark-strike':
-    case 'mark-code':
+  public static setInstance(editor: RichTextWrapper | null): void {
+    if (this.instance === editor) return
+    this.instance = editor
+    this.notify()
+  }
 
-    case 'mark-superscript':
-    case 'mark-subscript':
+  public static subscribe(listener: (instance: RichTextWrapper | null) => void): () => void {
+    this.listeners.add(listener)
+    return () => this.listeners.delete(listener)
 
-    case 'textalign-left':
-    case 'textalign-right':
-    case 'textalign-center':
-    case 'textalign-justify':
+  }
 
-    case 'highlight-text':
+  private static notify(): void {
+    this.listeners.forEach((listener) => {
+      try {
+        listener(this.instance)
+      } catch (e) {
+        console.error("Error in RichTextSingleton listener:", e)
+      }
+    })
+  }
 
-    case 'upload-img':
+  /**
+   * Switc instance RichTextWrapper to instances of other libs.
+   */
+  public static switchEditor(
+    newEditor: RichTextWrapper,
+    options?: { transferContent?: boolean }
+  ): void {
+    // assert(false, "This need to be reimplement because I didn't do it yet!")
+    // throw new Error("This need to be reimplement because I didn't do it yet!")
+    const oldEditor = this.instance
+    if (oldEditor === newEditor) return
 
-    default: {
-      throw Error('Unknown action: ' + action.type);
+    const shouldTransfer = options?.transferContent !== false
+
+    if (shouldTransfer && oldEditor) {
+      try {
+        let content: any = null
+        if (typeof oldEditor.getContent === 'function') {
+          content = oldEditor.getContent()
+        } else if (oldEditor.editor?.getHTML) {
+          content = oldEditor.editor.getHTML()
+        }
+
+        if (content !== null && content !== undefined) {
+          if (typeof newEditor.setContent === 'function') {
+            newEditor.setContent(content)
+          } else if (newEditor.editor?.commands?.setContent) {
+            newEditor.editor.commands.setContent(content)
+          }
+        }
+      } catch (err) {
+        console.warn("Could not transfer content during editor switch:", err)
+      }
     }
+
+    this.setInstance(newEditor)
   }
 }
+
+// export function RichTextReducer(wrapper: RichTextWrapper, action: any) {
+//   switch (action.type) {
+//     case 'undo':
+//     case 'redo':
+
+//     case 'toggle-heading':
+//       const level = action.level
+
+//     case 'mark-bold':
+//     case 'mark-italic':
+//     case 'mark-underline':
+//     case 'mark-strike':
+//     case 'mark-code':
+
+//     case 'mark-superscript':
+//     case 'mark-subscript':
+
+//     case 'textalign-left':
+//     case 'textalign-right':
+//     case 'textalign-center':
+//     case 'textalign-justify':
+
+//     case 'highlight-text':
+
+//     case 'upload-img':
+
+//     default: {
+//       throw Error('Unknown action: ' + action.type);
+//     }
+//   }
+// }

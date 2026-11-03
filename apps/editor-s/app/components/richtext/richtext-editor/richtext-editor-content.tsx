@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom'
 import { useSyncExternalStore } from 'use-sync-external-store/shim/index.js'
 import type { ContentComponent, EditorWithContentComponent, ReactRenderer } from './ReactRenderer'
 import type { RichTextWrapper } from '@/libs/richtext'
+import { useCurrentEditor } from '@/contexts/richtext-context'
 
 
 const mergeRefs = <T extends HTMLDivElement>(
@@ -36,7 +37,7 @@ const Portals: React.FC<{ contentComponent: ContentComponent }> = ({ contentComp
 }
 
 export interface EditorContentProps extends HTMLProps<HTMLDivElement> {
-  editor: RichTextWrapper | null
+  editor?: RichTextWrapper | null
   innerRef?: ForwardedRef<HTMLDivElement | null>
 }
 
@@ -135,19 +136,12 @@ export class PureEditorContent extends React.Component<
 
     const contentComponent = createContentComponent()
     editor.contentComponent = contentComponent
-    if (editor.editor) {
-      editor.editor.contentComponent = contentComponent
-    }
 
     if (editor.doBeforeMount) editor.doBeforeMount()
     editor.mount(element)
     if (editor.doAfterMount) editor.doAfterMount()
 
     editor.isEditorContentInitialized = true
-    if (editor.editor) {
-      editor.editor.isEditorContentInitialized = true
-    }
-
     this.forceUpdate()
   }
 
@@ -159,18 +153,12 @@ export class PureEditorContent extends React.Component<
     }
 
     editor.isEditorContentInitialized = false
-    if (editor.editor) {
-      editor.editor.isEditorContentInitialized = false
-    }
 
     if (editor.doBeforeUnmount) editor.doBeforeUnmount()
     editor.unmount()
     if (editor.doAfterUnmount) editor.doAfterUnmount()
 
     editor.contentComponent = null
-    if (editor.editor) {
-      editor.editor.contentComponent = null
-    }
   }
 
   render() {
@@ -189,16 +177,20 @@ export class PureEditorContent extends React.Component<
 // EditorContent should be re-created whenever the Editor instance changes
 const EditorContentWithKey = forwardRef<HTMLDivElement, EditorContentProps>(
   (props: Omit<EditorContentProps, 'innerRef'>, ref) => {
+    const contextEditor = useCurrentEditor()
+    const activeEditor = props.editor ?? contextEditor
+
     const key = React.useMemo(() => {
       return Math.floor(Math.random() * 0xffffffff).toString()
       // oxlint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.editor?.editor ?? props.editor])
+    }, [activeEditor?.editor ?? activeEditor])
 
     // Can't use JSX here because it conflicts with the type definition of Vue's JSX, so use createElement
     return React.createElement(PureEditorContent, {
       key,
       innerRef: ref,
       ...props,
+      editor: activeEditor,
     })
   },
 )

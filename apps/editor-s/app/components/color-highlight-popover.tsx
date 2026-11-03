@@ -4,6 +4,9 @@ import * as React from "react"
 import { useMenuNavigation } from "@/hooks/tiptap/use-menu-navigation"
 import { useIsMobile } from "@/hooks/tiptap/use-mobile"
 
+// --- Context ---
+import { useCurrentEditor } from "@/contexts/richtext-context"
+
 // --- Icons ---
 import { BanIcon } from "@/components/tiptap-icons/ban-icon"
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
@@ -57,7 +60,7 @@ export const ColorHighlightPopoverButton = React.forwardRef<
     role="button"
     tabIndex={-1}
     aria-label="Highlight text"
-    tooltip="Highlight"
+    tooltip="Highlight text"
     ref={ref}
     {...props}
   >
@@ -68,7 +71,7 @@ export const ColorHighlightPopoverButton = React.forwardRef<
 ColorHighlightPopoverButton.displayName = "ColorHighlightPopoverButton"
 
 export function ColorHighlightPopoverContent({
-  editor,
+  editor: providedEditor,
   colors = pickHighlightColorsByValue([
     "var(--tt-color-highlight-green)",
     "var(--tt-color-highlight-blue)",
@@ -77,6 +80,8 @@ export function ColorHighlightPopoverContent({
     "var(--tt-color-highlight-yellow)",
   ]),
 }: ColorHighlightPopoverContentProps) {
+  const currentEditor = useCurrentEditor()
+  const editor = providedEditor ?? currentEditor
   const { handleRemoveHighlight } = useColorHighlight({ editor })
   const isMobile = useIsMobile()
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -157,16 +162,10 @@ export function ColorHighlightPopover({
   onApplied,
   ...props
 }: ColorHighlightPopoverProps) {
-  
-  const { editor } = providedEditor?.useEditorState()
+  const currentEditor = useCurrentEditor()
+  const editor = providedEditor ?? currentEditor
   const [isOpen, setIsOpen] = React.useState(false)
-  const { isVisible, canColorHighlight, isActive, label, Icon } =
-    useColorHighlight({
-      editor,
-      hideWhenUnavailable,
-      onApplied,
-    })
-
+  const { isVisible, canColorHighlight, isActive, label, Icon } = useColorHighlight({ editor, hideWhenUnavailable, onApplied, })
   if (!isVisible) return null
 
   return (
@@ -184,11 +183,14 @@ export function ColorHighlightPopover({
           <Icon className="tiptap-button-icon" />
         </ColorHighlightPopoverButton>
       </PopoverTrigger>
-      <PopoverContent aria-label="Highlight colors">
+      <PopoverContent
+        aria-label="Highlight colors"
+        side="bottom"
+        align="start"
+        sideOffset={8}
+      >
         <ColorHighlightPopoverContent editor={editor} colors={colors} />
       </PopoverContent>
     </Popover>
   )
 }
-
-export default ColorHighlightPopover

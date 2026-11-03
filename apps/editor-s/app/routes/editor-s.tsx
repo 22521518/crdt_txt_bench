@@ -32,7 +32,6 @@ export default function Home({ loaderData, }: Route.ComponentProps) {
 
   return (
     <div style={{
-      flex: 1,
       display: 'flex',
       flexDirection: 'column',
       gap: '32px'
@@ -41,7 +40,6 @@ export default function Home({ loaderData, }: Route.ComponentProps) {
         value={docTitle}
         onChange={(e) => onTitleChange(e.target.value)}
       />
-
       <RichTextEditor />
     </div>
   );

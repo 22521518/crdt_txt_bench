@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "@/lib/tiptap-utils"
-import "@/components/tiptap-ui-primitive/card/card.scss"
+import { concat_cls } from "@/libs/components.utils"
+import "./card.scss"
 
 const Card = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
   ({ className, ...props }, ref) => {
-    return <div ref={ref} className={cn("tiptap-card", className)} {...props} />
+    return <div ref={ref} className={concat_cls("tiptap-card", className)} {...props} />
   }
 )
 Card.displayName = "Card"
@@ -16,7 +16,7 @@ const CardHeader = React.forwardRef<
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
   return (
-    <div ref={ref} className={cn("tiptap-card-header", className)} {...props} />
+    <div ref={ref} className={concat_cls("tiptap-card-header", className)} {...props} />
   )
 })
 CardHeader.displayName = "CardHeader"
@@ -24,7 +24,7 @@ CardHeader.displayName = "CardHeader"
 const CardBody = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
   ({ className, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn("tiptap-card-body", className)} {...props} />
+      <div ref={ref} className={concat_cls("tiptap-card-body", className)} {...props} />
     )
   }
 )
@@ -40,7 +40,7 @@ const CardItemGroup = React.forwardRef<
     <div
       ref={ref}
       data-orientation={orientation}
-      className={cn("tiptap-card-item-group", className)}
+      className={concat_cls("tiptap-card-item-group", className)}
       {...props}
     />
   )
@@ -54,7 +54,7 @@ const CardGroupLabel = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("tiptap-card-group-label", className)}
+      className={concat_cls("tiptap-card-group-label", className)}
       {...props}
     />
   )
@@ -66,7 +66,7 @@ const CardFooter = React.forwardRef<
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
   return (
-    <div ref={ref} className={cn("tiptap-card-footer", className)} {...props} />
+    <div ref={ref} className={concat_cls("tiptap-card-footer", className)} {...props} />
   )
 })
 CardFooter.displayName = "CardFooter"

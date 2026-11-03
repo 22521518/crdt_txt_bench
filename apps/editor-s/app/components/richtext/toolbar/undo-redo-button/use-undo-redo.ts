@@ -1,45 +1,34 @@
 import * as React from "react"
-// import { type Editor } from "@tiptap/react"
-
-// --- Hooks ---
-// import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
-
-// --- Lib ---
-// import { isNodeTypeSelected } from "@/lib/tiptap-utils"
-
-// --- Icons ---
 import { Redo2Icon } from "@/components/tiptap-icons/redo2-icon"
 import { Undo2Icon } from "@/components/tiptap-icons/undo2-icon"
 import type { RichTextWrapper } from "@/libs/richtext"
+import { useCurrentEditor } from "@/contexts/richtext-context"
 
 export type UndoRedoAction = "undo" | "redo"
 
-/**
- * Configuration for the history functionality
- */
+export const UNDO_REDO_SHORTCUT_KEYS: Record<UndoRedoAction, string> = {
+  undo: "mod+z",
+  redo: "mod+shift+z",
+}
+
 export interface UseUndoRedoConfig {
   /**
    * The Tiptap editor instance.
    */
   editor?: RichTextWrapper | null
   /**
-   * The history action to perform (undo or redo).
+   * The undo/redo action to perform.
    */
   action: UndoRedoAction
   /**
-   * Whether the button should hide when action is not available.
+   * Whether the button should be hidden when the action cannot be executed.
    * @default false
    */
   hideWhenUnavailable?: boolean
   /**
-   * Callback function called after a successful action execution.
+   * Optional callback function that is called after the action is executed.
    */
   onExecuted?: () => void
-}
-
-export const UNDO_REDO_SHORTCUT_KEYS: Record<UndoRedoAction, string> = {
-  undo: "mod+z",
-  redo: "mod+shift+z",
 }
 
 export const historyActionLabels: Record<UndoRedoAction, string> = {
@@ -47,13 +36,16 @@ export const historyActionLabels: Record<UndoRedoAction, string> = {
   redo: "Redo",
 }
 
-export const historyIcons = {
+export const historyIcons: Record<
+  UndoRedoAction,
+  React.ComponentType<{ className?: string }>
+> = {
   undo: Undo2Icon,
   redo: Redo2Icon,
 }
 
 /**
- * Checks if a history action can be executed
+ * Checks if an undo/redo action can be executed on the editor
  */
 export function canExecuteUndoRedoAction(
   editor: RichTextWrapper | null,
@@ -77,13 +69,12 @@ export function executeUndoRedoAction(
   if (!canExecuteUndoRedoAction(editor, action)) return false
   if (action === "undo" && editor.undo) return editor.undo()
   if (action === "redo" && editor.redo) return editor.redo()
+
   return false
-  // const chain = editor.chain().focus()
-  // return action === "undo" ? chain.undo().run() : chain.redo().run()
 }
 
 /**
- * Determines if the history button should be shown
+ * Determines if the undo/redo button should be visible
  */
 export function shouldShowButton(props: {
   editor: RichTextWrapper | null
@@ -104,6 +95,8 @@ export function shouldShowButton(props: {
 /**
  * Custom hook that provides history functionality for Tiptap editor
  *
+ * @param config - Configuration options for the hook
+ * @returns Object containing state and handlers for undo/redo actions
  * @example
  * ```tsx
  * // Simple usage
@@ -136,31 +129,37 @@ export function shouldShowButton(props: {
  *   )
  * }
  * ```
- */
+*/
 export function useUndoRedo({
   editor: providedEditor,
   action,
   hideWhenUnavailable = false,
   onExecuted,
 }: UseUndoRedoConfig) {
+  const currentEditor = useCurrentEditor()
+  const editor = providedEditor ?? currentEditor
 
-  // if (!providedEditor?.useEditorState) return
-
-  const editor = providedEditor?.useEditorState()
-  const [isVisible, setIsVisible] = React.useState<boolean>(true)
-  const canExecute = canExecuteUndoRedoAction(editor, action)
+  const [isVisible, setIsVisible] = React.useState<boolean>(() =>
+    shouldShowButton({ editor, hideWhenUnavailable, action })
+  )
+  const [canExecute, setCanExecute] = React.useState<boolean>(() =>
+    canExecuteUndoRedoAction(editor, action)
+  )
 
   React.useEffect(() => {
     if (!editor) return
 
-    const handleUpdate = () => setIsVisible(shouldShowButton({ editor, hideWhenUnavailable, action }))
+    const handleUpdate = () => {
+      setIsVisible(shouldShowButton({ editor, hideWhenUnavailable, action }))
+      setCanExecute(canExecuteUndoRedoAction(editor, action))
+    }
 
     handleUpdate()
 
-    editor.on("transaction", handleUpdate)
+    editor.on?.("transaction", handleUpdate)
 
     return () => {
-      editor.off("transaction", handleUpdate)
+      editor.off?.("transaction", handleUpdate)
     }
   }, [editor, hideWhenUnavailable, action])
 

@@ -4,6 +4,8 @@ import { concat_cls } from "@/libs/components.utils"
 import * as React from "react"
 import { Separator } from "@/components/separator"
 
+import "./toolbar.scss"
+
 type BaseProps = React.HTMLAttributes<HTMLDivElement>
 interface ToolbarProps extends BaseProps { variant?: "floating" | "fixed" }
 

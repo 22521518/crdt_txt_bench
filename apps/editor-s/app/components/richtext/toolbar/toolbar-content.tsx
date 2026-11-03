@@ -7,6 +7,8 @@ import { Button } from "@/components/button"
 import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon"
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
 import { LinkIcon } from "@/components/tiptap-icons/link-icon"
+import { ColorHighlightPopover, ColorHighlightPopoverButton, ColorHighlightPopoverContent } from "@/components/color-highlight-popover"
+import { LinkButton, LinkContent, LinkPopover } from "@/components/link-popover"
 
 export const MainToolbarContent = ({
   onHighlighterClick,
@@ -27,55 +29,52 @@ export const MainToolbarContent = ({
 
       <ToolbarSeparator />
 
-      {/* <ToolbarGroup>
-        <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
+      <ToolbarGroup>
+        {/* <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
         <ListDropdownMenu
           types={["bulletList", "orderedList", "taskList"]}
           portal={isMobile}
         />
         <BlockquoteButton />
-        <CodeBlockButton />
+        <CodeBlockButton /> */}
       </ToolbarGroup>
 
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <MarkButton type="bold" />
+        {/* <MarkButton type="bold" />
         <MarkButton type="italic" />
         <MarkButton type="strike" />
         <MarkButton type="code" />
-        <MarkButton type="underline" />
-        {!isMobile ? (
-          <ColorHighlightPopover />
-        ) : (
-          <ColorHighlightPopoverButton onClick={onHighlighterClick} />
-        )}
+        <MarkButton type="underline" /> */}
+        <ColorHighlightPopoverButton onClick={isMobile ? () => onHighlighterClick() : ()=>{}} />
         {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
       </ToolbarGroup>
 
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <MarkButton type="superscript" />
-        <MarkButton type="subscript" />
+        {/* <MarkButton type="superscript" />
+        <MarkButton type="subscript" /> */}
       </ToolbarGroup>
 
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <TextAlignButton align="left" />
+        {/* <TextAlignButton align="left" />
         <TextAlignButton align="center" />
         <TextAlignButton align="right" />
-        <TextAlignButton align="justify" />
+        <TextAlignButton align="justify" /> */}
       </ToolbarGroup>
 
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <ImageUploadButton text="Add" />
+        {/* <ImageUploadButton text="Add" /> */}
       </ToolbarGroup>
 
-      <Spacer /> */}
+      
+      <Spacer /> 
 
       {isMobile && <ToolbarSeparator />}
 
@@ -107,10 +106,10 @@ export const MobileToolbarContent = ({
 
     <ToolbarSeparator />
 
-    {/* {type === "highlighter" ? (
+    {type === "highlighter" ? (
       <ColorHighlightPopoverContent />
     ) : (
       <LinkContent />
-    )} */}
+    )}
   </>
 )

@@ -1,7 +1,7 @@
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
-import { cn } from "@/lib/tiptap-utils"
-import "@/components/tiptap-ui-primitive/popover/popover.scss"
+import { concat_cls } from "@/libs/components.utils"
+import "./popover.scss"
 
 function Popover({
   ...props
@@ -26,7 +26,7 @@ function PopoverContent({
       <PopoverPrimitive.Content
         align={align}
         sideOffset={sideOffset}
-        className={cn("tiptap-popover", className)}
+        className={concat_cls("tiptap-popover", className)}
         {...props}
       />
     </PopoverPrimitive.Portal>

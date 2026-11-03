@@ -6,6 +6,9 @@ import { useHotkeys } from "react-hotkeys-hook"
 // --- Hooks ---
 import { useIsMobile } from "@/hooks/tiptap/use-mobile"
 
+// --- Context ---
+import { useCurrentEditor } from "@/contexts/richtext-context"
+
 // --- Icons ---
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
 import type { RichTextWrapper } from "@/libs/richtext"
@@ -68,7 +71,8 @@ export function isColorHighlightActive(
 export function removeHighlight(editor: RichTextWrapper | null): boolean {
   if (!editor || !editor.isEditable) return false
   if (!canColorHighlight(editor)) return false
-  return editor.unsetSelectionWithMark("highlight")
+  return editor.createTransaction().focus().unsetMark("highlight").commit()
+  // return editor.unsetSelectionWithMark("highlight")
 }
 
 export function shouldShowButton(props: {
@@ -96,8 +100,8 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
     onApplied,
   } = config
 
-  // const { editor } = useTiptapEditor()
-  const { editor } = providedEditor?.useEditorState()
+  const currentEditor = useCurrentEditor()
+  const editor = providedEditor ?? currentEditor
   const isMobile = useIsMobile()
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const canColorHighlightState = canColorHighlight(editor)
@@ -105,39 +109,27 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
 
   React.useEffect(() => {
     if (!editor) return
-
-    const handleSelectionUpdate = () => {
-      setIsVisible(shouldShowButton({ editor, hideWhenUnavailable }))
-    }
-
+    const handleSelectionUpdate = () => setIsVisible(shouldShowButton({ editor, hideWhenUnavailable }))
     handleSelectionUpdate()
-
-    editor.on("selectionUpdate", handleSelectionUpdate)
-
-    return () => {
-      editor.off("selectionUpdate", handleSelectionUpdate)
-    }
+    editor.on?.("selectionUpdate", handleSelectionUpdate)
+    return () => editor.off?.("selectionUpdate", handleSelectionUpdate)
   }, [editor, hideWhenUnavailable])
 
   const handleColorHighlight = React.useCallback(() => {
-    if (!editor || !canColorHighlightState || !highlightColor || !label)
-      return false
-
-    if (editor.state.storedMarks) {
-      const highlightMarkType = editor.schema.marks.highlight
-      if (highlightMarkType) {
-        editor.view.dispatch(
-          editor.state.tr.removeStoredMark(highlightMarkType)
-        )
-      }
+    if (!editor || !canColorHighlightState || !highlightColor || !label) return false
+    if (editor.getSelectionMarkTypeList()) {
+      const highlightMarkType = editor.getMarkTypeInSchema('highlight')
+      // if (highlightMarkType) {
+      //   innerEditor.view?.dispatch?.(
+      //     innerEditor.state.tr.removeStoredMark(highlightMarkType)
+      //   )
+      // }
+      // editor.unsetSelectionWithMark(highlightMarkType)
+      editor.createTransaction().focus().unsetMark(highlightMarkType).commit()
     }
 
     setTimeout(() => {
-      const success = editor
-        .chain()
-        .focus()
-        .toggleMark("highlight", { color: highlightColor })
-        .run()
+      let success = editor.toggleSelectionWithMark("highlight", { color: highlightColor })
       if (success) {
         onApplied?.({ color: highlightColor, label })
       }

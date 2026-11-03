@@ -1,25 +1,25 @@
 import * as React from "react"
 
 // --- Lib ---
-import { parseShortcutKeys } from "@/lib/tiptap-utils"
+import { parseShortcutKeys } from "@/libs/key-shortcut.utils"
 
-// --- Hooks ---
-import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
+// --- Context ---
+import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- Tiptap UI ---
-import type { UseColorHighlightConfig } from "@/components/tiptap-ui/color-highlight-button"
+import type { UseColorHighlightConfig } from "@/components/color-highlight-button"
 import {
   COLOR_HIGHLIGHT_SHORTCUT_KEY,
   useColorHighlight,
-} from "@/components/tiptap-ui/color-highlight-button"
+} from "@/components/color-highlight-button"
 
 // --- UI Primitives ---
-import type { ButtonProps } from "@/components/tiptap-ui-primitive/button"
-import { Button } from "@/components/tiptap-ui-primitive/button"
-import { Badge } from "@/components/tiptap-ui-primitive/badge"
+import type { ButtonProps } from "@/components/button"
+import { Button } from "@/components/button"
+import { Badge } from "@/components/badge"
 
 // --- Styles ---
-import "@/components/tiptap-ui/color-highlight-button/color-highlight-button.scss"
+import "./color-highlight-button.scss"
 
 export interface ColorHighlightButtonProps
   extends Omit<ButtonProps, "type">,
@@ -67,7 +67,9 @@ export const ColorHighlightButton = React.forwardRef<
     },
     ref
   ) => {
-    const { editor } = useTiptapEditor(providedEditor)
+    const currentEditor = useCurrentEditor()
+    const editor = providedEditor ?? currentEditor
+
     const {
       isVisible,
       canColorHighlight,
@@ -125,10 +127,8 @@ export const ColorHighlightButton = React.forwardRef<
         {children ?? (
           <>
             <span
-              className="tiptap-button-highlight"
-              style={
-                { "--highlight-color": highlightColor } as React.CSSProperties
-              }
+              className="tiptap-button-color-highlight"
+              style={{ backgroundColor: highlightColor }}
             />
             {text && <span className="tiptap-button-text">{text}</span>}
             {showShortcut && (

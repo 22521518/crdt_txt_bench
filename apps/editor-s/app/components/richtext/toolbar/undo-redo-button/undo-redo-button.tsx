@@ -5,11 +5,11 @@ import * as React from "react"
 // --- Lib ---
 import { parseShortcutKeys } from "@/libs/key-shortcut.utils"
 
-// --- Hooks ---
-// import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
+// --- Context ---
+import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- Tiptap UI ---
-import type { UndoRedoAction, UseUndoRedoConfig} from "./use-undo-redo"
+import type { UndoRedoAction, UseUndoRedoConfig } from "./use-undo-redo"
 import { UNDO_REDO_SHORTCUT_KEYS, useUndoRedo } from "./use-undo-redo"
 
 // --- UI Primitives ---
@@ -64,11 +64,15 @@ export const UndoRedoButton = React.forwardRef<
     },
     ref
   ) => {
-    
-    if (!providedEditor?.useEditorState) return (<></>)
+    const currentEditor = useCurrentEditor()
+    const editor = providedEditor ?? currentEditor
 
-    const { editor } = providedEditor?.useEditorState()
-    const { isVisible, handleAction, label, canExecute, Icon, shortcutKeys } = useUndoRedo({ editor, action, hideWhenUnavailable, onExecuted, })
+    const { isVisible, handleAction, label, canExecute, Icon, shortcutKeys } = useUndoRedo({
+      editor,
+      action,
+      hideWhenUnavailable,
+      onExecuted,
+    })
 
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {

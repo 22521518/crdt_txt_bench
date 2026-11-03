@@ -28,14 +28,6 @@ export function RichTextEditor() {
     if (!isMobile && mobileView !== "main")
       setMobileView("main")
   }, [isMobile, mobileView])
-
-  React.useEffect(() => {
-    console.log("RichTextEditor mounted")
-
-    return () => {
-      console.log("RichTextEditor unmounted")
-    }
-  }, [])
   
   return (
     <div className="richtxt-editor-wrapper">

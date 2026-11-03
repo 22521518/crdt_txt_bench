@@ -1,3 +1,5 @@
+import "./color-highlight-button.scss"
+
 export const HIGHLIGHT_COLORS = [
   {
     label: "Default background",
