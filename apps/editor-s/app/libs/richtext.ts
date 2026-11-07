@@ -1,12 +1,16 @@
 import type { EditorCursorCoord } from "@/hooks/tiptap/use-cursor-visibility"
 import { Editor as TiptapEditor } from "@tiptap/react"
 // import { assert } from "console"
-import type { RichTextTransaction } from "./richtext-command"
+import type { RichTextTransaction } from "./richtext-transaction"
+
+export interface RichTextNodeWrapper {
+  getChildren: () => RichTextNodeWrapper[],
+  getLength: () => number
+}
 
 export interface RichTextWrapper {
   editor: TiptapEditor | any
   createTransaction(): RichTextTransaction;
-
 
   isEditable: () => boolean,
   isFocus: () => boolean,
@@ -17,19 +21,26 @@ export interface RichTextWrapper {
   isNodeTypeInSchema: (typeName: string) => boolean
   isMarkInSchema: (markName: string) => boolean
 
+  findNodePosition: (node: any) => number | null
+
   getSelectionMarkTypeList: () => readonly any[]
   getMarkTypeInSchema: (markName: string) => any | undefined
   // getSelectionNodeTypeAttributes: (typeName: string | any) => any | undefined
   // getSelectionMarkAttributes: (markName: string | any) => any | undefined
   getSelectionAttributes: (typeOrName: string | any) => any
+  getSelectionType: () => 'inline' | 'block' | 'unknown' // `inline` may be considered as text, whereas `block` is node ||| `unknown` is i don know
+  getSelectionNodes: () => RichTextNodeWrapper
 
   isSelectionMarkable: (markName: string | any, attributes?: {}) => boolean
+  isNodeSetable: (markName: string | any, attributes?: {}) => boolean
   // setSelectionWithMark: (markName: string | any, attributes?: {}) => boolean
   // unsetSelectionWithMark: (markName: string | any) => boolean
   toggleSelectionWithMark: (markName: string | any, attributes?: {}) => boolean // state = !state
 
-  getSelection: () => { from: number, to: number, isEmpty: boolean }
+  getSelection: () => { from: number, to: number, isEmpty: boolean, $anchor?: any }
   getCursorCoord: () => EditorCursorCoord
+
+  createNode(pos: number, atNode?: any): any
 
   undoable?: () => boolean
   redoable?: () => boolean
@@ -56,6 +67,14 @@ export interface RichTextWrapper {
   destroy: () => void
   isDestroyed: () => boolean
 }
+
+export const isValidPosition = (
+  pos: number | null | undefined
+): pos is number => {
+  return typeof pos === "number" &&
+    Number.isFinite(pos) &&
+    pos >= 0;
+};
 
 /**
  * Singleton of the active instance RichTextWrapper.

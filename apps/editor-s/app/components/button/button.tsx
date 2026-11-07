@@ -9,7 +9,7 @@ import {
 
 // --- Lib ---
 import { parseShortcutKeys } from "@/libs/key-shortcut.utils"
-import { concat_cls } from "@/libs/components.utils"
+import { concatClassCSS } from "@/libs/components.utils"
 
 import "./button-colors.scss"
 import "./button-group.scss"
@@ -61,7 +61,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     if (!tooltip || !showTooltip) {
       return (
         <button
-          className={concat_cls("tiptap-button", className)}
+          className={concatClassCSS("tiptap-button", className)}
           ref={ref}
           aria-label={ariaLabel}
           {...props}
@@ -74,7 +74,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Tooltip delay={200}>
         <TooltipTrigger
-          className={concat_cls("tiptap-button", className)}
+          className={concatClassCSS("tiptap-button", className)}
           ref={ref}
           aria-label={ariaLabel}
           {...props}
@@ -101,7 +101,7 @@ export const ButtonGroup = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={concat_cls("tiptap-button-group", className)}
+      className={concatClassCSS("tiptap-button-group", className)}
       data-orientation={orientation}
       role="group"
       {...props}

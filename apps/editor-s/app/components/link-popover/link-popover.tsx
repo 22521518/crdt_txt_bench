@@ -219,8 +219,7 @@ export const LinkPopover = React.forwardRef<
     },
     ref
   ) => {
-    const currentEditor = useCurrentEditor()
-    const editor = providedEditor ?? currentEditor
+    let editor = providedEditor ?? useCurrentEditor()
     const [isOpen, setIsOpen] = React.useState(false)
 
     const {

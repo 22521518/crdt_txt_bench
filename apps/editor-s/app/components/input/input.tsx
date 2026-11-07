@@ -1,10 +1,10 @@
 import * as React from "react"
-import { concat_cls } from "@/libs/components.utils"
+import { concatClassCSS } from "@/libs/components.utils"
 import "./input.scss"
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
-    <input type={type} className={concat_cls("tiptap-input", className)} {...props} />
+    <input type={type} className={concatClassCSS("tiptap-input", className)} {...props} />
   )
 }
 
@@ -14,7 +14,7 @@ function InputGroup({
   ...props
 }: React.ComponentProps<"div">) {
   return (
-    <div className={concat_cls("tiptap-input-group", className)} {...props}>
+    <div className={concatClassCSS("tiptap-input-group", className)} {...props}>
       {children}
     </div>
   )

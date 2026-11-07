@@ -47,9 +47,15 @@ export interface RichTextTransaction {
   unsetLink(): this
 
   extendMarkRange(name: string): this;
-  // setNode(name: string, attributes?: Record<string, any>): this;
+  setNode(name: string, attributes?: Record<string, any>): this;
   setMeta(key: string, value: any): this;
+  clearNodes(): this
+
+  selectTextblockEnd(): this
+  setTextSelection(from: number, to: number): this
+  setNodeSelection(node: any): this
+
   commit(): boolean;
-  rollback?(): void;
+  // rollback?(): void;
 }
 

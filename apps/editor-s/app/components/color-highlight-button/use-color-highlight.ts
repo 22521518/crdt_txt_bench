@@ -54,8 +54,7 @@ export function pickHighlightColorsByValue(values: string[]) {
 
 export function canColorHighlight(editor: RichTextWrapper | null): boolean {
   if (!editor) return false
-  const isEditable = typeof editor.isEditable === "function" ? editor.isEditable() : Boolean(editor.isEditable)
-  if (!isEditable) return false
+  if (!editor.isEditable()) return false
   if (editor.isNodeTypeSelected?.(["image"])) return false
   return editor.isSelectionMarkable?.("highlight") ?? false
 }
@@ -65,8 +64,7 @@ export function isColorHighlightActive(
   highlightColor?: string
 ): boolean {
   if (!editor) return false
-  const isEditable = typeof editor.isEditable === "function" ? editor.isEditable() : Boolean(editor.isEditable)
-  if (!isEditable) return false
+  if (!editor.isEditable()) return false
   const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
   if (!checkActive) return false
   return highlightColor ?
@@ -76,8 +74,7 @@ export function isColorHighlightActive(
 
 export function removeHighlight(editor: RichTextWrapper | null): boolean {
   if (!editor) return false
-  const isEditable = typeof editor.isEditable === "function" ? editor.isEditable() : Boolean(editor.isEditable)
-  if (!isEditable) return false
+  if (!editor.isEditable()) return false
   if (!canColorHighlight(editor)) return false
   return editor.createTransaction().focus().unsetMark("highlight").commit()
 }
@@ -89,8 +86,7 @@ export function shouldShowButton(props: {
   const { editor, hideWhenUnavailable } = props
 
   if (!editor) return false
-  const isEditable = typeof editor.isEditable === "function" ? editor.isEditable() : Boolean(editor.isEditable)
-  if (!isEditable) return false
+  if (!editor.isEditable()) return false
   if (!editor.isMarkInSchema?.("highlight")) return false
 
   const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
@@ -110,8 +106,7 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
     onApplied,
   } = config
 
-  const currentEditor = useCurrentEditor()
-  const editor = providedEditor ?? currentEditor
+  let editor = providedEditor ?? useCurrentEditor()
   const isMobile = useIsMobile()
 
   const [isVisible, setIsVisible] = React.useState<boolean>(() =>

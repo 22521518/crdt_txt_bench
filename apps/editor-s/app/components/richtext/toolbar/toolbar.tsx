@@ -1,6 +1,6 @@
 import useComposedRef from "@/hooks/tiptap/use-composed-ref"
 import { useMenuNavigation } from "@/hooks/tiptap/use-menu-navigation"
-import { concat_cls } from "@/libs/components.utils"
+import { concatClassCSS } from "@/libs/components.utils"
 import * as React from "react"
 import { Separator } from "@/components/separator"
 
@@ -88,7 +88,7 @@ export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
         role="toolbar"
         aria-label="toolbar"
         data-variant={variant}
-        className={concat_cls("tiptap-toolbar", className)}
+        className={concatClassCSS("tiptap-toolbar", className)}
         {...props}
       >
         {children}
@@ -104,7 +104,7 @@ export const ToolbarGroup = React.forwardRef<HTMLDivElement, BaseProps>(
     <div
       ref={ref}
       role="group"
-      className={concat_cls("tiptap-toolbar-group", className)}
+      className={concatClassCSS("tiptap-toolbar-group", className)}
       {...props}
     >
       {children}

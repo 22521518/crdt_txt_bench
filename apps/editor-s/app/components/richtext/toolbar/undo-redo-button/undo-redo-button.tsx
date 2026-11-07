@@ -64,8 +64,7 @@ export const UndoRedoButton = React.forwardRef<
     },
     ref
   ) => {
-    const currentEditor = useCurrentEditor()
-    const editor = providedEditor ?? currentEditor
+    let editor = providedEditor ?? useCurrentEditor()
 
     const { isVisible, handleAction, label, canExecute, Icon, shortcutKeys } = useUndoRedo({
       editor,

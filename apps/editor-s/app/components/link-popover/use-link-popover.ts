@@ -47,7 +47,7 @@ export interface LinkHandlerProps {
  * Checks if a link can be set in the current editor state
  */
 export function canSetLink(editor: RichTextWrapper | null): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   return editor.isSelectionMarkable("link")
 }
 
@@ -55,7 +55,7 @@ export function canSetLink(editor: RichTextWrapper | null): boolean {
  * Checks if a link is currently active in the editor
  */
 export function isLinkActive(editor: RichTextWrapper | null): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   return editor.isSelectedNodeTypeActive?.("link") ?? false
 }
 
@@ -246,8 +246,7 @@ export function useLinkPopover(config?: UseLinkPopoverConfig) {
     onSetLink,
   } = config || {}
 
-  const currentEditor = useCurrentEditor()
-  const editor = providedEditor ?? currentEditor
+  let editor = providedEditor ?? useCurrentEditor()
 
   const { isVisible, canSet, isActive } = useLinkState({
     editor,

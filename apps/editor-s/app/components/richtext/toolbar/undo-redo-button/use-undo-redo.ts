@@ -51,7 +51,7 @@ export function canExecuteUndoRedoAction(
   editor: RichTextWrapper | null,
   action: UndoRedoAction
 ): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (editor.isNodeTypeSelected && editor.isNodeTypeSelected(["image"])) return false
   if (action === "undo" && editor.undoable) return editor.undoable()
   if (action === "redo" && editor.redoable) return editor.redoable()
@@ -65,7 +65,7 @@ export function executeUndoRedoAction(
   editor: RichTextWrapper | null,
   action: UndoRedoAction
 ): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (!canExecuteUndoRedoAction(editor, action)) return false
   if (action === "undo" && editor.undo) return editor.undo()
   if (action === "redo" && editor.redo) return editor.redo()
@@ -83,7 +83,7 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, hideWhenUnavailable, action } = props
 
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
 
   if (hideWhenUnavailable && (!editor.isSelectedNodeTypeActive || !editor.isSelectedNodeTypeActive("code"))) {
     return canExecuteUndoRedoAction(editor, action)
@@ -136,8 +136,7 @@ export function useUndoRedo({
   hideWhenUnavailable = false,
   onExecuted,
 }: UseUndoRedoConfig) {
-  const currentEditor = useCurrentEditor()
-  const editor = providedEditor ?? currentEditor
+  let editor = providedEditor ?? useCurrentEditor()
 
   const [isVisible, setIsVisible] = React.useState<boolean>(() =>
     shouldShowButton({ editor, hideWhenUnavailable, action })

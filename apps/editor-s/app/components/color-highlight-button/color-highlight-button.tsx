@@ -67,8 +67,7 @@ export const ColorHighlightButton = React.forwardRef<
     },
     ref
   ) => {
-    const currentEditor = useCurrentEditor()
-    const editor = providedEditor ?? currentEditor
+    let editor = providedEditor ?? useCurrentEditor()
 
     const {
       isVisible,

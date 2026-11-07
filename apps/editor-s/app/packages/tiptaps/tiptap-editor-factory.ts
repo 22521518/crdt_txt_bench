@@ -1,5 +1,5 @@
-import type { RichTextWrapper } from "@/libs/richtext"
-import { NodeSelection, PluginKey, Plugin } from "@tiptap/pm/state"
+import { type RichTextWrapper } from "@/libs/richtext"
+import { NodeSelection, PluginKey, Plugin, TextSelection, AllSelection } from "@tiptap/pm/state"
 import { Editor, useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import { Highlight } from "@tiptap/extension-highlight"
@@ -49,6 +49,32 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
     isNodeTypeInSchema(typeName: string) { return editor?.schema ? editor.schema.spec.nodes.get(typeName) !== undefined : false },
     isMarkInSchema(markName: string) { return editor?.schema ? editor.schema.spec.marks.get(markName) !== undefined : false },
 
+    findNodePosition(node: any) {
+      if (!editor || !editor.state?.doc) return null
+      const hasValidNode = node !== undefined && node !== null
+      // const hasValidPos = isValidPosition(nodePos)
+      // if (!hasValidNode && !hasValidPos) return null
+      if (!hasValidNode) return null
+      let foundPos = -1
+      let foundNode: Node | null = null
+
+      editor.state.doc.descendants((currentNode, pos) => {
+        // TODO: Needed?
+        // if (currentNode.type && currentNode.type.name === node!.type.name) {
+        if (currentNode === node) {
+          foundPos = pos
+          foundNode = currentNode
+          return false
+        }
+        return true
+      })
+
+      if (foundPos !== -1 && foundNode !== null) {
+        return foundPos
+      }
+      return null
+    },
+
     getSelectionMarkTypeList() { return editor?.state.storedMarks ?? [] },
     getMarkTypeInSchema(markName: string) { return editor?.schema.marks[markName] },
 
@@ -59,21 +85,39 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
       if (schemaType === "mark") return getSelectionMarkAttributes(editor, typeOrName);
       return {};
     },
+    getSelectionType() {
+      if (editor?.view.state.selection instanceof TextSelection) return 'inline'
+      if (editor?.view.state.selection instanceof NodeSelection) return 'block'
+      if (editor?.view.state.selection instanceof AllSelection) return 'block'
+      return 'unknown'
+    },
+    getSelectionNodes() {
+      if (editor?.view.state.selection instanceof NodeSelection) {
+        const selectionNode = editor?.view.state.selection.node
+        return createRichTextNodeWrapper(selectionNode)
+      }
+      return { getChildren() { return [] }, getLength() { return 0 } }
+    },
 
     isSelectionMarkable(markName: string | any, attributes?: {}) { return editor?.can().setMark(markName, attributes) ?? false },
+    isNodeSetable(markName: string | any, attributes?: {}) { return editor?.can().setNode(markName, attributes) ?? false },
     // setSelectionWithMark(markName: string | any, attributes?: {}) { return editor?.chain().focus().setMark(markName, attributes).run() ?? false },
     // unsetSelectionWithMark(markName: string | any) { return editor?.chain().focus().unsetMark(markName).run() ?? false },
     toggleSelectionWithMark(markName: string | any, attributes?: {}) { return editor?.chain().focus().toggleMark(markName, attributes).run() ?? false },
 
     getSelection() {
       if (!editor) return { from: 0, to: 0, isEmpty: true }
-      const { from, to, empty } = editor.state.selection
-      return { from: from, to: to, isEmpty: empty }
+      const { from, to, empty, $anchor } = editor.state.selection
+      return { from: from, to: to, isEmpty: empty, $anchor: $anchor }
     },
+    // isSelectionAText() { return editor?.view.state.selection instanceof TextSelection },
+    // isSelectionNodes() { return editor?.view.state.selection instanceof NodeSelection },
     getCursorCoord() {
       if (!editor || !this.isFocus() || !editor.view) return { left: 0, right: 0, top: 0, bottom: 0 }
       return editor.view.coordsAtPos(editor.state.selection.from)
     },
+
+    createNode(pos: number, atNode?: any) { return NodeSelection.create(atNode ?? this.editor.state.doc, pos); },
 
     undoable() { return editor?.can().undo() ?? false },
     redoable() { return editor?.can().redo() ?? false },
@@ -96,9 +140,7 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
 
       if (editor.view?.dom?.parentNode) {
         element.append(...editor.view.dom.parentNode.childNodes)
-        editor.setOptions({
-          element,
-        })
+        editor.setOptions({ element, })
         editor.createNodeViews()
       } else {
         editor.mount(element)
@@ -108,11 +150,7 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
       if (!editor?.isDestroyed) {
         editor?.registerPlugin(new Plugin({
           key: mobileEnterPluginKey,
-          props: {
-            handleDOMEvents: {
-              beforeinput: (_view, event) => handleMobileEnter(editor, event),
-            },
-          },
+          props: { handleDOMEvents: { beforeinput: (_view, event) => handleMobileEnter(editor, event), } },
         }))
       }
     },
@@ -120,22 +158,16 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
     doBeforeUnmount() {
       if (!editor?.isDestroyed) {
         editor?.unregisterPlugin(mobileEnterPluginKey)
-        editor?.view?.setProps({
-          nodeViews: {},
-        })
+        editor?.view?.setProps({ nodeViews: {}, })
       }
     },
     unmount() {
       if (!editor || editor.isDestroyed) return
-
       try {
         if (!editor.view?.dom?.parentNode) return
-
         const newElement = document.createElement('div')
         newElement.append(...editor.view.dom.parentNode.childNodes)
-        editor.setOptions({
-          element: newElement,
-        })
+        editor.setOptions({ element: newElement, })
       } catch {
         // do nothing
       }
@@ -210,4 +242,14 @@ function getSelectionNodeTypeAttributes(editor: Editor, typeName: string | any) 
   editor.state.doc.nodesBetween(from, to, (n: Node) => { nodes.push(n) });
   const node = nodes.reverse().find((nodeItem) => nodeItem.type.name === type.name);
   return node ? { ...node.attrs } : {};
+}
+
+function createRichTextNodeWrapper(node: Node) {
+  return {
+    getChildren() {
+      return node.children.map((child: Node) => createRichTextNodeWrapper(child));
+    },
+    getLength() { return node.childCount; }
+  };
+
 }

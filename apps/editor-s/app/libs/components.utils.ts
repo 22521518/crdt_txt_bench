@@ -1,5 +1,5 @@
 
-export function concat_cls(
+export function concatClassCSS(
   ...classes: (string | boolean | undefined | null)[]
 ): string {
   return classes.filter(Boolean).join(" ")

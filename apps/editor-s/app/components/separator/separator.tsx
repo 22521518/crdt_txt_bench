@@ -1,6 +1,6 @@
 import * as React from "react"
 import "./separator.scss"
-import { concat_cls } from "@/libs/components.utils"
+import { concatClassCSS } from "@/libs/components.utils"
 
 export type Orientation = "horizontal" | "vertical"
 
@@ -18,7 +18,7 @@ export const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
 
     return (
       <div
-        className={concat_cls("tiptap-separator", className)}
+        className={concatClassCSS("tiptap-separator", className)}
         data-orientation={orientation}
         {...semanticProps}
         {...divProps}
