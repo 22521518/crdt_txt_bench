@@ -92,27 +92,39 @@ export function useHeadingDropdownMenu(config?: UseHeadingDropdownMenuConfig) {
 
   // const { editor } = useTiptapEditor(providedEditor)
   const editor = providedEditor ?? useCurrentEditor()
-  const [isVisible, setIsVisible] = React.useState(true)
-
-  const activeLevel = getActiveHeadingLevel(editor, levels)
-  const isActive = isHeadingActive(editor)
-  const canToggleState = canToggle(editor)
+  const [isVisible, setIsVisible] = React.useState<boolean>(() =>
+    shouldShowButton({ editor, hideWhenUnavailable, level: levels })
+  )
+  const [activeLevel, setActiveLevel] = React.useState<Level | undefined>(() =>
+    getActiveHeadingLevel(editor, levels)
+  )
+  const [isActive, setIsActive] = React.useState<boolean>(() =>
+    isHeadingActive(editor)
+  )
+  const [canToggleState, setCanToggleState] = React.useState<boolean>(() =>
+    canToggle(editor)
+  )
 
   React.useEffect(() => {
     if (!editor) return
 
-    const handleSelectionUpdate = () => {
+    const handleUpdate = () => {
       setIsVisible(
         shouldShowButton({ editor, hideWhenUnavailable, level: levels })
       )
+      setActiveLevel(getActiveHeadingLevel(editor, levels))
+      setIsActive(isHeadingActive(editor))
+      setCanToggleState(canToggle(editor))
     }
 
-    handleSelectionUpdate()
+    handleUpdate()
 
-    editor.on?.("selectionUpdate", handleSelectionUpdate)
+    editor.on?.("selectionUpdate", handleUpdate)
+    editor.on?.("transaction", handleUpdate)
 
     return () => {
-      editor.off?.("selectionUpdate", handleSelectionUpdate)
+      editor.off?.("selectionUpdate", handleUpdate)
+      editor.off?.("transaction", handleUpdate)
     }
   }, [editor, hideWhenUnavailable, levels])
 

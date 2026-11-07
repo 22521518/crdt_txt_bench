@@ -11,7 +11,7 @@ import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- Icons ---
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
-import type { RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
 import { HIGHLIGHT_COLORS } from "./constant"
 
 export const COLOR_HIGHLIGHT_SHORTCUT_KEY = "mod+shift+h"
@@ -65,11 +65,11 @@ export function isColorHighlightActive(
 ): boolean {
   if (!editor) return false
   if (!editor.isEditable()) return false
-  const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
-  if (!checkActive) return false
+  // const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
+  // if (!checkActive) return false
   return highlightColor ?
-    checkActive("highlight", { color: highlightColor }) :
-    checkActive("highlight")
+    checkEditorMarkNodeActive(editor, "highlight", { color: highlightColor }) :
+    checkEditorMarkNodeActive(editor, "highlight")
 }
 
 export function removeHighlight(editor: RichTextWrapper | null): boolean {
@@ -89,8 +89,9 @@ export function shouldShowButton(props: {
   if (!editor.isEditable()) return false
   if (!editor.isMarkInSchema?.("highlight")) return false
 
-  const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
-  if (hideWhenUnavailable && checkActive && !checkActive("code")) {
+  // const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
+  // if (!checkActive) return false
+  if (hideWhenUnavailable && !checkEditorMarkNodeActive(editor, "code")) {
     return canColorHighlight(editor)
   }
 
@@ -121,7 +122,6 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
 
   React.useEffect(() => {
     if (!editor) return
-
     const handleUpdate = () => {
       setIsVisible(shouldShowButton({ editor, hideWhenUnavailable }))
       setCanColorHighlightState(canColorHighlight(editor))
@@ -142,15 +142,9 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
   const handleColorHighlight = React.useCallback(() => {
     if (!editor || !canColorHighlightState || !highlightColor || !label) return false
 
-    const success = editor
-      .createTransaction()
-      .focus()
-      .toggleMark("highlight", { color: highlightColor })
-      .commit()
+    const success = editor.createTransaction().focus().toggleMark("highlight", { color: highlightColor }).commit()
 
-    if (success) {
-      onApplied?.({ color: highlightColor, label })
-    }
+    if (success) onApplied?.({ color: highlightColor, label })
     return success
   }, [canColorHighlightState, highlightColor, editor, label, onApplied])
 

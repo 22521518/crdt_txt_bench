@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Redo2Icon } from "@/components/tiptap-icons/redo2-icon"
 import { Undo2Icon } from "@/components/tiptap-icons/undo2-icon"
-import type { RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
 import { useCurrentEditor } from "@/contexts/richtext-context"
 
 export type UndoRedoAction = "undo" | "redo"
@@ -85,7 +85,9 @@ export function shouldShowButton(props: {
 
   if (!editor || !editor.isEditable()) return false
 
-  if (hideWhenUnavailable && (!editor.isSelectedNodeTypeActive || !editor.isSelectedNodeTypeActive("code"))) {
+  const isCodeActive = checkEditorMarkNodeActive(editor, "code")
+  // const isCodeActive = (!editor.isSelectedNodeTypeActive || !editor.isSelectedNodeTypeActive("code"))
+  if (hideWhenUnavailable && !isCodeActive) {
     return canExecuteUndoRedoAction(editor, action)
   }
 

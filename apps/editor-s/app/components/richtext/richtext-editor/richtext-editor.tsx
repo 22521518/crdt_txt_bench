@@ -7,7 +7,17 @@ import { RichTextProvider } from '@/contexts/richtext-context'
 import { useCursorVisibility, type EditorCursorCoord } from '@/hooks/tiptap/use-cursor-visibility'
 import { Toolbar, MainToolbarContent, MobileToolbarContent } from '@/components/richtext/toolbar'
 import { useCreateTipTapEditor } from '@/packages/tiptaps/tiptap-editor-factory'
-import { EditorContent } from './richtext-editor-content'
+import { EditorContent } from './richtext-editor-content' 
+// --- Tiptap Node ---
+// import { ImageUploadNode } from "@/components/tiptap-nodes/image-upload-node/image-upload-node-extension"
+// import { HorizontalRule } from "@/components/tiptap-nodes/horizontal-rule-node/horizontal-rule-node-extension"
+// import "@/components/tiptap-nodes/horizontal-rule-node/horizontal-rule-node.scss"
+// import "@/components/tiptap-nodes/image-node/image-node.scss"
+import "@/components/tiptap-nodes/blockquote-node/blockquote-node.scss"
+import "@/components/tiptap-nodes/code-block-node/code-block-node.scss"
+import "@/components/tiptap-nodes/list-node/list-node.scss"
+import "@/components/tiptap-nodes/heading-node/heading-node.scss"
+import "@/components/tiptap-nodes/paragraph-node/paragraph-node.scss"
 
 export function RichTextEditor() {
   const isMobile = useIsMobile()

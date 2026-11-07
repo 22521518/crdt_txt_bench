@@ -76,6 +76,12 @@ export const isValidPosition = (
     pos >= 0;
 };
 
+export const checkEditorMarkNodeActive = (editor: RichTextWrapper, name: string, attributes?: {}) => {
+  const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
+  if (!checkActive) return false
+  return checkActive(name, attributes)
+}
+
 /**
  * Singleton of the active instance RichTextWrapper.
  * (switchEditor) to other libs (Quill, Slate, ProseMirror)

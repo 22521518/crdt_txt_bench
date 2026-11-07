@@ -71,12 +71,7 @@ export const HeadingButton = React.forwardRef<
       label,
       Icon,
       shortcutKeys,
-    } = useHeading({
-      editor,
-      level,
-      hideWhenUnavailable,
-      onToggled,
-    })
+    } = useHeading({ editor, level, hideWhenUnavailable, onToggled, })
 
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {

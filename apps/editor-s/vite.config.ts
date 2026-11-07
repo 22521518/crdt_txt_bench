@@ -7,11 +7,4 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
-  // css: {
-  //   preprocessorOptions: {
-  //     scss: {
-  //       additionalData: '@use "./app/index.scss" as *;\n',
-  //     },
-  //   },
-  // },
 });

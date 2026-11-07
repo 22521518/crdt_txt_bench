@@ -5,7 +5,7 @@ import { LinkIcon } from "@/components/tiptap-icons/link-icon"
 
 // --- Lib ---
 import { sanitizeUrl } from "@/libs/components.utils"
-import type { RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
 
 // --- Context --- 
 import { useCurrentEditor } from "@/contexts/richtext-context"
@@ -56,7 +56,8 @@ export function canSetLink(editor: RichTextWrapper | null): boolean {
  */
 export function isLinkActive(editor: RichTextWrapper | null): boolean {
   if (!editor || !editor.isEditable()) return false
-  return editor.isSelectedNodeTypeActive?.("link") ?? false
+  // return editor.isSelectedNodeTypeActive?.("link") ?? false
+  return checkEditorMarkNodeActive(editor, "link")
 }
 
 /**
@@ -73,8 +74,9 @@ export function shouldShowLinkButton(props: {
   if (!linkInSchema || !editor) {
     return false
   }
-
-  if (hideWhenUnavailable && !editor.isSelectedNodeTypeActive?.("code")) {
+  // const isCodeActive =  !editor.isSelectedNodeTypeActive?.("code")
+  const isCodeActive = checkEditorMarkNodeActive(editor, "code")
+  if (hideWhenUnavailable && !isCodeActive) {
     return canSetLink(editor)
   }
 
