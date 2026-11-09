@@ -8,7 +8,7 @@ import { useCurrentEditor } from "@/contexts/richtext-context"
 import { ChevronDownIcon } from "@/components/tiptap-icons/chevron-down-icon"
 
 // --- Tiptap UI ---
-import { ListButton, type ListType } from "@/components/list-button"
+import { ListButton, type ListType } from "@/components/richtext/toolbar/list-button"
 
 import { useListDropdownMenu } from "./use-list-dropdown-menu"
 

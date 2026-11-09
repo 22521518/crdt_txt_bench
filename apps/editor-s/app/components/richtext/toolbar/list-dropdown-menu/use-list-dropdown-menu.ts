@@ -18,7 +18,7 @@ import {
   isListActive,
   listIcons,
   type ListType,
-} from "@/components/list-button"
+} from "@/components/richtext/toolbar/list-button"
 import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
 
 /**

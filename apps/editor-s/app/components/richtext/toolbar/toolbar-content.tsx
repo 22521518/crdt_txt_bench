@@ -7,9 +7,9 @@ import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon"
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
 import { LinkIcon } from "@/components/tiptap-icons/link-icon"
 import { ColorHighlightPopover, ColorHighlightPopoverButton, ColorHighlightPopoverContent } from "@/components/richtext/toolbar/color-highlight-popover"
-import { LinkButton, LinkContent, LinkPopover } from "@/components/link-popover"
+import { LinkButton, LinkContent, LinkPopover } from "@/components/richtext/toolbar/link-popover"
 import { HeadingDropdownMenu } from "./heading-dropdown-menu"
-import { ListDropdownMenu } from "@/components/list-dropdown-menu"
+import { ListDropdownMenu } from "@/components/richtext/toolbar/list-dropdown-menu"
 import { BlockquoteButton } from "./blockquote-button"
 import { CodeBlockButton } from "./code-block-button"
 
@@ -37,8 +37,6 @@ export const MainToolbarContent = ({
         <ListDropdownMenu types={["bulletList", "orderedList", "taskList"]} portal={isMobile} />
         <BlockquoteButton />
         <CodeBlockButton /> 
-        {/* 
-        */}
       </ToolbarGroup>
 
       <ToolbarSeparator />
