@@ -15,6 +15,7 @@ export class TiptapTransaction implements RichTextTransaction {
   */
   setMark(name: string, attributes?: Record<string, any>) { this.chain = this.chain.setMark(name, attributes); return this; }
   unsetMark(name: string, options?: { extendEmptyMarkRange?: boolean }) { this.chain = this.chain.unsetMark(name, options); return this; }
+  isMarkTogglable(name: string, attributes?: Record<string, any>, options?: { extendEmptyMarkRange?: boolean }) { return this.editor.can().toggleMark(name, attributes, options); }
   toggleMark(name: string, attributes?: Record<string, any>, options?: { extendEmptyMarkRange?: boolean }) { this.chain = this.chain.toggleMark(name, attributes, options); return this }
   updateAttribute(typeOrName: string | any, attributes: Record<string, any>) { this.chain = this.chain.updateAttributes(typeOrName, attributes); return this }
 

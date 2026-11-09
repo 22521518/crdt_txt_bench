@@ -40,7 +40,7 @@ export function canToggleBlockquote(
   editor: RichTextWrapper | null,
   turnInto: boolean = true
 ): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (
     !editor.isNodeTypeInSchema("blockquote") ||
     editor.isNodeTypeSelected(["image"])
@@ -70,7 +70,7 @@ export function canToggleBlockquote(
  * Toggles blockquote formatting for a specific node or the current selection
  */
 export function toggleBlockquote(editor: RichTextWrapper | null): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (!canToggleBlockquote(editor)) return false
 
   try {
@@ -120,7 +120,7 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, hideWhenUnavailable } = props
 
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (!editor.isNodeTypeInSchema("blockquote")) return false
 
   const isCodeActive = checkEditorMarkNodeActive(editor, "code")

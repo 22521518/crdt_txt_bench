@@ -65,7 +65,7 @@ export function canToggleList(
   type: ListType,
   turnInto: boolean = true
 ): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (!editor.isNodeTypeInSchema(type) || editor.isNodeTypeSelected(["image"]))
     return false
 
@@ -100,7 +100,7 @@ export function canToggleList(
  * Checks if list is currently active
  */
 export function isListActive(editor: RichTextWrapper | null, type: ListType): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
 
   switch (type) {
     case "bulletList":
@@ -118,7 +118,7 @@ export function isListActive(editor: RichTextWrapper | null, type: ListType): bo
  * Toggles list in the editor
  */
 export function toggleList(editor: RichTextWrapper | null, type: ListType): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (!canToggleList(editor, type)) return false
 
   try {
@@ -187,7 +187,7 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, type, hideWhenUnavailable } = props
 
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (!editor.isNodeTypeInSchema(type)) return false
 
   if (hideWhenUnavailable && !checkEditorMarkNodeActive(editor, "code")) {

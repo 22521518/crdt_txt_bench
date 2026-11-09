@@ -41,6 +41,7 @@ export interface RichTextTransaction {
   insertContent(text: Content): this;
   setMark(name: string, attributes?: Record<string, any>): this;
   unsetMark(name: string, options?: { extendEmptyMarkRange?: boolean }): this;
+  isMarkTogglable(name: string, attributes?: Record<string, any>, options?: { extendEmptyMarkRange?: boolean }): boolean
   toggleMark(name: string, attributes?: Record<string, any>, options?: { extendEmptyMarkRange?: boolean }): this;
   updateAttribute(typeOrName: string | any, attributes: Record<string, any>): this;
 

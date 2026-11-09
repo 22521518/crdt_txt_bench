@@ -12,6 +12,7 @@ import { HeadingDropdownMenu } from "./heading-dropdown-menu"
 import { ListDropdownMenu } from "@/components/richtext/toolbar/list-dropdown-menu"
 import { BlockquoteButton } from "./blockquote-button"
 import { CodeBlockButton } from "./code-block-button"
+import { MarkButton } from "./mark-button"
 
 export const MainToolbarContent = ({
   onHighlighterClick,
@@ -42,11 +43,11 @@ export const MainToolbarContent = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        {/* <MarkButton type="bold" />
+        <MarkButton type="bold" />
         <MarkButton type="italic" />
         <MarkButton type="strike" />
         <MarkButton type="code" />
-        <MarkButton type="underline" /> */}
+        <MarkButton type="underline" />
         {!isMobile ? <ColorHighlightPopover /> : <ColorHighlightPopoverButton onClick={onHighlighterClick} />}
         {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
       </ToolbarGroup>
@@ -54,8 +55,8 @@ export const MainToolbarContent = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        {/* <MarkButton type="superscript" />
-        <MarkButton type="subscript" /> */}
+        <MarkButton type="superscript" />
+        <MarkButton type="subscript" />
       </ToolbarGroup>
 
       <ToolbarSeparator />

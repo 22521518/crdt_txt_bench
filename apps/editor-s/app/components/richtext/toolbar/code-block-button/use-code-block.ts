@@ -37,7 +37,7 @@ export function canToggle(
   editor: RichTextWrapper | null,
   turnInto: boolean = true
 ): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (
     !editor.isNodeTypeInSchema("codeBlock") ||
     editor.isNodeTypeSelected(["image"])
@@ -66,7 +66,7 @@ export function canToggle(
  * Toggles code block in the editor
  */
 export function toggleCodeBlock(editor: RichTextWrapper | null): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (!canToggle(editor)) return false
 
   try {
@@ -118,7 +118,7 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, hideWhenUnavailable } = props
 
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable()) return false
   if (!editor.isNodeTypeInSchema("codeBlock")) return false
 
   const isCodeActive = checkEditorMarkNodeActive(editor, "code")
