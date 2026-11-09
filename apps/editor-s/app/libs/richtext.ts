@@ -52,8 +52,8 @@ export interface RichTextWrapper {
   setContent?: (content: any) => void
 
   // Event subscription API
-  on?: (event: string, callback: (...args: any[]) => void) => void
-  off?: (event: string, callback: (...args: any[]) => void) => void
+  on: (event: string, callback: (...args: any[]) => void) => void
+  off: (event: string, callback: (...args: any[]) => void) => void
 
   // DOM cycle API
   doBeforeMount?: () => void
@@ -155,35 +155,3 @@ export class RichTextSingleton {
     this.setInstance(newEditor)
   }
 }
-
-// export function RichTextReducer(wrapper: RichTextWrapper, action: any) {
-//   switch (action.type) {
-//     case 'undo':
-//     case 'redo':
-
-//     case 'toggle-heading':
-//       const level = action.level
-
-//     case 'mark-bold':
-//     case 'mark-italic':
-//     case 'mark-underline':
-//     case 'mark-strike':
-//     case 'mark-code':
-
-//     case 'mark-superscript':
-//     case 'mark-subscript':
-
-//     case 'textalign-left':
-//     case 'textalign-right':
-//     case 'textalign-center':
-//     case 'textalign-justify':
-
-//     case 'highlight-text':
-
-//     case 'upload-img':
-
-//     default: {
-//       throw Error('Unknown action: ' + action.type);
-//     }
-//   }
-// }

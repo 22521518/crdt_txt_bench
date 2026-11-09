@@ -1,16 +1,17 @@
-import React from "react"
-import { Spacer } from "../../spacer"
+import { Spacer } from "@/components/spacer"
 import { ToolbarGroup, ToolbarSeparator } from "./toolbar"
-import { ThemeToggle } from "../../theme-toggle"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { UndoRedoButton } from "./undo-redo-button"
 import { Button } from "@/components/button"
 import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon"
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
 import { LinkIcon } from "@/components/tiptap-icons/link-icon"
-import { ColorHighlightPopover, ColorHighlightPopoverButton, ColorHighlightPopoverContent } from "@/components/color-highlight-popover"
+import { ColorHighlightPopover, ColorHighlightPopoverButton, ColorHighlightPopoverContent } from "@/components/richtext/toolbar/color-highlight-popover"
 import { LinkButton, LinkContent, LinkPopover } from "@/components/link-popover"
 import { HeadingDropdownMenu } from "./heading-dropdown-menu"
 import { ListDropdownMenu } from "@/components/list-dropdown-menu"
+import { BlockquoteButton } from "./blockquote-button"
+import { CodeBlockButton } from "./code-block-button"
 
 export const MainToolbarContent = ({
   onHighlighterClick,
@@ -33,13 +34,10 @@ export const MainToolbarContent = ({
 
       <ToolbarGroup>
         <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
-        <ListDropdownMenu
-          types={["bulletList", "orderedList", "taskList"]}
-          portal={isMobile}
-          />
-        {/* 
+        <ListDropdownMenu types={["bulletList", "orderedList", "taskList"]} portal={isMobile} />
         <BlockquoteButton />
         <CodeBlockButton /> 
+        {/* 
         */}
       </ToolbarGroup>
 

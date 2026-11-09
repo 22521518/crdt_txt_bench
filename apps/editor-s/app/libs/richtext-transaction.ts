@@ -52,6 +52,8 @@ export interface RichTextTransaction {
   setNode(name: string, attributes?: Record<string, any>): this;
   setMeta(key: string, value: any): this;
   clearNodes(): this
+  isNodeTogglable(typeOrName: string | any, toggleTypeOrName: string | any, attributes?: Record<string, any>): boolean
+  toggleNode(typeOrName: string | any, toggleTypeOrName: string | any, attributes?: Record<string, any>): this
 
   selectTextblockEnd(): this
   setTextSelection(from: number, to: number): this
@@ -60,11 +62,12 @@ export interface RichTextTransaction {
   // schema-list extensions
   liftListItem?: (typeOrName: string | any) => this
   lift?: (typeOrName: string | any) => this
+  isWrapTogglable(typeOrName: string | any, attributes?: Record<string, any>): boolean
   isListTogglable(listTypeOrName: string | any, itemTypeOrName: string | any, keepMarks?: boolean, attributes?: Record<string, any>): boolean
   isTaskListTogglable(): boolean
   isBulletListTogglable(): boolean
   isOrderedListTogglable(): boolean
-
+  wrapIn?: (typeOrName: string | any, attributes?: Record<string, any>) => this
   toggleList?: (listTypeOrName: string | any, itemTypeOrName: string | any, keepMarks?: boolean, attributes?: Record<string, any>) => this;
   toggleTaskList?: () => this // "Mod-Shift-9"
   toggleBulletList?: () => this // "Mod-Shift-8"

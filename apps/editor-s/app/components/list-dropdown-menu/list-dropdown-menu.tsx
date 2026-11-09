@@ -54,8 +54,6 @@ export function ListDropdownMenu({
 }: ListDropdownMenuProps) {
   // const { editor } = useTiptapEditor(providedEditor)
   const editor = providedEditor ?? useCurrentEditor()
-  if (!editor) return (<></>)
-
   const [isOpen, setIsOpen] = React.useState(false)
 
   const { filteredLists, canToggle, isActive, isVisible, Icon } =

@@ -156,10 +156,10 @@ export function useUndoRedo({
 
     handleUpdate()
 
-    editor.on?.("transaction", handleUpdate)
+    editor.on("transaction", handleUpdate)
 
     return () => {
-      editor.off?.("transaction", handleUpdate)
+      editor.off("transaction", handleUpdate)
     }
   }, [editor, hideWhenUnavailable, action])
 

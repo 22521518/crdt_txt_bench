@@ -19,8 +19,8 @@ import { Separator } from "@/components/separator"
 import { Card, CardBody, CardItemGroup } from "@/components/card"
 
 // --- Tiptap UI ---
-import type { HighlightColor, UseColorHighlightConfig } from "@/components/color-highlight-button"
-import { ColorHighlightButton, pickHighlightColorsByValue, useColorHighlight } from "@/components/color-highlight-button"
+import type { HighlightColor, UseColorHighlightConfig } from "@/components/richtext/toolbar/color-highlight-button"
+import { ColorHighlightButton, pickHighlightColorsByValue, useColorHighlight } from "@/components/richtext/toolbar/color-highlight-button"
 import type { RichTextWrapper } from "@/libs/richtext"
 
 export interface ColorHighlightPopoverContentProps {

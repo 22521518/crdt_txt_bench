@@ -256,10 +256,10 @@ export function useList(config: UseListConfig) {
 
     handleSelectionUpdate()
 
-    editor.on?.("selectionUpdate", handleSelectionUpdate)
+    editor.on("selectionUpdate", handleSelectionUpdate)
 
     return () => {
-      editor.off?.("selectionUpdate", handleSelectionUpdate)
+      editor.off("selectionUpdate", handleSelectionUpdate)
     }
   }, [editor, type, hideWhenUnavailable])
 

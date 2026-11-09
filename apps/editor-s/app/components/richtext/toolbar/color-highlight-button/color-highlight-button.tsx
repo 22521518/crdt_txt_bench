@@ -7,11 +7,8 @@ import { parseShortcutKeys } from "@/libs/key-shortcut.utils"
 import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- Tiptap UI ---
-import type { UseColorHighlightConfig } from "@/components/color-highlight-button"
-import {
-  COLOR_HIGHLIGHT_SHORTCUT_KEY,
-  useColorHighlight,
-} from "@/components/color-highlight-button"
+import type { UseColorHighlightConfig } from "./use-color-highlight"
+import { COLOR_HIGHLIGHT_SHORTCUT_KEY, useColorHighlight, } from "./use-color-highlight"
 
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/button"

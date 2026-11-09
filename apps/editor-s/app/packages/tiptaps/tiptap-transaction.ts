@@ -26,6 +26,8 @@ export class TiptapTransaction implements RichTextTransaction {
   setNode(name: string, attributes?: Record<string, any>) { this.chain = this.chain.setNode(name, attributes); return this; }
   setMeta(key: string, value: any) { this.chain = this.chain.setMeta(key, value); return this; }
   clearNodes(): this { this.chain = this.chain.clearNodes(); return this }
+  isNodeTogglable(typeOrName: string | any, toggleTypeOrName: string | any, attributes?: Record<string, any>) { return this.editor.can().toggleNode(typeOrName, toggleTypeOrName, attributes); }
+  toggleNode(typeOrName: string | any, toggleTypeOrName: string | any, attributes?: Record<string, any>) { this.chain = this.chain.toggleNode(typeOrName, toggleTypeOrName, attributes); return this }
 
   selectTextblockEnd() { this.chain = this.chain.selectTextblockEnd(); return this }
   setTextSelection(from: number, to: number) { this.chain = this.chain.setTextSelection({ from, to }); return this }
@@ -34,11 +36,12 @@ export class TiptapTransaction implements RichTextTransaction {
   // schema-list extensions
   liftListItem(typeOrName: string | any) { this.chain = this.chain.liftListItem(typeOrName); return this }
   lift(typeOrName: string | any) { this.chain = this.chain.lift(typeOrName); return this }
+  isWrapTogglable(typeOrName: string | any, attributes?: Record<string, any>): boolean { return this.wrapIn !== undefined && this.editor.can().toggleWrap(typeOrName, attributes) }
   isTaskListTogglable() { return this.toggleTaskList !== undefined && this.editor.can().toggleTaskList() }
   isBulletListTogglable() { return this.toggleBulletList !== undefined && this.editor.can().toggleBulletList() }
   isOrderedListTogglable() { return this.toggleOrderedList !== undefined && this.editor.can().toggleOrderedList() }
   isListTogglable(listTypeOrName: string | any, itemTypeOrName: string | any, keepMarks?: boolean, attributes?: Record<string, any>) { return this.toggleList !== undefined && this.editor.can().toggleList(listTypeOrName, itemTypeOrName, keepMarks, attributes) }
-
+  wrapIn(typeOrName: string | any, attributes?: Record<string, any>) { this.chain = this.chain.wrapIn(typeOrName, attributes); return this }
   toggleList(listTypeOrName: string | any, itemTypeOrName: string | any, keepMarks?: boolean, attributes?: Record<string, any>) { this.chain = this.chain.toggleList(listTypeOrName, itemTypeOrName, keepMarks, attributes); return this }
   toggleTaskList() { this.chain = this.chain.toggleTaskList(); return this }
   toggleBulletList() { this.chain = this.chain.toggleBulletList(); return this }

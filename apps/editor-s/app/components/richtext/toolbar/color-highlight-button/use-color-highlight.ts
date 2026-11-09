@@ -130,12 +130,12 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
 
     handleUpdate()
 
-    editor.on?.("selectionUpdate", handleUpdate)
-    editor.on?.("transaction", handleUpdate)
+    editor.on("selectionUpdate", handleUpdate)
+    editor.on("transaction", handleUpdate)
 
     return () => {
-      editor.off?.("selectionUpdate", handleUpdate)
-      editor.off?.("transaction", handleUpdate)
+      editor.off("selectionUpdate", handleUpdate)
+      editor.off("transaction", handleUpdate)
     }
   }, [editor, hideWhenUnavailable, highlightColor])
 

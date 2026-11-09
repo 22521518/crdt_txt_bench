@@ -172,8 +172,8 @@ export function useListDropdownMenu(config?: UseListDropdownMenuConfig) {
     [types]
   )
 
-  const [canToggleAny, setCanToggleAny] = React.useState(() => canToggleAnyList(editor, types))
-  const [isAnyActive, setisAnyActive] = React.useState(() => isAnyListActive(editor, types))
+  const [canToggleAny, setCanToggleAny] = React.useState(false)
+  const [isAnyActive, setisAnyActive] = React.useState(false)
   const [activeType, setActiveType] = React.useState(() => getActiveListType(editor, types))
   const activeList = filteredLists.find((option) => option.type === activeType)
 
