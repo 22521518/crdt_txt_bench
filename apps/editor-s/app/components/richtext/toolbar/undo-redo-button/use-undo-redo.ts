@@ -86,7 +86,6 @@ export function shouldShowButton(props: {
   if (!editor || !editor.isEditable()) return false
 
   const isCodeActive = checkEditorMarkNodeActive(editor, "code")
-  // const isCodeActive = (!editor.isSelectedNodeTypeActive || !editor.isSelectedNodeTypeActive("code"))
   if (hideWhenUnavailable && !isCodeActive) {
     return canExecuteUndoRedoAction(editor, action)
   }

@@ -134,8 +134,8 @@ export function toggleHeading(
       const pos = editor.findNodePosition($anchor?.node(1))
       if (!isValidPosition(pos)) return false
       const newNode = editor.createNode(pos)
-      // editor.createTransaction().setNodeSelection(newNode).commit()
       editor.createTransaction().setNode(newNode).commit()
+      // editor.createTransaction().setNodeSelection(newNode).commit()
     }
 
     let chain = editor.createTransaction().focus()
@@ -177,7 +177,6 @@ export function shouldShowButton(props: {
   if (!editor || !editor.isEditable()) return false
   if (!editor.isNodeTypeInSchema("heading")) return false
 
-  // const isCodeActive = editor.isSelectedNodeTypeActive?.("code")
   const isCodeActive = checkEditorMarkNodeActive(editor, "code")
   if (hideWhenUnavailable && !isCodeActive) {
     if (Array.isArray(level)) {

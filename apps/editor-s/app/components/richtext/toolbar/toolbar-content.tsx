@@ -10,6 +10,7 @@ import { LinkIcon } from "@/components/tiptap-icons/link-icon"
 import { ColorHighlightPopover, ColorHighlightPopoverButton, ColorHighlightPopoverContent } from "@/components/color-highlight-popover"
 import { LinkButton, LinkContent, LinkPopover } from "@/components/link-popover"
 import { HeadingDropdownMenu } from "./heading-dropdown-menu"
+import { ListDropdownMenu } from "@/components/list-dropdown-menu"
 
 export const MainToolbarContent = ({
   onHighlighterClick,
@@ -32,13 +33,14 @@ export const MainToolbarContent = ({
 
       <ToolbarGroup>
         <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
-        {/* 
         <ListDropdownMenu
           types={["bulletList", "orderedList", "taskList"]}
           portal={isMobile}
-        />
+          />
+        {/* 
         <BlockquoteButton />
-        <CodeBlockButton /> */}
+        <CodeBlockButton /> 
+        */}
       </ToolbarGroup>
 
       <ToolbarSeparator />

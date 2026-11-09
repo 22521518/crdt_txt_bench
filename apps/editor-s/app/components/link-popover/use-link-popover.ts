@@ -74,7 +74,6 @@ export function shouldShowLinkButton(props: {
   if (!linkInSchema || !editor) {
     return false
   }
-  // const isCodeActive =  !editor.isSelectedNodeTypeActive?.("code")
   const isCodeActive = checkEditorMarkNodeActive(editor, "code")
   if (hideWhenUnavailable && !isCodeActive) {
     return canSetLink(editor)

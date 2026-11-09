@@ -106,12 +106,10 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
     toggleSelectionWithMark(markName: string | any, attributes?: {}) { return editor?.chain().focus().toggleMark(markName, attributes).run() ?? false },
 
     getSelection() {
-      if (!editor) return { from: 0, to: 0, isEmpty: true }
+      if (!editor) return { from: 0, to: 0, isEmpty: true, $anchor: null }
       const { from, to, empty, $anchor } = editor.state.selection
       return { from: from, to: to, isEmpty: empty, $anchor: $anchor }
     },
-    // isSelectionAText() { return editor?.view.state.selection instanceof TextSelection },
-    // isSelectionNodes() { return editor?.view.state.selection instanceof NodeSelection },
     getCursorCoord() {
       if (!editor || !this.isFocus() || !editor.view) return { left: 0, right: 0, top: 0, bottom: 0 }
       return editor.view.coordsAtPos(editor.state.selection.from)
@@ -127,12 +125,8 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
     getContent() { return editor?.getHTML() ?? "" },
     setContent(content: any) { editor?.commands.setContent(content) },
 
-    on(event: string, callback: (...args: any[]) => void) {
-      editor?.on(event as any, callback)
-    },
-    off(event: string, callback: (...args: any[]) => void) {
-      editor?.off(event as any, callback)
-    },
+    on(event: string, callback: (...args: any[]) => void) { editor?.on(event as any, callback) },
+    off(event: string, callback: (...args: any[]) => void) { editor?.off(event as any, callback) },
 
     doBeforeMount() { },
     mount(element: HTMLElement) {
@@ -142,9 +136,7 @@ export const useCreateTipTapEditor = (initialContent?: string): RichTextWrapper 
         element.append(...editor.view.dom.parentNode.childNodes)
         editor.setOptions({ element, })
         editor.createNodeViews()
-      } else {
-        editor.mount(element)
-      }
+      } else { editor.mount(element) }
     },
     doAfterMount() {
       if (!editor?.isDestroyed) {

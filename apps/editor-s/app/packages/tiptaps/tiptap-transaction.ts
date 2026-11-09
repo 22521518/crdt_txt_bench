@@ -1,5 +1,4 @@
 import type { LinkMarkAttributes, RichTextTransaction } from "@/libs/richtext-transaction";
-import { NodeSelection } from "@tiptap/pm/state";
 import { Editor, type ChainedCommands, type Content } from "@tiptap/react"
 
 export class TiptapTransaction implements RichTextTransaction {
@@ -10,22 +9,17 @@ export class TiptapTransaction implements RichTextTransaction {
   // insertText(text: string, position?: number) { ; return this; }
   insertContent(content: Content) { this.chain = this.chain.insertContent(content); return this; }
 
-  // setMark(name: string, attributes?: Record<string, any>) { this.chain = this.chain.setMark(name, attributes); return this; }
   /**
-  * @param typeOrName The mark type or name.
-  * @param options.extendEmptyMarkRange Removes the mark even across the current selection. Defaults to `false`.
+   * @param typeOrName The mark type or name.
+   * @param options.extendEmptyMarkRange Removes the mark even across the current selection. Defaults to `false`.
   */
+  setMark(name: string, attributes?: Record<string, any>) { this.chain = this.chain.setMark(name, attributes); return this; }
   unsetMark(name: string, options?: { extendEmptyMarkRange?: boolean }) { this.chain = this.chain.unsetMark(name, options); return this; }
   toggleMark(name: string, attributes?: Record<string, any>, options?: { extendEmptyMarkRange?: boolean }) { this.chain = this.chain.toggleMark(name, attributes, options); return this }
+  updateAttribute(typeOrName: string | any, attributes: Record<string, any>) { this.chain = this.chain.updateAttributes(typeOrName, attributes); return this }
 
-  setLink(attributes: LinkMarkAttributes) {
-    this.chain = this.chain.setLink({ href: attributes.href, target: attributes.target, rel: attributes.rel, class: attributes.class })
-    return this
-  }
-  toggleLink(attributes?: LinkMarkAttributes) {
-    this.chain = this.chain.toggleLink({ href: attributes?.href ?? "", target: attributes?.target, rel: attributes?.rel, class: attributes?.class })
-    return this
-  }
+  setLink(attributes: LinkMarkAttributes) { this.chain = this.chain.setLink(convertToNativeLinkAttribute(attributes)); return this }
+  toggleLink(attributes?: LinkMarkAttributes) { this.chain = this.chain.toggleLink(convertToNativeLinkAttribute(attributes)); return this }
   unsetLink() { this.chain = this.chain.unsetLink(); return this }
 
   extendMarkRange(name: string) { this.chain = this.chain.extendMarkRange(name); return this; }
@@ -37,5 +31,28 @@ export class TiptapTransaction implements RichTextTransaction {
   setTextSelection(from: number, to: number) { this.chain = this.chain.setTextSelection({ from, to }); return this }
   setNodeSelection(node: any) { this.chain = this.chain.setNodeSelection(node); return this; }
 
+  // schema-list extensions
+  liftListItem(typeOrName: string | any) { this.chain = this.chain.liftListItem(typeOrName); return this }
+  lift(typeOrName: string | any) { this.chain = this.chain.lift(typeOrName); return this }
+  isTaskListTogglable() { return this.toggleTaskList !== undefined && this.editor.can().toggleTaskList() }
+  isBulletListTogglable() { return this.toggleBulletList !== undefined && this.editor.can().toggleBulletList() }
+  isOrderedListTogglable() { return this.toggleOrderedList !== undefined && this.editor.can().toggleOrderedList() }
+  isListTogglable(listTypeOrName: string | any, itemTypeOrName: string | any, keepMarks?: boolean, attributes?: Record<string, any>) { return this.toggleList !== undefined && this.editor.can().toggleList(listTypeOrName, itemTypeOrName, keepMarks, attributes) }
+
+  toggleList(listTypeOrName: string | any, itemTypeOrName: string | any, keepMarks?: boolean, attributes?: Record<string, any>) { this.chain = this.chain.toggleList(listTypeOrName, itemTypeOrName, keepMarks, attributes); return this }
+  toggleTaskList() { this.chain = this.chain.toggleTaskList(); return this }
+  toggleBulletList() { this.chain = this.chain.toggleBulletList(); return this }
+  toggleOrderedList() { this.chain = this.chain.toggleOrderedList(); return this }
+
   commit() { return this.chain.run() }
+}
+
+function convertToNativeLinkAttribute(attributes?: LinkMarkAttributes): {
+  href: string;
+  target?: string | null | undefined;
+  rel?: string | null | undefined;
+  class?: string | null | undefined;
+  title?: string | null | undefined;
+} {
+  return { href: attributes?.href ?? "", target: attributes?.target, rel: attributes?.rel, class: attributes?.class }
 }

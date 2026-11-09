@@ -34,13 +34,15 @@ export type LinkMarkAttributes = {
   rel?: string | null;
   class?: string | null;
 }
+
 export interface RichTextTransaction {
   focus(): this;
   // insertText(text: string, position?: number): this;
   insertContent(text: Content): this;
-  // setMark(name: string, attributes?: Record<string, any>): this;
+  setMark(name: string, attributes?: Record<string, any>): this;
   unsetMark(name: string, options?: { extendEmptyMarkRange?: boolean }): this;
   toggleMark(name: string, attributes?: Record<string, any>, options?: { extendEmptyMarkRange?: boolean }): this;
+  updateAttribute(typeOrName: string | any, attributes: Record<string, any>): this;
 
   setLink(attributes: LinkMarkAttributes): this
   toggleLink(attributes?: LinkMarkAttributes): this
@@ -55,6 +57,18 @@ export interface RichTextTransaction {
   setTextSelection(from: number, to: number): this
   setNodeSelection(node: any): this
 
+  // schema-list extensions
+  liftListItem?: (typeOrName: string | any) => this
+  lift?: (typeOrName: string | any) => this
+  isListTogglable(listTypeOrName: string | any, itemTypeOrName: string | any, keepMarks?: boolean, attributes?: Record<string, any>): boolean
+  isTaskListTogglable(): boolean
+  isBulletListTogglable(): boolean
+  isOrderedListTogglable(): boolean
+
+  toggleList?: (listTypeOrName: string | any, itemTypeOrName: string | any, keepMarks?: boolean, attributes?: Record<string, any>) => this;
+  toggleTaskList?: () => this // "Mod-Shift-9"
+  toggleBulletList?: () => this // "Mod-Shift-8"
+  toggleOrderedList?: () => this // "Mod-Shift-7"
   commit(): boolean;
   // rollback?(): void;
 }
