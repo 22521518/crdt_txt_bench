@@ -30,6 +30,10 @@ export default function Home({ loaderData, }: Route.ComponentProps) {
     document.title = `${docTitle.slice(0, 10)}${docTitle.length > 10 ? '...' : ''} - My Editor`;
   }, [docTitle]);
 
+  const renderCount = React.useRef(0);
+  renderCount.current++;
+
+  console.log("Home render:", renderCount.current);
   return (
     <div style={{
       display: 'flex',

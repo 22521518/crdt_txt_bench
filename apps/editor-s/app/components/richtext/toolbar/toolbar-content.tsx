@@ -13,6 +13,7 @@ import { ListDropdownMenu } from "@/components/richtext/toolbar/list-dropdown-me
 import { BlockquoteButton } from "./blockquote-button"
 import { CodeBlockButton } from "./code-block-button"
 import { MarkButton } from "./mark-button"
+import { TextAlignButton } from "./text-align-button"
 
 export const MainToolbarContent = ({
   onHighlighterClick,
@@ -62,10 +63,10 @@ export const MainToolbarContent = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        {/* <TextAlignButton align="left" />
+        <TextAlignButton align="left" />
         <TextAlignButton align="center" />
         <TextAlignButton align="right" />
-        <TextAlignButton align="justify" /> */}
+        <TextAlignButton align="justify" /> 
       </ToolbarGroup>
 
       <ToolbarSeparator />

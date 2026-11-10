@@ -159,8 +159,8 @@ export function toggleList(editor: RichTextWrapper | null, type: ListType): bool
       const toggleMap: Record<ListType, () => typeof chain> = {
         bulletList: () => chain.toggleBulletList?.() ?? chain,
         orderedList: () => chain.toggleOrderedList?.() ?? chain,
-        taskList: () => chain.toggleTaskList?.() ?? chain,
-        // taskList: () => chain.toggleTaskList?.("taskList", "taskItem") ?? chain,
+        // taskList: () => chain.toggleTaskList?.() ?? chain,
+        taskList: () => chain.toggleList?.("taskList", "taskItem") ?? chain,
       }
 
       const toggle = toggleMap[type]

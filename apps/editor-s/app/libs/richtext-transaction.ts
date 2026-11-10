@@ -35,6 +35,8 @@ export type LinkMarkAttributes = {
   class?: string | null;
 }
 
+export type TextAlign = "left" | "center" | "right" | "justify"
+
 export interface RichTextTransaction {
   focus(): this;
   // insertText(text: string, position?: number): this;
@@ -73,6 +75,11 @@ export interface RichTextTransaction {
   toggleTaskList?: () => this // "Mod-Shift-9"
   toggleBulletList?: () => this // "Mod-Shift-8"
   toggleOrderedList?: () => this // "Mod-Shift-7"
+
+  // text-alignment extension
+  isTextAlignUsable(align: TextAlign): boolean
+  setTextAlign?: (align: TextAlign) => this
+
   commit(): boolean;
   // rollback?(): void;
 }

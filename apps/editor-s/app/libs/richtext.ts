@@ -2,6 +2,7 @@ import type { EditorCursorCoord } from "@/hooks/tiptap/use-cursor-visibility"
 import { Editor as TiptapEditor } from "@tiptap/react"
 // import { assert } from "console"
 import type { RichTextTransaction } from "./richtext-transaction"
+import { createRichTextWrapper, createTipTapEditor } from "@/packages/tiptaps/tiptap-editor-factory";
 
 export interface RichTextNodeWrapper {
   getChildren: () => RichTextNodeWrapper[],
@@ -9,15 +10,16 @@ export interface RichTextNodeWrapper {
 }
 
 export interface RichTextWrapper {
-  editor: TiptapEditor | any
+  // editor: TiptapEditor | any
   createTransaction(): RichTextTransaction;
+  isExtensionAvailable(extensionNames: string | string[]): boolean
 
   isEditable: () => boolean,
   isFocus: () => boolean,
 
   isNodeTypeSelected: (types: string[]) => boolean
-  isSelectedNodeTypeActive?: (name: string, attributes?: {}) => boolean // Attributes are the metadata for the node type of the rich text
-  isMarkActive?: (name: string, attributes?: {}) => boolean
+  isSelectedNodeTypeActive?: (name: string | null, attributes?: {}) => boolean // Attributes are the metadata for the node type of the rich text
+  isMarkActive?: (name: string | null, attributes?: {}) => boolean
   isNodeTypeInSchema: (typeName: string) => boolean
   isMarkInSchema: (markName: string) => boolean
 
@@ -48,8 +50,10 @@ export interface RichTextWrapper {
   redo?: () => boolean
 
   // Content transfer API
-  getContent?: () => any
-  setContent?: (content: any) => void
+  getHTML: () => any
+  setContentFromHTML: (htmlContent: string) => void
+  getInternalContent: () => any
+  setInternalContent: (content: any) => void
 
   // Event subscription API
   on: (event: string, callback: (...args: any[]) => void) => void
@@ -76,7 +80,7 @@ export const isValidPosition = (
     pos >= 0;
 };
 
-export const checkEditorMarkNodeActive = (editor: RichTextWrapper, name: string, attributes?: {}) => {
+export const checkEditorMarkNodeActive = (editor: RichTextWrapper, name: string | null, attributes?: {}) => {
   const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
   if (!checkActive) return false
   return checkActive(name, attributes)
@@ -92,7 +96,9 @@ export class RichTextSingleton {
   private static listeners = new Set<(instance: RichTextWrapper | null) => void>()
 
   public static getInstance(): RichTextWrapper | null {
-    return this.instance
+    if (this.instance)
+      return this.instance
+    return createRichTextWrapper(createTipTapEditor())
   }
 
   public static setInstance(editor: RichTextWrapper | null): void {
@@ -133,20 +139,21 @@ export class RichTextSingleton {
 
     if (shouldTransfer && oldEditor) {
       try {
-        let content: any = null
-        if (typeof oldEditor.getContent === 'function') {
-          content = oldEditor.getContent()
-        } else if (oldEditor.editor?.getHTML) {
-          content = oldEditor.editor.getHTML()
+        let htmlContent = oldEditor.getHTML()
+        if (htmlContent) {
+          newEditor.setContentFromHTML(htmlContent)
         }
+        // if (typeof oldEditor.getContent === 'function') {
+        //   content = oldEditor.getContent()
+        // } else if (oldEditor?.getHTML) {
+        //   htmlContent = oldEditor.getHTML()
+        // }
 
-        if (content !== null && content !== undefined) {
-          if (typeof newEditor.setContent === 'function') {
-            newEditor.setContent(content)
-          } else if (newEditor.editor?.commands?.setContent) {
-            newEditor.editor.commands.setContent(content)
-          }
-        }
+        // if (content !== null && content !== undefined) {
+        //   if (typeof newEditor.setContent === 'function') {
+        //     newEditor.setContent(content)
+        //   }
+        // }
       } catch (err) {
         console.warn("Could not transfer content during editor switch:", err)
       }
