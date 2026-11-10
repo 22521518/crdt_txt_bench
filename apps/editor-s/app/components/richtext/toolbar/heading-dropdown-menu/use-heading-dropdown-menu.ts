@@ -91,7 +91,8 @@ export function useHeadingDropdownMenu(config?: UseHeadingDropdownMenuConfig) {
   } = config || {}
 
   // const { editor } = useTiptapEditor(providedEditor)
-  const editor = providedEditor ?? useCurrentEditor()
+  const contextEditor = useCurrentEditor()
+    const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(() =>
     shouldShowButton({ editor, hideWhenUnavailable, level: levels })
   )

@@ -1,24 +1,23 @@
 import type { EditorCursorCoord } from "@/hooks/tiptap/use-cursor-visibility"
-import { Editor as TiptapEditor } from "@tiptap/react"
-// import { assert } from "console"
 import type { RichTextTransaction } from "./richtext-transaction"
-import { createRichTextWrapper, createTipTapEditor } from "@/packages/tiptaps/tiptap-editor-factory";
+import type { RichTextEditorFactory } from "./editor-factory"
 
 export interface RichTextNodeWrapper {
-  getChildren: () => RichTextNodeWrapper[],
+  getChildren: () => RichTextNodeWrapper[]
   getLength: () => number
 }
 
 export interface RichTextWrapper {
-  // editor: TiptapEditor | any
-  createTransaction(): RichTextTransaction;
+  /** The underlying editor engine instance (e.g., Tiptap Editor, Slate instance, etc.) */
+  editor?: any
+  createTransaction(): RichTextTransaction
   isExtensionAvailable(extensionNames: string | string[]): boolean
 
-  isEditable: () => boolean,
-  isFocus: () => boolean,
+  isEditable: () => boolean
+  isFocus: () => boolean
 
   isNodeTypeSelected: (types: string[]) => boolean
-  isSelectedNodeTypeActive?: (name: string | null, attributes?: {}) => boolean // Attributes are the metadata for the node type of the rich text
+  isSelectedNodeTypeActive?: (name: string | null, attributes?: {}) => boolean
   isMarkActive?: (name: string | null, attributes?: {}) => boolean
   isNodeTypeInSchema: (typeName: string) => boolean
   isMarkInSchema: (markName: string) => boolean
@@ -27,17 +26,13 @@ export interface RichTextWrapper {
 
   getSelectionMarkTypeList: () => readonly any[]
   getMarkTypeInSchema: (markName: string) => any | undefined
-  // getSelectionNodeTypeAttributes: (typeName: string | any) => any | undefined
-  // getSelectionMarkAttributes: (markName: string | any) => any | undefined
   getSelectionAttributes: (typeOrName: string | any) => any
-  getSelectionType: () => 'inline' | 'block' | 'unknown' // `inline` may be considered as text, whereas `block` is node ||| `unknown` is i don know
+  getSelectionType: () => 'inline' | 'block' | 'unknown'
   getSelectionNodes: () => RichTextNodeWrapper
 
   isSelectionMarkable: (markName: string | any, attributes?: {}) => boolean
   isNodeSetable: (markName: string | any, attributes?: {}) => boolean
-  // setSelectionWithMark: (markName: string | any, attributes?: {}) => boolean
-  // unsetSelectionWithMark: (markName: string | any) => boolean
-  toggleSelectionWithMark: (markName: string | any, attributes?: {}) => boolean // state = !state
+  toggleSelectionWithMark: (markName: string | any, attributes?: {}) => boolean
 
   getSelection: () => { from: number, to: number, isEmpty: boolean, $anchor?: any }
   getCursorCoord: () => EditorCursorCoord
@@ -59,7 +54,7 @@ export interface RichTextWrapper {
   on: (event: string, callback: (...args: any[]) => void) => void
   off: (event: string, callback: (...args: any[]) => void) => void
 
-  // DOM cycle API
+  // DOM lifecycle API
   doBeforeMount?: () => void
   mount: (element: HTMLElement) => void
   doAfterMount?: () => void
@@ -77,8 +72,8 @@ export const isValidPosition = (
 ): pos is number => {
   return typeof pos === "number" &&
     Number.isFinite(pos) &&
-    pos >= 0;
-};
+    pos >= 0
+}
 
 export const checkEditorMarkNodeActive = (editor: RichTextWrapper, name: string | null, attributes?: {}) => {
   const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
@@ -86,37 +81,92 @@ export const checkEditorMarkNodeActive = (editor: RichTextWrapper, name: string 
   return checkActive(name, attributes)
 }
 
+export interface SwitchEditorOptions {
+  /**
+   * Whether to transfer HTML content from the current editor to the new editor.
+   * @default true
+   */
+  transferContent?: boolean
+  /**
+   * Whether to destroy the previous editor instance after switching.
+   * @default false
+   */
+  destroyOld?: boolean
+}
+
 /**
- * Singleton of the active instance RichTextWrapper.
- * (switchEditor) to other libs (Quill, Slate, ProseMirror)
- * with maintaining the existing content.
+ * Singleton of the active RichTextWrapper instance.
+ * Decoupled from specific vendor implementations via RichTextEditorFactory.
+ * Enables switching between editors (Tiptap, Quill, Slate, etc.) with content preservation.
  */
 export class RichTextSingleton {
   private static instance: RichTextWrapper | null = null
+  private static defaultFactory: RichTextEditorFactory | null = null
   private static listeners = new Set<(instance: RichTextWrapper | null) => void>()
 
-  public static getInstance(): RichTextWrapper | null {
-    if (this.instance)
-      return this.instance
-    return createRichTextWrapper(createTipTapEditor())
+  /**
+   * Register a default factory to instantiate the editor when getInstance is called and no instance exists.
+   */
+  public static registerDefaultFactory(factory: RichTextEditorFactory): void {
+    this.defaultFactory = factory
   }
 
+  /**
+   * Get the registered default factory.
+   */
+  public static getDefaultFactory(): RichTextEditorFactory | null {
+    return this.defaultFactory
+  }
+
+  /**
+   * Retrieve the active RichTextWrapper instance.
+   * Lazily creates an instance using the registered default factory if none exists.
+   */
+  public static getInstance(): RichTextWrapper | null {
+    if (this.instance && !this.instance.isDestroyed?.()) {
+      return this.instance
+    }
+
+    if (this.defaultFactory) {
+      this.instance = this.defaultFactory.createEditor()
+      this.notify()
+      return this.instance
+    }
+
+    return null
+  }
+
+  /**
+   * Snapshot selector compatible with React 18+ useSyncExternalStore.
+   */
+  public static getSnapshot = (): RichTextWrapper | null => {
+    return this.getInstance()
+  }
+
+  /**
+   * Set the active editor instance directly.
+   */
   public static setInstance(editor: RichTextWrapper | null): void {
     if (this.instance === editor) return
     this.instance = editor
     this.notify()
   }
 
+  /**
+   * Subscribe to changes in the active instance.
+   */
   public static subscribe(listener: (instance: RichTextWrapper | null) => void): () => void {
     this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
-
+    return () => {
+      this.listeners.delete(listener)
+    }
   }
 
   private static notify(): void {
+    const current = this.instance
     this.listeners.forEach((listener) => {
       try {
-        listener(this.instance)
+        listener(current)
       } catch (e) {
         console.error("Error in RichTextSingleton listener:", e)
       }
@@ -124,14 +174,13 @@ export class RichTextSingleton {
   }
 
   /**
-   * Switc instance RichTextWrapper to instances of other libs.
+   * Switch the active instance to another RichTextWrapper.
+   * Optionally transfers content and/or destroys the previous editor.
    */
   public static switchEditor(
     newEditor: RichTextWrapper,
-    options?: { transferContent?: boolean }
+    options?: SwitchEditorOptions
   ): void {
-    // assert(false, "This need to be reimplement because I didn't do it yet!")
-    // throw new Error("This need to be reimplement because I didn't do it yet!")
     const oldEditor = this.instance
     if (oldEditor === newEditor) return
 
@@ -139,26 +188,37 @@ export class RichTextSingleton {
 
     if (shouldTransfer && oldEditor) {
       try {
-        let htmlContent = oldEditor.getHTML()
-        if (htmlContent) {
+        const htmlContent = oldEditor.getHTML?.()
+        if (htmlContent && newEditor.setContentFromHTML) {
           newEditor.setContentFromHTML(htmlContent)
         }
-        // if (typeof oldEditor.getContent === 'function') {
-        //   content = oldEditor.getContent()
-        // } else if (oldEditor?.getHTML) {
-        //   htmlContent = oldEditor.getHTML()
-        // }
-
-        // if (content !== null && content !== undefined) {
-        //   if (typeof newEditor.setContent === 'function') {
-        //     newEditor.setContent(content)
-        //   }
-        // }
       } catch (err) {
         console.warn("Could not transfer content during editor switch:", err)
       }
     }
 
+    if (options?.destroyOld && oldEditor) {
+      try {
+        oldEditor.destroy?.()
+      } catch (err) {
+        console.warn("Could not destroy previous editor instance:", err)
+      }
+    }
+
     this.setInstance(newEditor)
+  }
+
+  /**
+   * Destroy the current editor instance and reset the singleton.
+   */
+  public static destroy(): void {
+    if (this.instance) {
+      try {
+        this.instance.destroy?.()
+      } catch (err) {
+        console.warn("Error destroying RichTextSingleton instance:", err)
+      }
+      this.setInstance(null)
+    }
   }
 }

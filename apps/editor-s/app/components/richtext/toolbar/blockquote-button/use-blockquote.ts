@@ -174,7 +174,8 @@ export function useBlockquote(config?: UseBlockquoteConfig) {
     onToggled,
   } = config || {}
 
-  const editor = providedEditor ?? useCurrentEditor()
+  const contextEditor = useCurrentEditor()
+    const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const [canToggle, setCanToggle] = React.useState<boolean>(false)
   const [isActive, setIsActive] = React.useState<boolean>(false)

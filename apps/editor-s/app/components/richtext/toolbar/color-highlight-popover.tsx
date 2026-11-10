@@ -85,7 +85,8 @@ export function ColorHighlightPopoverContent({
   ]),
   onApplied,
 }: ColorHighlightPopoverContentProps) {
-let editor = providedEditor ?? useCurrentEditor()
+const contextEditor = useCurrentEditor()
+    let editor = providedEditor ?? contextEditor
   const { handleRemoveHighlight } = useColorHighlight({ editor, onApplied })
   const isMobile = useIsMobile()
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -167,7 +168,8 @@ export function ColorHighlightPopover({
   onApplied,
   ...props
 }: ColorHighlightPopoverProps) {
-let editor = providedEditor ?? useCurrentEditor()
+const contextEditor = useCurrentEditor()
+    let editor = providedEditor ?? contextEditor
   const [isOpen, setIsOpen] = React.useState(false)
   const { isVisible, canColorHighlight, isActive, label, Icon } = useColorHighlight({ editor, hideWhenUnavailable, onApplied })
   if (!isVisible) return null

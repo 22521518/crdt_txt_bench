@@ -61,7 +61,8 @@ export const MarkButton = React.forwardRef<HTMLButtonElement, MarkButtonProps>(
     },
     ref
   ) => {
-    const editor = providedEditor ?? useCurrentEditor()
+    const contextEditor = useCurrentEditor()
+    const editor = providedEditor ?? contextEditor
     const {
       isVisible,
       handleMark,

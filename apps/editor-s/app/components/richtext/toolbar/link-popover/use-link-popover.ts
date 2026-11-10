@@ -247,7 +247,8 @@ export function useLinkPopover(config?: UseLinkPopoverConfig) {
     onSetLink,
   } = config || {}
 
-  let editor = providedEditor ?? useCurrentEditor()
+  const contextEditor = useCurrentEditor()
+    let editor = providedEditor ?? contextEditor
 
   const { isVisible, canSet, isActive } = useLinkState({
     editor,

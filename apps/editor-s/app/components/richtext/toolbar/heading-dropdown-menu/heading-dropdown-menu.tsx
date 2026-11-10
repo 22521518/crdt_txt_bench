@@ -52,7 +52,8 @@ export const HeadingDropdownMenu = React.forwardRef<
     },
     ref
   ) => {
-    let editor = providedEditor ?? useCurrentEditor()
+    const contextEditor = useCurrentEditor()
+    let editor = providedEditor ?? contextEditor
 
     const [isOpen, setIsOpen] = React.useState(false)
     const { isVisible, isActive, canToggle, Icon } = useHeadingDropdownMenu({

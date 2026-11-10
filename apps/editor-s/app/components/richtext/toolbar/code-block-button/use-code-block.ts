@@ -179,7 +179,8 @@ export function useCodeBlock(config?: UseCodeBlockConfig) {
     onToggled,
   } = config || {}
 
-  const editor = providedEditor ?? useCurrentEditor()
+  const contextEditor = useCurrentEditor()
+    const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const [canToggleState, setCanToggleState] = React.useState(false)
   const [isActive, setIsActive] = React.useState(false)

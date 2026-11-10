@@ -58,7 +58,8 @@ export const BlockquoteButton = React.forwardRef<
     },
     ref
   ) => {
-    const editor = providedEditor ?? useCurrentEditor()
+    const contextEditor = useCurrentEditor()
+    const editor = providedEditor ?? contextEditor
     const {
       isVisible,
       canToggle,

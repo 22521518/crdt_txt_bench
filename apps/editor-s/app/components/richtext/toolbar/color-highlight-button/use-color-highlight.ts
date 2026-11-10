@@ -107,7 +107,8 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
     onApplied,
   } = config
 
-  let editor = providedEditor ?? useCurrentEditor()
+  const contextEditor = useCurrentEditor()
+    let editor = providedEditor ?? contextEditor
   const isMobile = useIsMobile()
 
   const [isVisible, setIsVisible] = React.useState<boolean>(() =>

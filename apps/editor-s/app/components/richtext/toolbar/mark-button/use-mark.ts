@@ -167,7 +167,8 @@ export function useMark(config: UseMarkConfig) {
     onToggled,
   } = config
 
-  const editor = providedEditor ?? useCurrentEditor()
+  const contextEditor = useCurrentEditor()
+    const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const [canToggle, setCanToggle] = React.useState(false)
   const [isActive, setIsActive] = React.useState(false)

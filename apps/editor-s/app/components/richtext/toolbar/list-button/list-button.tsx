@@ -61,7 +61,8 @@ export const ListButton = React.forwardRef<HTMLButtonElement, ListButtonProps>(
     ref
   ) => {
     // const { editor } = useTiptapEditor(providedEditor)
-    const editor = providedEditor ?? useCurrentEditor()
+    const contextEditor = useCurrentEditor()
+    const editor = providedEditor ?? contextEditor
     const {
       isVisible,
       canToggle,

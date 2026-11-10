@@ -1,4 +1,4 @@
-import type { LinkMarkAttributes, RichTextTransaction } from "@/libs/richtext-transaction";
+import type { LinkMarkAttributes, RichTextTransaction, TextAlign } from "@/libs/richtext-transaction";
 import { Editor, type ChainedCommands, type Content } from "@tiptap/react"
 
 export class TiptapTransaction implements RichTextTransaction {
@@ -47,6 +47,10 @@ export class TiptapTransaction implements RichTextTransaction {
   toggleTaskList() { this.chain = this.chain.toggleTaskList(); return this }
   toggleBulletList() { this.chain = this.chain.toggleBulletList(); return this }
   toggleOrderedList() { this.chain = this.chain.toggleOrderedList(); return this }
+
+  isTextAlignUsable(align: TextAlign) { return this.setTextAlign !== undefined && this.editor.can().setTextAlign(align) }
+  setTextAlign(align: TextAlign) { this.chain = this.chain.setTextAlign ? this.chain.setTextAlign(align) : this.chain; return this }
+
 
   commit() { return this.chain.run() }
 }

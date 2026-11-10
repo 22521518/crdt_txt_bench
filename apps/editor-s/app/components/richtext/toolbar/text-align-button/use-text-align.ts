@@ -11,6 +11,7 @@ import { AlignLeftIcon } from "@/components/tiptap-icons/align-left-icon"
 import { AlignRightIcon } from "@/components/tiptap-icons/align-right-icon"
 import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
 import type { TextAlign } from "@/libs/richtext-transaction"
+export type { TextAlign }
 
 /**
  * Configuration for the text align functionality
@@ -161,7 +162,8 @@ export function useTextAlign(config: UseTextAlignConfig) {
     onAligned,
   } = config
 
-  const editor = providedEditor ?? useCurrentEditor()
+  const contextEditor = useCurrentEditor()
+    const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const [canAlign, setCanAlign] = React.useState(false)
   const [isActive, setIsActive] = React.useState(false)

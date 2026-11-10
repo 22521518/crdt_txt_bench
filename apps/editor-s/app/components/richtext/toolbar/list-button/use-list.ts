@@ -242,7 +242,8 @@ export function useList(config: UseListConfig) {
     onToggled,
   } = config
 
-  const editor = providedEditor ?? useCurrentEditor()
+  const contextEditor = useCurrentEditor()
+    const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const canToggle = canToggleList(editor, type)
   const isActive = isListActive(editor, type)

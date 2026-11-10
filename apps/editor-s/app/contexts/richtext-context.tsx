@@ -1,92 +1,87 @@
-import type { RichTextWrapper } from '@/libs/richtext'
-import { RichTextSingleton } from '@/libs/richtext'
-import { useCreateTipTapEditor } from '@/packages/tiptaps/tiptap-editor-factory'
 import React from 'react'
+import type { RichTextWrapper, SwitchEditorOptions } from '@/libs/richtext'
+import { RichTextSingleton } from '@/libs/richtext'
 
 export interface RichTextContextValue {
   editor: RichTextWrapper | null
   setEditor: (editor: RichTextWrapper | null) => void
-  switchEditor: (newEditor: RichTextWrapper, options?: { transferContent?: boolean }) => void
+  switchEditor: (newEditor: RichTextWrapper, options?: SwitchEditorOptions) => void
 }
 
 const RichTextContext = React.createContext<RichTextContextValue | null>(null)
 
-export type RichTextProviderProps = {
+export interface RichTextProviderProps {
   editor?: RichTextWrapper | null
   children: React.ReactNode
 }
 
 /**
- * RichTextProvider manage the active instance RichTextWrapper.
- * If no `editor`, using the default factory `useCreateTipTapEditor`.
- * Sync with RichTextSingleton and allow mechanism to adapt with other libs.
+ * Hook to reactively subscribe to changes in RichTextSingleton via useSyncExternalStore.
  */
-export function RichTextProvider({ editor: externalEditor, children }: RichTextProviderProps) {
-  const defaultEditor = useCreateTipTapEditor()
-
-  const [currentEditor, setCurrentEditor] = React.useState<RichTextWrapper | null>(() => {
-    const initial = externalEditor ?? defaultEditor
-    if (initial) {
-      RichTextSingleton.setInstance(initial)
-    }
-    return initial
-  })
-
-  // Run when externalEditor or defaultEditor change
-  React.useEffect(() => {
-    const active = externalEditor ?? defaultEditor
-    if (active) {
-      setCurrentEditor(active)
-      RichTextSingleton.setInstance(active)
-    }
-  }, [externalEditor, defaultEditor])
-
-  // Listen the change when singleton change with `switchEditor` event
-  React.useEffect(() => {
-    const unsubscribe = RichTextSingleton.subscribe((inst) => {
-      setCurrentEditor(inst)
-    })
-    return unsubscribe
-  }, [])
-
-  const setEditor = React.useCallback((editor: RichTextWrapper | null) => {
-    setCurrentEditor(editor)
-    RichTextSingleton.setInstance(editor)
-  }, [])
-
-  const switchEditor = React.useCallback((newEditor: RichTextWrapper, options?: { transferContent?: boolean }) => {
-    RichTextSingleton.switchEditor(newEditor, options)
-    setCurrentEditor(newEditor)
-  }, [])
-
-  const value = React.useMemo<RichTextContextValue>(() => ({
-    editor: currentEditor ?? externalEditor ?? defaultEditor,
-    setEditor,
-    switchEditor,
-  }), [currentEditor, externalEditor, defaultEditor, setEditor, switchEditor])
-
-  return (
-    <RichTextContext value={value}>
-      {children}
-    </RichTextContext>
+export function useRichTextSingleton(): RichTextWrapper | null {
+  return React.useSyncExternalStore(
+    RichTextSingleton.subscribe.bind(RichTextSingleton),
+    RichTextSingleton.getSnapshot,
+    () => null // Server snapshot for SSR hydration safety
   )
 }
 
 /**
- * Hook to get instance RichTextWrapper from Context or Singleton
+ * RichTextProvider manages the active RichTextWrapper instance in the React tree.
+ * When no `editor` prop is provided, it automatically connects to and synchronizes
+ * with the global RichTextSingleton.
  */
-export function useCurrentEditor(): RichTextWrapper | null {
-  const context = React.useContext(RichTextContext)
-  return context?.editor ?? RichTextSingleton.getInstance()
+export function RichTextProvider({ editor: externalEditor, children }: RichTextProviderProps) {
+  const singletonEditor = useRichTextSingleton()
+  const activeEditor = externalEditor !== undefined ? externalEditor : singletonEditor
+
+  const setEditor = React.useCallback((editor: RichTextWrapper | null) => {
+    RichTextSingleton.setInstance(editor)
+  }, [])
+
+  const switchEditor = React.useCallback(
+    (newEditor: RichTextWrapper, options?: SwitchEditorOptions) => {
+      RichTextSingleton.switchEditor(newEditor, options)
+    },
+    []
+  )
+
+  const value = React.useMemo<RichTextContextValue>(
+    () => ({
+      editor: activeEditor,
+      setEditor,
+      switchEditor,
+    }),
+    [activeEditor, setEditor, switchEditor]
+  )
+
+  return (
+    <RichTextContext.Provider value={value}>
+      {children}
+    </RichTextContext.Provider>
+  )
 }
 
 /**
- * Hook return context editor along with setEditor, switchEditor
- * Supporting array [editor, setEditor] and object { editor, setEditor, switchEditor }
+ * Hook to get the current RichTextWrapper instance from React Context or the Singleton.
+ * Automatically triggers a re-render when the active editor changes or switches.
+ */
+export function useCurrentEditor(): RichTextWrapper | null {
+  const context = React.useContext(RichTextContext)
+  const singletonEditor = useRichTextSingleton()
+  return context?.editor ?? singletonEditor
+}
+
+/**
+ * Hook returning the active editor along with setEditor and switchEditor controls.
+ * Supports both tuple destructuring: `const [editor, setEditor] = useRichTextContext()`
+ * and object destructuring: `const { editor, setEditor, switchEditor } = useRichTextContext()`.
  */
 export function useRichTextContext() {
   const context = React.useContext(RichTextContext)
-  const editor = context?.editor ?? RichTextSingleton.getInstance()
+  const singletonEditor = useRichTextSingleton()
+
+  const editor = context?.editor ?? singletonEditor
   const setEditor = context?.setEditor ?? RichTextSingleton.setInstance.bind(RichTextSingleton)
   const switchEditor = context?.switchEditor ?? RichTextSingleton.switchEditor.bind(RichTextSingleton)
 
@@ -98,6 +93,6 @@ export function useRichTextContext() {
   return result as [RichTextWrapper | null, (editor: RichTextWrapper | null) => void] & {
     editor: RichTextWrapper | null
     setEditor: (editor: RichTextWrapper | null) => void
-    switchEditor: (newEditor: RichTextWrapper, options?: { transferContent?: boolean }) => void
+    switchEditor: (newEditor: RichTextWrapper, options?: SwitchEditorOptions) => void
   }
 }
