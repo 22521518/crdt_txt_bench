@@ -2,7 +2,6 @@ import type { RichTextWrapper } from "./richtext"
 
 export interface EditorFactoryOptions {
   initialContent?: any
-  content?: any
   editable?: boolean
   autofocus?: any
   [key: string]: any

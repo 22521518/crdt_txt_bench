@@ -17,7 +17,7 @@ export interface RichTextWrapper {
   isFocus: () => boolean
 
   isNodeTypeSelected: (types: string[]) => boolean
-  isSelectedNodeTypeActive?: (name: string | null, attributes?: {}) => boolean
+  isNodeTypeActive?: (name: string | null, attributes?: {}) => boolean
   isMarkActive?: (name: string | null, attributes?: {}) => boolean
   isNodeTypeInSchema: (typeName: string) => boolean
   isMarkInSchema: (markName: string) => boolean
@@ -76,7 +76,7 @@ export const isValidPosition = (
 }
 
 export const checkEditorMarkNodeActive = (editor: RichTextWrapper, name: string | null, attributes?: {}) => {
-  const checkActive = editor.isMarkActive ?? editor.isSelectedNodeTypeActive
+  const checkActive = editor.isMarkActive ?? editor.isNodeTypeActive
   if (!checkActive) return false
   return checkActive(name, attributes)
 }
