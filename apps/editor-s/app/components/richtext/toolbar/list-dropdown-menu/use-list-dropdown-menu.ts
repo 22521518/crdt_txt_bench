@@ -161,9 +161,8 @@ export function useListDropdownMenu(config?: UseListDropdownMenuConfig) {
     hideWhenUnavailable = false,
   } = config || {}
 
-  // const { editor } = useTiptapEditor(providedEditor)
   const contextEditor = useCurrentEditor()
-    const editor = providedEditor ?? contextEditor
+  const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState(false)
 
   const listInSchema = types.some((type) => editor?.isNodeTypeInSchema?.(type))

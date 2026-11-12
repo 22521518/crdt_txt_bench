@@ -19,7 +19,7 @@ import defaultContent from "./data/content.json"
 
 const mobileEnterPluginKey = new PluginKey("reactMobileEnter")
 
-export type TiptapEditorOptions = Partial<Omit<EditorOptions, "content">> & EditorFactoryOptions & {
+type TiptapEditorOptions = Partial<Omit<EditorOptions, "content">> & EditorFactoryOptions & {
   initialContent?: any
   setAsSingleton?: boolean
 }
@@ -59,12 +59,11 @@ export function getDefaultEditorProps() {
 /**
  * Wraps a Tiptap Editor instance into a standardized RichTextWrapper.
  */
-export const createRichTextWrapper = (
+const createRichTextWrapper = (
   editor: Editor | null
 ): RichTextWrapper => {
   return {
-    editor: editor ?? undefined,
-
+    engine: 'tiptap',
     createTransaction() {
       if (!editor) throw new Error("The tiptap editor is not initialized yet!")
       return new TiptapTransaction(editor)

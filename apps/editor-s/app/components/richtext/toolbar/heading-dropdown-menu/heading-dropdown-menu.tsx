@@ -4,7 +4,6 @@ import * as React from "react"
 import { ChevronDownIcon } from "@/components/tiptap-icons/chevron-down-icon"
 
 // --- Hooks ---
-// import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- Tiptap UI ---

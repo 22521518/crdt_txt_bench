@@ -3,7 +3,6 @@
 import * as React from "react"
 
 // --- Hooks ---
-// import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- Icons ---
@@ -175,7 +174,7 @@ export function useBlockquote(config?: UseBlockquoteConfig) {
   } = config || {}
 
   const contextEditor = useCurrentEditor()
-    const editor = providedEditor ?? contextEditor
+  const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const [canToggle, setCanToggle] = React.useState<boolean>(false)
   const [isActive, setIsActive] = React.useState<boolean>(false)

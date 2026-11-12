@@ -11,7 +11,6 @@ import { HEADING_SHORTCUT_KEYS, useHeading, } from "./use-heading"
 import type { ButtonProps } from "@/components/button"
 import { Button } from "@/components/button"
 import { Badge } from "@/components/badge"
-// import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 import { useCurrentEditor } from "@/contexts/richtext-context"
 
 export interface HeadingButtonProps

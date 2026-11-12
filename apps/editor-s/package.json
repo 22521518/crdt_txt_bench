@@ -34,10 +34,12 @@
   "devDependencies": {
     "@react-router/dev": "^8.5.1",
     "@tailwindcss/vite": "^4.2.2",
+    "@types/jsdom": "^30.0.0",
     "@types/lodash.throttle": "^4.1.9",
     "@types/node": "^22",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
+    "jsdom": "^29.1.1",
     "sass": "^1.107.1",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",

@@ -6,14 +6,20 @@ import { useWindowSize } from '@/hooks/tiptap/use-window-size'
 import { RichTextProvider, useCurrentEditor } from '@/contexts/richtext-context'
 import { useCursorVisibility } from '@/hooks/tiptap/use-cursor-visibility'
 import { Toolbar, MainToolbarContent, MobileToolbarContent } from '@/components/richtext/toolbar'
-import { createTiptapEditor } from '@/packages/tiptaps/tiptap-editor-factory'
+import { createTiptapEditor } from '@/adapters/tiptaps/tiptap-editor-factory'
 import { EditorContent } from './richtext-editor-content' 
 import "@/components/tiptap-nodes/blockquote-node/blockquote-node.scss"
 import "@/components/tiptap-nodes/code-block-node/code-block-node.scss"
 import "@/components/tiptap-nodes/list-node/list-node.scss"
 import "@/components/tiptap-nodes/heading-node/heading-node.scss"
 import "@/components/tiptap-nodes/paragraph-node/paragraph-node.scss"
-import { RichTextSingleton } from '@/libs/richtext'
+import { RichTextSingleton, type SupportedEngineType } from '@/libs/richtext'
+
+interface RichEditorProps {
+  engine: SupportedEngineType;
+  initialContent: any;
+  onChange?: (content: any) => void;
+}
 
 export function RichTextEditor() {
   const isMobile = useIsMobile()
@@ -40,8 +46,7 @@ export function RichTextEditor() {
         type="button"
         onClick={() => {
           RichTextSingleton.switchEditor(
-            createTiptapEditor(),
-            { transferContent: false, destroyOld: true }
+            createTiptapEditor(), { transferContent: false, destroyOld: true }
           )
         }}
       >

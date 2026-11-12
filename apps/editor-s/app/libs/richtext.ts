@@ -7,9 +7,12 @@ export interface RichTextNodeWrapper {
   getLength: () => number
 }
 
+export type SupportedEngineType = 'tiptap' | 'slate' | 'quill'
+
 export interface RichTextWrapper {
+
+  engine: SupportedEngineType
   /** The underlying editor engine instance (e.g., Tiptap Editor, Slate instance, etc.) */
-  editor?: any
   createTransaction(): RichTextTransaction
   isExtensionAvailable(extensionNames: string | string[]): boolean
 

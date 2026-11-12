@@ -2,9 +2,10 @@ import type { ForwardedRef, HTMLProps, Ref, RefObject } from 'react'
 import React, { forwardRef } from 'react'
 import ReactDOM from 'react-dom'
 import { useSyncExternalStore } from 'use-sync-external-store/shim/index.js'
-import type { ContentComponent, EditorWithContentComponent, ReactRenderer } from './ReactRenderer'
 import type { RichTextWrapper } from '@/libs/richtext'
 import { useCurrentEditor } from '@/contexts/richtext-context'
+
+import type { ContentComponent, EditorWithContentComponent, ReactRenderer } from './ReactRenderer'
 
 
 const mergeRefs = <T extends HTMLDivElement>(
@@ -183,7 +184,7 @@ const EditorContentWithKey = forwardRef<HTMLDivElement, EditorContentProps>(
     const key = React.useMemo(() => {
       return Math.floor(Math.random() * 0xffffffff).toString()
       // oxlint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeEditor?.editor ?? activeEditor])
+    }, [activeEditor])
 
     // Can't use JSX here because it conflicts with the type definition of Vue's JSX, so use createElement
     return React.createElement(PureEditorContent, {

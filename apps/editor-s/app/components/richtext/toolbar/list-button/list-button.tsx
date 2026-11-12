@@ -4,7 +4,6 @@ import * as React from "react"
 import { parseShortcutKeys } from "@/libs/key-shortcut.utils"
 
 // --- Hooks ---
-// import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- UI Primitives ---
@@ -60,7 +59,6 @@ export const ListButton = React.forwardRef<HTMLButtonElement, ListButtonProps>(
     },
     ref
   ) => {
-    // const { editor } = useTiptapEditor(providedEditor)
     const contextEditor = useCurrentEditor()
     const editor = providedEditor ?? contextEditor
     const {

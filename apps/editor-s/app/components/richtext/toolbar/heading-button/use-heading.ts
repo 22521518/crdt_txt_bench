@@ -242,10 +242,8 @@ export function useHeading(config: UseHeadingConfig) {
     onToggled,
   } = config
 
-  // const { editor } = useTiptapEditor(providedEditor)
-
   const contextEditor = useCurrentEditor()
-    let editor = providedEditor ?? contextEditor
+  let editor = providedEditor ?? contextEditor
 
   const [isVisible, setIsVisible] = React.useState<boolean>(() =>
     shouldShowButton({ editor, level, hideWhenUnavailable })

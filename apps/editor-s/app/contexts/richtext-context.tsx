@@ -35,25 +35,14 @@ export function RichTextProvider({ editor: externalEditor, children }: RichTextP
   const singletonEditor = useRichTextSingleton()
   const activeEditor = externalEditor !== undefined ? externalEditor : singletonEditor
 
-  const setEditor = React.useCallback((editor: RichTextWrapper | null) => {
-    RichTextSingleton.setInstance(editor)
-  }, [])
-
-  const switchEditor = React.useCallback(
-    (newEditor: RichTextWrapper, options?: SwitchEditorOptions) => {
-      RichTextSingleton.switchEditor(newEditor, options)
-    },
-    []
-  )
+  const setEditor = React.useCallback((editor: RichTextWrapper | null) => 
+    RichTextSingleton.setInstance(editor), [])
+  const switchEditor = React.useCallback((newEditor: RichTextWrapper, options?: SwitchEditorOptions) => 
+    RichTextSingleton.switchEditor(newEditor, options), [])
 
   const value = React.useMemo<RichTextContextValue>(
-    () => ({
-      editor: activeEditor,
-      setEditor,
-      switchEditor,
-    }),
-    [activeEditor, setEditor, switchEditor]
-  )
+    () => ({ editor: activeEditor, setEditor, switchEditor, }),
+    [activeEditor, setEditor, switchEditor])
 
   return (
     <RichTextContext.Provider value={value}>

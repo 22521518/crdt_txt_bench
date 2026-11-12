@@ -3,7 +3,6 @@
 import * as React from "react"
 
 // --- Hooks ---
-// import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- Icons ---
@@ -90,9 +89,8 @@ export function useHeadingDropdownMenu(config?: UseHeadingDropdownMenuConfig) {
     hideWhenUnavailable = false,
   } = config || {}
 
-  // const { editor } = useTiptapEditor(providedEditor)
   const contextEditor = useCurrentEditor()
-    const editor = providedEditor ?? contextEditor
+  const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(() =>
     shouldShowButton({ editor, hideWhenUnavailable, level: levels })
   )

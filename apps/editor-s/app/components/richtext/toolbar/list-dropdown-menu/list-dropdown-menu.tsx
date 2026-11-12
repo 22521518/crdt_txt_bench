@@ -1,7 +1,6 @@
 import * as React from "react"
 
 // --- Hooks ---
-// import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- Icons ---
@@ -52,7 +51,6 @@ export function ListDropdownMenu({
   portal = false,
   ...props
 }: ListDropdownMenuProps) {
-  // const { editor } = useTiptapEditor(providedEditor)
   const contextEditor = useCurrentEditor()
     const editor = providedEditor ?? contextEditor
   const [isOpen, setIsOpen] = React.useState(false)
