@@ -16,13 +16,13 @@ import type { ButtonProps } from "@/components/button"
 import { Button, ButtonGroup } from "@/components/button"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, } from "@/components/dropdown-menu"
 import { Card, CardBody } from "@/components/card"
-import type { RichTextWrapper } from "@/libs/richtext"
+import type { RichTextAdapter } from "@/adapters/richtext-adapter"
 
 export interface ListDropdownMenuProps extends Omit<ButtonProps, "type"> {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper
+  editor?: RichTextAdapter
   /**
    * The list types to display in the dropdown.
    */

@@ -5,7 +5,7 @@ import { LinkIcon } from "@/components/tiptap-icons/link-icon"
 
 // --- Lib ---
 import { sanitizeUrl } from "@/libs/components.utils"
-import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, type RichTextAdapter } from "@/adapters/richtext-adapter"
 
 // --- Context --- 
 import { useCurrentEditor } from "@/contexts/richtext-context"
@@ -17,7 +17,7 @@ export interface UseLinkPopoverConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * Whether to hide the link popover when not available.
    * @default false
@@ -36,7 +36,7 @@ export interface LinkHandlerProps {
   /**
    * The Tiptap editor instance.
    */
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   /**
    * Callback function RichTextWrapper when the link is set.
    */
@@ -46,7 +46,7 @@ export interface LinkHandlerProps {
 /**
  * Checks if a link can be set in the current editor state
  */
-export function canSetLink(editor: RichTextWrapper | null): boolean {
+export function canSetLink(editor: RichTextAdapter | null): boolean {
   if (!editor || !editor.isEditable()) return false
   return editor.isSelectionMarkable("link")
 }
@@ -54,7 +54,7 @@ export function canSetLink(editor: RichTextWrapper | null): boolean {
 /**
  * Checks if a link is currently active in the editor
  */
-export function isLinkActive(editor: RichTextWrapper | null): boolean {
+export function isLinkActive(editor: RichTextAdapter | null): boolean {
   if (!editor || !editor.isEditable()) return false
   // return editor.isSelectedNodeTypeActive?.("link") ?? false
   return checkEditorMarkNodeActive(editor, "link")
@@ -64,7 +64,7 @@ export function isLinkActive(editor: RichTextWrapper | null): boolean {
  * Determines if the link button should be shown
  */
 export function shouldShowLinkButton(props: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   hideWhenUnavailable: boolean
 }): boolean {
   const { editor, hideWhenUnavailable } = props
@@ -167,7 +167,7 @@ export function useLinkHandler(props: LinkHandlerProps) {
  * Custom hook for link popover state management
  */
 export function useLinkState(props: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   hideWhenUnavailable: boolean
 }) {
   const { editor, hideWhenUnavailable = false } = props
@@ -248,7 +248,7 @@ export function useLinkPopover(config?: UseLinkPopoverConfig) {
   } = config || {}
 
   const contextEditor = useCurrentEditor()
-    let editor = providedEditor ?? contextEditor
+  let editor = providedEditor ?? contextEditor
 
   const { isVisible, canSet, isActive } = useLinkState({
     editor,

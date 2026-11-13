@@ -21,13 +21,13 @@ import { Card, CardBody, CardItemGroup } from "@/components/card"
 // --- Tiptap UI ---
 import type { HighlightColor, UseColorHighlightConfig } from "@/components/richtext/toolbar/color-highlight-button"
 import { ColorHighlightButton, pickHighlightColorsByValue, useColorHighlight } from "@/components/richtext/toolbar/color-highlight-button"
-import type { RichTextWrapper } from "@/libs/richtext"
+import type { RichTextAdapter } from "@/adapters/richtext-adapter"
 
 export interface ColorHighlightPopoverContentProps {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * Optional colors to use in the highlight popover.
    * If not provided, defaults to a predefined set of colors.

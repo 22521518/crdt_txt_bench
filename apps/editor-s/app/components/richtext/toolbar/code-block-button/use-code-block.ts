@@ -7,7 +7,7 @@ import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- Icons ---
 import { CodeBlockIcon } from "@/components/tiptap-icons/code-block-icon"
-import { checkEditorMarkNodeActive, isValidPosition, type RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, isValidPosition, type RichTextAdapter } from "@/adapters/richtext-adapter"
 
 export const CODE_BLOCK_SHORTCUT_KEY = "mod+alt+c"
 
@@ -18,7 +18,7 @@ export interface UseCodeBlockConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * Whether the button should hide when code block is not available.
    * @default false
@@ -34,7 +34,7 @@ export interface UseCodeBlockConfig {
  * Checks if code block can be toggled in the current editor state
  */
 export function canToggle(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   turnInto: boolean = true
 ): boolean {
   if (!editor || !editor.isEditable()) return false
@@ -65,7 +65,7 @@ export function canToggle(
 /**
  * Toggles code block in the editor
  */
-export function toggleCodeBlock(editor: RichTextWrapper | null): boolean {
+export function toggleCodeBlock(editor: RichTextAdapter | null): boolean {
   if (!editor || !editor.isEditable()) return false
   if (!canToggle(editor)) return false
 
@@ -113,7 +113,7 @@ export function toggleCodeBlock(editor: RichTextWrapper | null): boolean {
  * Determines if the code block button should be shown
  */
 export function shouldShowButton(props: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   hideWhenUnavailable: boolean
 }): boolean {
   const { editor, hideWhenUnavailable } = props
@@ -180,7 +180,7 @@ export function useCodeBlock(config?: UseCodeBlockConfig) {
   } = config || {}
 
   const contextEditor = useCurrentEditor()
-    const editor = providedEditor ?? contextEditor
+  const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const [canToggleState, setCanToggleState] = React.useState(false)
   const [isActive, setIsActive] = React.useState(false)

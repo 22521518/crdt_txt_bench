@@ -15,7 +15,7 @@ import { HeadingThreeIcon } from "@/components/tiptap-icons/heading-three-icon"
 import { HeadingFourIcon } from "@/components/tiptap-icons/heading-four-icon"
 import { HeadingFiveIcon } from "@/components/tiptap-icons/heading-five-icon"
 import { HeadingSixIcon } from "@/components/tiptap-icons/heading-six-icon"
-import { checkEditorMarkNodeActive, isValidPosition, type RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, isValidPosition, type RichTextAdapter } from "@/adapters/richtext-adapter"
 
 export type Level = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -26,7 +26,7 @@ export interface UseHeadingConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * The heading level.
    */
@@ -64,7 +64,7 @@ export const HEADING_SHORTCUT_KEYS: Record<Level, string> = {
  * Checks if heading can be toggled in the current editor state
  */
 export function canToggle(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   level?: Level,
   turnInto: boolean = true, //true
 ): boolean {
@@ -99,7 +99,7 @@ export function canToggle(
  * Checks if heading is currently active
  */
 export function isHeadingActive(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   level?: Level | Level[]
 ): boolean {
 
@@ -117,7 +117,7 @@ export function isHeadingActive(
  * Toggles heading in the editor
  */
 export function toggleHeading(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   level: Level | Level[]
 ): boolean {
   if (!editor || !editor.isEditable()) return false
@@ -168,7 +168,7 @@ export function toggleHeading(
  * Determines if the heading button should be shown
  */
 export function shouldShowButton(props: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   level?: Level | Level[]
   hideWhenUnavailable: boolean
 }): boolean {

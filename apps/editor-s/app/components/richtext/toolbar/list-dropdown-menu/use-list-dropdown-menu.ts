@@ -19,7 +19,7 @@ import {
   listIcons,
   type ListType,
 } from "@/components/richtext/toolbar/list-button"
-import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, type RichTextAdapter } from "@/adapters/richtext-adapter"
 
 /**
  * Configuration for the list dropdown menu functionality
@@ -28,7 +28,7 @@ export interface UseListDropdownMenuConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * The list types to display in the dropdown.
    * @default ["bulletList", "orderedList", "taskList"]
@@ -66,7 +66,7 @@ export const listOptions: ListOption[] = [
 ]
 
 export function canToggleAnyList(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   listTypes: ListType[]
 ): boolean {
   if (!editor || !editor.isEditable()) return false
@@ -74,7 +74,7 @@ export function canToggleAnyList(
 }
 
 export function isAnyListActive(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   listTypes: ListType[]
 ): boolean {
   if (!editor || !editor.isEditable()) return false
@@ -90,7 +90,7 @@ export function getFilteredListOptions(
 }
 
 export function shouldShowListDropdown(params: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   listTypes: ListType[]
   hideWhenUnavailable: boolean
   listInSchema: boolean
@@ -108,7 +108,7 @@ export function shouldShowListDropdown(params: {
  * Gets the currently active list type from the available types
  */
 export function getActiveListType(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   availableTypes: ListType[]
 ): ListType | undefined {
   if (!editor || !editor.isEditable()) return undefined

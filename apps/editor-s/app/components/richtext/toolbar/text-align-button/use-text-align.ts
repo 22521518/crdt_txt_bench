@@ -9,8 +9,8 @@ import { AlignCenterIcon } from "@/components/tiptap-icons/align-center-icon"
 import { AlignJustifyIcon } from "@/components/tiptap-icons/align-justify-icon"
 import { AlignLeftIcon } from "@/components/tiptap-icons/align-left-icon"
 import { AlignRightIcon } from "@/components/tiptap-icons/align-right-icon"
-import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
-import type { TextAlign } from "@/libs/richtext-transaction"
+import { checkEditorMarkNodeActive, type RichTextAdapter } from "@/adapters/richtext-adapter"
+import type { TextAlign } from "@/adapters/richtext-transaction"
 export type { TextAlign }
 
 /**
@@ -20,7 +20,7 @@ export interface UseTextAlignConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * The text alignment to apply.
    */
@@ -61,7 +61,7 @@ export const textAlignLabels: Record<TextAlign, string> = {
  * Checks if text alignment can be performed in the current editor state
  */
 export function canSetTextAlign(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   align: TextAlign
 ): boolean {
   if (!editor || !editor.isEditable()) return false
@@ -78,7 +78,7 @@ export function canSetTextAlign(
  * Checks if the text alignment is currently active
  */
 export function isTextAlignActive(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   align: TextAlign
 ): boolean {
   if (!editor || !editor.isEditable()) return false
@@ -88,7 +88,7 @@ export function isTextAlignActive(
 /**
  * Sets text alignment in the editor
  */
-export function setTextAlign(editor: RichTextWrapper | null, align: TextAlign): boolean {
+export function setTextAlign(editor: RichTextAdapter | null, align: TextAlign): boolean {
   if (!editor || !editor.isEditable()) return false
   if (!canSetTextAlign(editor, align)) return false
 
@@ -100,7 +100,7 @@ export function setTextAlign(editor: RichTextWrapper | null, align: TextAlign): 
  * Determines if the text align button should be shown
  */
 export function shouldShowButton(props: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   hideWhenUnavailable: boolean
   align: TextAlign
 }): boolean {
@@ -163,7 +163,7 @@ export function useTextAlign(config: UseTextAlignConfig) {
   } = config
 
   const contextEditor = useCurrentEditor()
-    const editor = providedEditor ?? contextEditor
+  const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const [canAlign, setCanAlign] = React.useState(false)
   const [isActive, setIsActive] = React.useState(false)

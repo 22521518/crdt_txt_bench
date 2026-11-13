@@ -1,10 +1,10 @@
-import type { EditorFactoryOptions } from "@/libs/editor-factory"
-import { RichTextSingleton, type RichTextNodeWrapper, type RichTextWrapper } from "@/libs/richtext"
+import type { EditorFactoryOptions } from "@/adapters/richtext-factory"
+import { RichTextWrapper, type RichTextNodeWrapper, type RichTextAdapter } from "@/adapters/richtext-adapter"
 import { getDefaultExtensions } from "../tiptaps/tiptap-editor-factory"
 import { getProsemirrorPropsFromTiptapLegacy } from "./_tiptaps"
 import { EditorState, Plugin } from "@tiptap/pm/state"
 import { Schema } from "@tiptap/pm/model"
-import type { Content, RichTextTransaction } from "@/libs/richtext-transaction"
+import type { Content, RichTextTransaction } from "@/adapters/richtext-transaction"
 import type { Node } from "@tiptap/pm/model"
 import { createDocument } from "./helpers"
 import { EditorView } from "@tiptap/pm/view"
@@ -19,7 +19,7 @@ type ProsemirrorEditorOptions = EditorFactoryOptions & {
 /**
  * Factory method to instantiate a Prosemirror editor wrapped in RichTextWrapper.
  */
-export const createProsemirrorEditor = (options?: ProsemirrorEditorOptions): RichTextWrapper => {
+export const createProsemirrorEditor = (options?: ProsemirrorEditorOptions): RichTextAdapter => {
   const { schema: tiptapSchema, plugins: tiptapPlugins } = getProsemirrorPropsFromTiptapLegacy()
   // because the fallback when create docs disable the collab extension so the prosemirro-model have to be reset
   const { doc: initialDoc, newSchema, newPlugins } = createProsemirrorDocument(options?.initialContent, tiptapSchema, tiptapPlugins)
@@ -27,7 +27,7 @@ export const createProsemirrorEditor = (options?: ProsemirrorEditorOptions): Ric
   const wrapper = createRichTextWrapper(state)
 
   if (options?.setAsSingleton) {
-    RichTextSingleton.setInstance(wrapper)
+    RichTextWrapper.setInstance(wrapper)
   }
 
   return wrapper
@@ -37,7 +37,7 @@ export const createProsemirrorEditor = (options?: ProsemirrorEditorOptions): Ric
 /**
  * Wraps a Tiptap Editor instance into a standardized RichTextWrapper.
  */
-const createRichTextWrapper = (editor: EditorState): RichTextWrapper => {
+const createRichTextWrapper = (editor: EditorState): RichTextAdapter => {
   let editorView = null
   return {
     createTransaction: function (): RichTextTransaction { return new ProseMirrorTransaction() },

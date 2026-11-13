@@ -1,11 +1,11 @@
-import type { RichTextWrapper } from "./richtext";
+import type { RichTextAdapter } from "./richtext-adapter";
 
 export interface RichTextCommand {
   execute(context: RichTextCommandContext): boolean;
 }
 
 export interface RichTextCommandContext {
-  editor: RichTextWrapper;
+  editor: RichTextAdapter;
   transaction: RichTextTransaction;
 }
 

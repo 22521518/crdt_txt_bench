@@ -12,7 +12,7 @@ import { ListOrderedIcon } from "@/components/tiptap-icons/list-ordered-icon"
 import { ListTodoIcon } from "@/components/tiptap-icons/list-todo-icon"
 
 // --- Lib ---
-import { checkEditorMarkNodeActive, isValidPosition, type RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, isValidPosition, type RichTextAdapter } from "@/adapters/richtext-adapter"
 
 export type ListType = "bulletList" | "orderedList" | "taskList"
 
@@ -23,7 +23,7 @@ export interface UseListConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * The type of list to toggle.
    */
@@ -61,7 +61,7 @@ export const LIST_SHORTCUT_KEYS: Record<ListType, string> = {
  * Checks if a list can be toggled in the current editor state
  */
 export function canToggleList(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   type: ListType,
   turnInto: boolean = true
 ): boolean {
@@ -99,7 +99,7 @@ export function canToggleList(
 /**
  * Checks if list is currently active
  */
-export function isListActive(editor: RichTextWrapper | null, type: ListType): boolean {
+export function isListActive(editor: RichTextAdapter | null, type: ListType): boolean {
   if (!editor || !editor.isEditable()) return false
 
   switch (type) {
@@ -117,7 +117,7 @@ export function isListActive(editor: RichTextWrapper | null, type: ListType): bo
 /**
  * Toggles list in the editor
  */
-export function toggleList(editor: RichTextWrapper | null, type: ListType): boolean {
+export function toggleList(editor: RichTextAdapter | null, type: ListType): boolean {
   if (!editor || !editor.isEditable()) return false
   if (!canToggleList(editor, type)) return false
 
@@ -181,7 +181,7 @@ export function toggleList(editor: RichTextWrapper | null, type: ListType): bool
  * Determines if the list button should be shown
  */
 export function shouldShowButton(props: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   type: ListType
   hideWhenUnavailable: boolean
 }): boolean {

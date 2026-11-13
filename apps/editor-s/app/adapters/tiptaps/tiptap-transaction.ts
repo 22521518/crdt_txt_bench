@@ -1,4 +1,4 @@
-import type { LinkMarkAttributes, RichTextTransaction, TextAlign } from "@/libs/richtext-transaction";
+import type { LinkMarkAttributes, RichTextTransaction, TextAlign } from "@/adapters/richtext-transaction";
 import { Editor, type ChainedCommands, type Content } from "@tiptap/react"
 
 export class TiptapTransaction implements RichTextTransaction {

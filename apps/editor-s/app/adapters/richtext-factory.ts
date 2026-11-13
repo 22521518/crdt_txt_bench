@@ -1,4 +1,4 @@
-import type { RichTextWrapper } from "./richtext"
+import type { RichTextAdapter } from "./richtext-adapter"
 
 export interface EditorFactoryOptions {
   initialContent?: any
@@ -13,8 +13,8 @@ export interface EditorFactoryOptions {
  */
 export interface RichTextEditorFactory<
   TOptions extends EditorFactoryOptions = EditorFactoryOptions,
-  TWrapper extends RichTextWrapper = RichTextWrapper
+  TWrapper extends RichTextAdapter = RichTextAdapter
 > {
   readonly name: string
-  createEditor(options?: TOptions): TWrapper
+  createEditor(options?: TOptions): { adapter: TWrapper, editor: any }
 }

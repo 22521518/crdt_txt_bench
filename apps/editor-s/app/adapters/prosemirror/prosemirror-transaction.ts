@@ -1,4 +1,4 @@
-import type { Content, LinkMarkAttributes, RichTextTransaction, TextAlign } from "@/libs/richtext-transaction";
+import type { Content, LinkMarkAttributes, RichTextTransaction, TextAlign } from "@/adapters/richtext-transaction";
 
 export class ProseMirrorTransaction implements RichTextTransaction {
   focus(): this {

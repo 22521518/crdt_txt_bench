@@ -1,6 +1,6 @@
 import type { Node, ParseOptions } from '@tiptap/pm/model'
 import { DOMParser, Fragment, Schema } from '@tiptap/pm/model'
-import type { Content } from '@/libs/richtext-transaction'
+import type { Content } from '@/adapters/richtext-transaction'
 
 /**
  * Create a new Prosemirror document node from content.

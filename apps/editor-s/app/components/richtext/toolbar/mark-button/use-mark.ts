@@ -11,7 +11,7 @@ import { StrikeIcon } from "@/components/tiptap-icons/strike-icon"
 import { SubscriptIcon } from "@/components/tiptap-icons/subscript-icon"
 import { SuperscriptIcon } from "@/components/tiptap-icons/superscript-icon"
 import { UnderlineIcon } from "@/components/tiptap-icons/underline-icon"
-import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, type RichTextAdapter } from "@/adapters/richtext-adapter"
 
 export type Mark =
   | "bold"
@@ -29,7 +29,7 @@ export interface UseMarkConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * The type of mark to toggle
    */
@@ -68,7 +68,7 @@ export const MARK_SHORTCUT_KEYS: Record<Mark, string> = {
 /**
  * Checks if a mark can be toggled in the current editor state
  */
-export function canToggleMark(editor: RichTextWrapper | null, type: Mark): boolean {
+export function canToggleMark(editor: RichTextAdapter | null, type: Mark): boolean {
   if (!editor || !editor.isEditable()) return false
   if (!editor.isMarkInSchema(type) || editor.isNodeTypeSelected(["image"]))
     return false
@@ -79,7 +79,7 @@ export function canToggleMark(editor: RichTextWrapper | null, type: Mark): boole
 /**
  * Checks if a mark is currently active
  */
-export function isMarkActive(editor: RichTextWrapper | null, type: Mark): boolean {
+export function isMarkActive(editor: RichTextAdapter | null, type: Mark): boolean {
   if (!editor || !editor.isEditable()) return false
   return checkEditorMarkNodeActive(editor, type)
 }
@@ -87,7 +87,7 @@ export function isMarkActive(editor: RichTextWrapper | null, type: Mark): boolea
 /**
  * Toggles a mark in the editor
  */
-export function toggleMark(editor: RichTextWrapper | null, type: Mark): boolean {
+export function toggleMark(editor: RichTextAdapter | null, type: Mark): boolean {
   if (!editor || !editor.isEditable()) return false
   if (!canToggleMark(editor, type)) return false
 
@@ -98,7 +98,7 @@ export function toggleMark(editor: RichTextWrapper | null, type: Mark): boolean 
  * Determines if the mark button should be shown
  */
 export function shouldShowButton(props: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   type: Mark
   hideWhenUnavailable: boolean
 }): boolean {
@@ -168,7 +168,7 @@ export function useMark(config: UseMarkConfig) {
   } = config
 
   const contextEditor = useCurrentEditor()
-    const editor = providedEditor ?? contextEditor
+  const editor = providedEditor ?? contextEditor
   const [isVisible, setIsVisible] = React.useState<boolean>(true)
   const [canToggle, setCanToggle] = React.useState(false)
   const [isActive, setIsActive] = React.useState(false)

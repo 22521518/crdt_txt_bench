@@ -10,18 +10,18 @@ import { Selection } from "@tiptap/extensions"
 import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 
-import { type RichTextWrapper, RichTextSingleton } from "@/libs/richtext"
-import type { RichTextEditorFactory, EditorFactoryOptions } from "@/libs/editor-factory"
+import { type RichTextAdapter } from "@/adapters/richtext-adapter"
+import type { RichTextEditorFactory, EditorFactoryOptions } from "@/adapters/richtext-factory"
 import { handleMobileEnter } from "./handle-mobile-enter"
 import { TiptapTransaction } from "./tiptap-transaction"
 
 import defaultContent from "./data/content.json"
+import { RichTextSingleton } from "@/hooks/richtext-singleton"
 
 const mobileEnterPluginKey = new PluginKey("reactMobileEnter")
 
 type TiptapEditorOptions = Partial<Omit<EditorOptions, "content">> & EditorFactoryOptions & {
   initialContent?: any
-  setAsSingleton?: boolean
 }
 
 export function getDefaultExtensions() {
@@ -59,10 +59,11 @@ export function getDefaultEditorProps() {
 /**
  * Wraps a Tiptap Editor instance into a standardized RichTextWrapper.
  */
-const createRichTextWrapper = (
+const createTiptapRichTextAdapter = (
   editor: Editor | null
-): RichTextWrapper => {
+): RichTextAdapter => {
   return {
+    editor: editor,
     engine: 'tiptap',
     createTransaction() {
       if (!editor) throw new Error("The tiptap editor is not initialized yet!")
@@ -218,7 +219,7 @@ const createRichTextWrapper = (
 /**
  * Factory method to instantiate a Tiptap editor wrapped in RichTextWrapper.
  */
-export const createTiptapEditor = (options?: TiptapEditorOptions): RichTextWrapper => {
+export const createTiptapEditorAdapter = (options?: TiptapEditorOptions): { editor: Editor, adapter: RichTextAdapter } => {
   // console.log(options?.initialContent)
   const editor = new Editor({
     extensions: options?.extensions ?? getDefaultExtensions(),
@@ -234,23 +235,20 @@ export const createTiptapEditor = (options?: TiptapEditorOptions): RichTextWrapp
     ...options,
   })
 
-  const wrapper = createRichTextWrapper(editor)
+  const adapter = createTiptapRichTextAdapter(editor)
 
-  if (options?.setAsSingleton) {
-    RichTextSingleton.setInstance(wrapper)
-  }
+  // if (options?.setAsSingleton) {
+  //   RichTextSingleton.setInstance(adapter)
+  // }
 
-  return wrapper
+  return { editor, adapter }
 }
 
 /**
  * Concrete factory implementing RichTextEditorFactory for Tiptap.
  */
 export const tiptapEditorFactory: RichTextEditorFactory<TiptapEditorOptions> = {
-  name: "tiptap",
-  createEditor(options?: TiptapEditorOptions) {
-    return createTiptapEditor(options)
-  },
+  name: "tiptap", createEditor(options?: TiptapEditorOptions) { return createTiptapEditorAdapter(options) },
 }
 
 RichTextSingleton.registerDefaultFactory(tiptapEditorFactory)

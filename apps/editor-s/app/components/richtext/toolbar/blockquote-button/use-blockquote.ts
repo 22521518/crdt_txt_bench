@@ -9,7 +9,7 @@ import { useCurrentEditor } from "@/contexts/richtext-context"
 import { BlockquoteIcon } from "@/components/tiptap-icons/blockquote-icon"
 
 // --- UI Utils ---
-import { checkEditorMarkNodeActive, isValidPosition, type RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, isValidPosition, type RichTextAdapter } from "@/adapters/richtext-adapter"
 
 export const BLOCKQUOTE_SHORTCUT_KEY = "mod+shift+b"
 
@@ -20,7 +20,7 @@ export interface UseBlockquoteConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * Whether the button should hide when blockquote is not available.
    * @default false
@@ -36,7 +36,7 @@ export interface UseBlockquoteConfig {
  * Checks if blockquote can be toggled in the current editor state
  */
 export function canToggleBlockquote(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   turnInto: boolean = true
 ): boolean {
   if (!editor || !editor.isEditable()) return false
@@ -68,7 +68,7 @@ export function canToggleBlockquote(
 /**
  * Toggles blockquote formatting for a specific node or the current selection
  */
-export function toggleBlockquote(editor: RichTextWrapper | null): boolean {
+export function toggleBlockquote(editor: RichTextAdapter | null): boolean {
   if (!editor || !editor.isEditable()) return false
   if (!canToggleBlockquote(editor)) return false
 
@@ -114,7 +114,7 @@ export function toggleBlockquote(editor: RichTextWrapper | null): boolean {
  * Determines if the blockquote button should be shown
  */
 export function shouldShowButton(props: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   hideWhenUnavailable: boolean
 }): boolean {
   const { editor, hideWhenUnavailable } = props

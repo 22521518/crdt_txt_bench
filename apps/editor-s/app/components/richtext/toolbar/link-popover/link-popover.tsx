@@ -32,7 +32,7 @@ import {
   CardItemGroup,
 } from "@/components/card"
 import { Input, InputGroup } from "@/components/input"
-import type { RichTextWrapper } from "@/libs/richtext"
+import type { RichTextAdapter } from "@/adapters/richtext-adapter"
 
 export interface LinkMainProps {
   /**
@@ -191,7 +191,7 @@ const LinkMain: React.FC<LinkMainProps> = ({
  * Link content component for standalone use
  */
 export const LinkContent: React.FC<{
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
 }> = ({ editor }) => {
   const linkPopover = useLinkPopover({editor})
   return <LinkMain {...linkPopover} />

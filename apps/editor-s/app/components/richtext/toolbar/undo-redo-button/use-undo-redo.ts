@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Redo2Icon } from "@/components/tiptap-icons/redo2-icon"
 import { Undo2Icon } from "@/components/tiptap-icons/undo2-icon"
-import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, type RichTextAdapter } from "@/adapters/richtext-adapter"
 import { useCurrentEditor } from "@/contexts/richtext-context"
 
 export type UndoRedoAction = "undo" | "redo"
@@ -15,7 +15,7 @@ export interface UseUndoRedoConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * The undo/redo action to perform.
    */
@@ -48,7 +48,7 @@ export const historyIcons: Record<
  * Checks if an undo/redo action can be executed on the editor
  */
 export function canExecuteUndoRedoAction(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   action: UndoRedoAction
 ): boolean {
   if (!editor || !editor.isEditable()) return false
@@ -62,7 +62,7 @@ export function canExecuteUndoRedoAction(
  * Executes a history action on the editor
  */
 export function executeUndoRedoAction(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   action: UndoRedoAction
 ): boolean {
   if (!editor || !editor.isEditable()) return false
@@ -77,7 +77,7 @@ export function executeUndoRedoAction(
  * Determines if the undo/redo button should be visible
  */
 export function shouldShowButton(props: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   hideWhenUnavailable: boolean
   action: UndoRedoAction
 }): boolean {
@@ -138,7 +138,7 @@ export function useUndoRedo({
   onExecuted,
 }: UseUndoRedoConfig) {
   const contextEditor = useCurrentEditor()
-    let editor = providedEditor ?? contextEditor
+  let editor = providedEditor ?? contextEditor
 
   const [isVisible, setIsVisible] = React.useState<boolean>(() =>
     shouldShowButton({ editor, hideWhenUnavailable, action })

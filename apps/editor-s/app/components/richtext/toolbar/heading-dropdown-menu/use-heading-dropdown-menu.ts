@@ -10,7 +10,7 @@ import { HeadingIcon } from "@/components/tiptap-icons/heading-icon"
 
 // --- Tiptap UI ---
 import { headingIcons, type Level, isHeadingActive, canToggle, shouldShowButton, } from "@/components/richtext/toolbar/heading-button"
-import type { RichTextWrapper } from "@/libs/richtext"
+import type { RichTextAdapter } from "@/adapters/richtext-adapter"
 
 /**
  * Configuration for the heading dropdown menu functionality
@@ -19,7 +19,7 @@ export interface UseHeadingDropdownMenuConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * Available heading levels to show in the dropdown
    * @default [1, 2, 3, 4, 5, 6]
@@ -36,7 +36,7 @@ export interface UseHeadingDropdownMenuConfig {
  * Gets the currently active heading level from the available levels
  */
 export function getActiveHeadingLevel(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   levels: Level[] = [1, 2, 3, 4, 5, 6]
 ): Level | undefined {
   if (!editor || !editor.isEditable()) return undefined

@@ -11,7 +11,7 @@ import { useCurrentEditor } from "@/contexts/richtext-context"
 
 // --- Icons ---
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
-import { checkEditorMarkNodeActive, type RichTextWrapper } from "@/libs/richtext"
+import { checkEditorMarkNodeActive, type RichTextAdapter } from "@/adapters/richtext-adapter"
 import { HIGHLIGHT_COLORS } from "./constant"
 
 export const COLOR_HIGHLIGHT_SHORTCUT_KEY = "mod+shift+h"
@@ -23,7 +23,7 @@ export interface UseColorHighlightConfig {
   /**
    * The Tiptap editor instance.
    */
-  editor?: RichTextWrapper | null
+  editor?: RichTextAdapter | null
   /**
    * The color to apply when toggling the highlight.
    */
@@ -52,7 +52,7 @@ export function pickHighlightColorsByValue(values: string[]) {
     .filter((color): color is (typeof HIGHLIGHT_COLORS)[number] => !!color)
 }
 
-export function canColorHighlight(editor: RichTextWrapper | null): boolean {
+export function canColorHighlight(editor: RichTextAdapter | null): boolean {
   if (!editor) return false
   if (!editor.isEditable()) return false
   if (editor.isNodeTypeSelected?.(["image"])) return false
@@ -60,7 +60,7 @@ export function canColorHighlight(editor: RichTextWrapper | null): boolean {
 }
 
 export function isColorHighlightActive(
-  editor: RichTextWrapper | null,
+  editor: RichTextAdapter | null,
   highlightColor?: string
 ): boolean {
   if (!editor) return false
@@ -72,7 +72,7 @@ export function isColorHighlightActive(
     checkEditorMarkNodeActive(editor, "highlight")
 }
 
-export function removeHighlight(editor: RichTextWrapper | null): boolean {
+export function removeHighlight(editor: RichTextAdapter | null): boolean {
   if (!editor) return false
   if (!editor.isEditable()) return false
   if (!canColorHighlight(editor)) return false
@@ -80,7 +80,7 @@ export function removeHighlight(editor: RichTextWrapper | null): boolean {
 }
 
 export function shouldShowButton(props: {
-  editor: RichTextWrapper | null
+  editor: RichTextAdapter | null
   hideWhenUnavailable: boolean
 }): boolean {
   const { editor, hideWhenUnavailable } = props
@@ -108,7 +108,7 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
   } = config
 
   const contextEditor = useCurrentEditor()
-    let editor = providedEditor ?? contextEditor
+  let editor = providedEditor ?? contextEditor
   const isMobile = useIsMobile()
 
   const [isVisible, setIsVisible] = React.useState<boolean>(() =>
